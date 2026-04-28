@@ -1,469 +1,503 @@
 <MainInterface>:
-	canvas.before:
-		Color:
-			rgba: 0.08, 0.09, 0.14, 1
-		Rectangle:
-			size: root.size
-			pos: root.pos
-	BoxLayout:
-		orientation: 'vertical'
-		BoxLayout:
-			size_hint_y: 0.1
-			orientation: 'vertical'
-			spacing: dp(10)
-			BoxLayout:
-				size_hint: 0.9, 0.1
-				pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-				orientation: 'vertical'
-				Label:
-					id: label1
-					text: '[b]DASHBOARD[/b]'
-					text_size: self.size
-					font_size: dp(19)
-					markup: True
-					valign: 'bottom'
-				Label:
-					id: label2
-					text: 'you activity overview'
-					color: 1,1,1,0.5
-					text_size: self.size
-					valign: 'top'
+    canvas.before:
+        Color:
+            rgba: 0.08, 0.09, 0.14, 1
+        Rectangle:
+            size: root.size
+            pos: root.pos
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            size_hint_y: 0.1
+            orientation: 'vertical'
+            spacing: dp(10)
+            
+            # --- UPDATED GLOBAL HEADER ---
+            BoxLayout:
+                size_hint: 0.9, 0.1
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                orientation: 'horizontal' # Set to horizontal to split Left (Text) and Right (Button)
+                
+                # Left Side: Vertically Stacked Labels
+                BoxLayout:
+                    orientation: 'vertical'
+                    Label:
+                        id: label1
+                        text: '[b]DASHBOARD[/b]'
+                        text_size: self.size
+                        font_size: dp(19)
+                        markup: True
+                        valign: 'bottom'
+                        halign: 'left' # Align text to the far left
+                    Label:
+                        id: label2
+                        text: 'you activity overview'
+                        color: 1,1,1,0.5
+                        text_size: self.size
+                        valign: 'top'
+                        halign: 'left' # Align text to the far left
+                        
+                # Right Side: Global Back Button
+                NavBackButton:
+                    id: back_btn
+                    opacity: 0     # Hidden by default
+                    disabled: True # Unclickable by default
+                    pos_hint: {'center_y': 0.5}
+                    on_release:
+                        # Return to menu and reset header
+                        screenmanager.get_screen('info').children[0].ids.screenmanager.current = 'menu'
+                        label1.text = '[b]MENU[/b]'
+                        label2.text = 'manage your account'
+                        self.opacity = 0
+                        self.disabled = True
 #-------------------------------------------------------------#
 
 #-------------------------------------------------------------#
-		ScreenManager:
-			id: screenmanager
-			size_hint: 0.9, 0.95
-			pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-			Screen:
-				name: 'dashboard'
-				Dashboard:
-			Screen:
-				name: 'product'
-				Product:
-			Screen:
-				name: 'sell'
-				Sell:
-			Screen:
-				name: 'service'
-				Service:
-			Screen:
-				name: 'info'
-				Status:
+        ScreenManager:
+            id: screenmanager
+            size_hint: 0.9, 0.95
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            Screen:
+                name: 'dashboard'
+                Dashboard:
+            Screen:
+                name: 'product'
+                Product:
+            Screen:
+                name: 'sell'
+                Sell:
+            Screen:
+                name: 'service'
+                Service:
+            Screen:
+                name: 'info'
+                Status:
 #-------------------------------------------------------------#
 
 #-------------------------------------------------------------#
-		BoxLayout:
-			size_hint: 0.98, 0.1
-			pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-			orientation: 'horizontal'
-			canvas.before:
-				Color:
-					rgba: 1,1,1,0.1
-				Rectangle:
-					size: self.size[0] + dp(50), self.size[1] + dp(2)
-					pos: self.pos[0] - dp(25), self.pos[1] - dp(1)	
-				Color:
-					rgba: 0.11, 0.12, 0.18, 1
-				Rectangle:
-					size: self.size[0] + dp(48), self.size[1] 
-					pos: self.pos[0] - dp(24), self.pos[1]
+        BoxLayout:
+            size_hint: 0.98, 0.1
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            orientation: 'horizontal'
+            canvas.before:
+                Color:
+                    rgba: 1,1,1,0.1
+                Rectangle:
+                    size: self.size[0] + dp(50), self.size[1] + dp(2)
+                    pos: self.pos[0] - dp(25), self.pos[1] - dp(1)   
+                Color:
+                    rgba: 0.11, 0.12, 0.18, 1
+                Rectangle:
+                    size: self.size[0] + dp(48), self.size[1] 
+                    pos: self.pos[0] - dp(24), self.pos[1]
 #-------------------------------------------------------------#
-			BoxLayout:
-				orientation: 'vertical'
-				pos_hint: {'center_x': 0.5, 'center_y': 0.35}
-				Image:
-					size_hint: 0.5, 0.5
-					pos_hint: {'center_x': 0.5, 'center_y': 0}
-					source: 'assets/dashboard_down.png'
-					ToggleButton:
-						id: dashboard
-						size: self.parent.parent.size
-						pos: self.parent.parent.pos
-						group: "footer"
-						background_color: 0,0,0,0
-						disabled: True if self.state == 'down' else False
-						state: 'down'
-						on_state:
-							self.parent.source = 'assets/dashboard_normal.png' if self.state == 'normal' else 'assets/dashboard_down.png'
-							if self.state == 'down': screenmanager.current = 'dashboard'
-							if self.state == 'down': label1.text = '[b]DASHBOARD[/b]'
-							if self.state == 'down': label2.text = 'you activity overview'		
-				Label:	
-					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-					size_hint_y: 0.5
-					text: "[b]DASHBOARD[/b]"
-					color: (1,1,1,1) if dashboard.state == 'normal' else (0.20, 0.11, 0.44, 1)
-					font_size: dp(10)
-					text_size: self.size
-					markup: True
-					halign: 'center'
-					valign: 'top'
+            BoxLayout:
+                orientation: 'vertical'
+                pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+                Image:
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'center_x': 0.5, 'center_y': 0}
+                    source: 'assets/dashboard_down.png'
+                    ToggleButton:
+                        id: dashboard
+                        size: self.parent.parent.size
+                        pos: self.parent.parent.pos
+                        group: "footer"
+                        background_color: 0,0,0,0
+                        disabled: True if self.state == 'down' else False
+                        state: 'down'
+                        on_state:
+                            self.parent.source = 'assets/dashboard_normal.png' if self.state == 'normal' else 'assets/dashboard_down.png'
+                            if self.state == 'down': screenmanager.current = 'dashboard'
+                            if self.state == 'down': label1.text = '[b]DASHBOARD[/b]'
+                            if self.state == 'down': label2.text = 'you activity overview'       
+                            if self.state == 'down': back_btn.opacity = 0
+                            if self.state == 'down': back_btn.disabled = True
+                Label:   
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    size_hint_y: 0.5
+                    text: "[b]DASHBOARD[/b]"
+                    color: (1,1,1,1) if dashboard.state == 'normal' else (0.20, 0.11, 0.44, 1)
+                    font_size: dp(10)
+                    text_size: self.size
+                    markup: True
+                    halign: 'center'
+                    valign: 'top'
 #-------------------------------------------------------------#
-			BoxLayout:
-				orientation: 'vertical'
-				pos_hint: {'center_x': 0.5, 'center_y': 0.35}
-				Image:
-					size_hint: 0.5, 0.5
-					pos_hint: {'center_x': 0.5, 'center_y': 0}
-					source: 'assets/product_normal.png'
-					ToggleButton:
-						id: product
-						size: self.parent.parent.size
-						pos: self.parent.parent.pos
-						group: "footer"
-						background_color: 0,0,0,0
-						disabled: True if self.state == 'down' else False
-						on_state:
-							self.parent.source = 'assets/product_normal.png' if self.state == 'normal' else 'assets/product_down.png'
-							if self.state == 'down': screenmanager.current = 'product'
-							if self.state == 'down': label1.text = '[b]PRODUCT[/b]'
-							if self.state == 'down': label2.text = 'textbooks, notes & materials'
-				Label:
-					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-					size_hint_y: 0.5
-					text: "[b]PRODUCT[/b]"
-					font_size: dp(10)
-					color: (1,1,1,1) if product.state == 'normal' else (0.20, 0.11, 0.44, 1)
-					text_size: self.size
-					markup: True
-					halign: 'center'
-					valign: 'top'
+            BoxLayout:
+                orientation: 'vertical'
+                pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+                Image:
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'center_x': 0.5, 'center_y': 0}
+                    source: 'assets/product_normal.png'
+                    ToggleButton:
+                        id: product
+                        size: self.parent.parent.size
+                        pos: self.parent.parent.pos
+                        group: "footer"
+                        background_color: 0,0,0,0
+                        disabled: True if self.state == 'down' else False
+                        on_state:
+                            self.parent.source = 'assets/product_normal.png' if self.state == 'normal' else 'assets/product_down.png'
+                            if self.state == 'down': screenmanager.current = 'product'
+                            if self.state == 'down': label1.text = '[b]PRODUCT[/b]'
+                            if self.state == 'down': label2.text = 'textbooks, notes & materials'
+                            if self.state == 'down': back_btn.opacity = 0
+                            if self.state == 'down': back_btn.disabled = True
+                Label:
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    size_hint_y: 0.5
+                    text: "[b]PRODUCT[/b]"
+                    font_size: dp(10)
+                    color: (1,1,1,1) if product.state == 'normal' else (0.20, 0.11, 0.44, 1)
+                    text_size: self.size
+                    markup: True
+                    halign: 'center'
+                    valign: 'top'
 #-------------------------------------------------------------#
-			BoxLayout:
-				orientation: 'vertical'
-				pos_hint: {'center_x': 0.5, 'center_y': 0.6}
-				Image:
-					size_hint: 0.5, 0.5
-					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-					source: 'assets/sell.png'
-					canvas.before:
-						Color:
-							rgba: 0.4, 0.31, 0.85, 1
-						Ellipse:
-							size: self.parent.size
-							pos: self.pos[0] - self.size[0] // 2, self.pos[1] - self.size[1] // 2
-					ToggleButton:
-						id: sell
-						size: self.parent.parent.size
-						pos: self.parent.parent.pos
-					    group: "footer"
-						background_color: 0,0,0,0
-						disabled: True if self.state == 'down' else False
-						on_state:
-							if self.state == 'down': screenmanager.current = 'sell'
-							if self.state == 'down': label1.text = '[b]CREATE LISTING[/b]'
-							if self.state == 'down': label2.text = 'publish your products & services'
-				Label:
-					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-					size_hint_y: 0.5
-					text: "[b]SELL[/b]"
-					color: (1,1,1,1) if sell.state == 'normal' else (0.20, 0.11, 0.44, 1)
-					font_size: dp(10)
-					text_size: self.size
-					markup: True
-					halign: 'center'
-					valign: 'bottom'
+            BoxLayout:
+                orientation: 'vertical'
+                pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+                Image:
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    source: 'assets/sell.png'
+                    canvas.before:
+                        Color:
+                            rgba: 0.4, 0.31, 0.85, 1
+                        Ellipse:
+                            size: self.parent.size
+                            pos: self.pos[0] - self.size[0] // 2, self.pos[1] - self.size[1] // 2
+                    ToggleButton:
+                        id: sell
+                        size: self.parent.parent.size
+                        pos: self.parent.parent.pos
+                        group: "footer"
+                        background_color: 0,0,0,0
+                        disabled: True if self.state == 'down' else False
+                        on_state:
+                            if self.state == 'down': screenmanager.current = 'sell'
+                            if self.state == 'down': label1.text = '[b]CREATE LISTING[/b]'
+                            if self.state == 'down': label2.text = 'publish your products & services'
+                            if self.state == 'down': back_btn.opacity = 0
+                            if self.state == 'down': back_btn.disabled = True
+                Label:
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    size_hint_y: 0.5
+                    text: "[b]SELL[/b]"
+                    color: (1,1,1,1) if sell.state == 'normal' else (0.20, 0.11, 0.44, 1)
+                    font_size: dp(10)
+                    text_size: self.size
+                    markup: True
+                    halign: 'center'
+                    valign: 'bottom'
 #-------------------------------------------------------------#
-			BoxLayout:
-				orientation: 'vertical'
-				pos_hint: {'center_x': 0.5, 'center_y': 0.35}
-				Image:
-					size_hint: 0.5, 0.5
-					pos_hint: {'center_x': 0.5, 'center_y': 0}
-					source: 'assets/service_normal.png'
-					ToggleButton:
-						id: service
-						size: self.parent.parent.size
-						pos: self.parent.parent.pos
-						group: "footer"
-						background_color: 0,0,0,0
-						disabled: True if self.state == 'down' else False
-						on_state:
-							self.parent.source = 'assets/service_normal.png' if self.state == 'normal' else 'assets/service_down.png'
-							if self.state == 'down': screenmanager.current = 'service'
-							if self.state == 'down': label1.text = '[b]SERVICE[/b]'
-							if self.state == 'down': label2.text = 'tutoring, review & freelance help'
-				Label:
-					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-					size_hint_y: 0.5
-					text: "[b]SERVICE[/b]"
-					color: (1,1,1,1) if service.state == 'normal' else (0.20, 0.11, 0.44, 1)
-					font_size: dp(10)
-					text_size: self.size
-					markup: True
-					halign: 'center'
-					valign: 'top'
+            BoxLayout:
+                orientation: 'vertical'
+                pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+                Image:
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'center_x': 0.5, 'center_y': 0}
+                    source: 'assets/service_normal.png'
+                    ToggleButton:
+                        id: service
+                        size: self.parent.parent.size
+                        pos: self.parent.parent.pos
+                        group: "footer"
+                        background_color: 0,0,0,0
+                        disabled: True if self.state == 'down' else False
+                        on_state:
+                            self.parent.source = 'assets/service_normal.png' if self.state == 'normal' else 'assets/service_down.png'
+                            if self.state == 'down': screenmanager.current = 'service'
+                            if self.state == 'down': label1.text = '[b]SERVICE[/b]'
+                            if self.state == 'down': label2.text = 'tutoring, review & freelance help'
+                            if self.state == 'down': back_btn.opacity = 0
+                            if self.state == 'down': back_btn.disabled = True
+                Label:
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    size_hint_y: 0.5
+                    text: "[b]SERVICE[/b]"
+                    color: (1,1,1,1) if service.state == 'normal' else (0.20, 0.11, 0.44, 1)
+                    font_size: dp(10)
+                    text_size: self.size
+                    markup: True
+                    halign: 'center'
+                    valign: 'top'
 #-------------------------------------------------------------#
-			BoxLayout:
-				orientation: 'vertical'
-				pos_hint: {'center_x': 0.5, 'center_y': 0.35}
-				Image:
-					size_hint: 0.5, 0.5
-					pos_hint: {'center_x': 0.5, 'center_y': 0}
-					source: 'assets/person_normal.png'
-					ToggleButton:
-						id: info
-						size: self.parent.parent.size
-						pos: self.parent.parent.pos
-						group: "footer"
-						background_color: 0,0,0,0
-						disabled: True if self.state == 'down' else False
-						on_state:
-							self.parent.source = 'assets/person_normal.png' if self.state == 'normal' else 'assets/person_down.png'
-							if self.state == 'down': screenmanager.current = 'info'
-							if self.state == 'down': label1.text = ''
-							if self.state == 'down': label2.text = ''
-				Label:
-					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-					size_hint_y: 0.5
-					text: "[b]STATUS[/b]"
-					color: (1,1,1,1) if info.state == 'normal' else (0.20, 0.11, 0.44, 1)
-					font_size: dp(10)
-					text_size: self.size
-					markup: True
-					halign: 'center'
-					valign: 'top'
+            BoxLayout:
+                orientation: 'vertical'
+                pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+                Image:
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'center_x': 0.5, 'center_y': 0}
+                    source: 'assets/person_normal.png'
+                    ToggleButton:
+                        id: info
+                        size: self.parent.parent.size
+                        pos: self.parent.parent.pos
+                        group: "footer"
+                        background_color: 0,0,0,0
+                        disabled: True if self.state == 'down' else False
+                        on_state:
+                            self.parent.source = 'assets/person_normal.png' if self.state == 'normal' else 'assets/person_down.png'
+                            if self.state == 'down': screenmanager.current = 'info'
+                            # Reset the Status inner screen manager back to the root menu
+                            if self.state == 'down': screenmanager.get_screen('info').children[0].ids.screenmanager.current = 'menu'
+                            if self.state == 'down': label1.text = '[b]MENU[/b]'
+                            if self.state == 'down': label2.text = 'manage your account'
+                            if self.state == 'down': back_btn.opacity = 0
+                            if self.state == 'down': back_btn.disabled = True
+                Label:
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    size_hint_y: 0.5
+                    text: "[b]STATUS[/b]"
+                    color: (1,1,1,1) if info.state == 'normal' else (0.20, 0.11, 0.44, 1)
+                    font_size: dp(10)
+                    text_size: self.size
+                    markup: True
+                    halign: 'center'
+                    valign: 'top'
 #------------------------------------------------------------#
-#DASHBOARD					
+#DASHBOARD                   
 #-----------------------------------------------------------#
 <Dashboard>:
-	ScrollView:
-		size: root.size
-		pos: root.pos
-		do_scroll: False, True
-		bar_width: 0
-		BoxLayout:
-			orientation: 'vertical'
-			size_hint_y: 1.5
-			spacing: dp(10)
+    ScrollView:
+        size: root.size
+        pos: root.pos
+        do_scroll: False, True
+        bar_width: 0
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: 1.5
+            spacing: dp(10)
 #-------------------------------------------------------------#
 # 0
 #-------------------------------------------------------------#
-			GridLayout:
-				rows: 2
-				cols: 2
-				spacing: dp(10)
+            GridLayout:
+                rows: 2
+                cols: 2
+                spacing: dp(10)
 #1------------------------------------------------------------#
-				BoxLayout:
-					orientation: 'vertical'
-					spacing: dp(5)
-					canvas.before:
-						Color:
-							rgba: 0.11, 0.12, 0.18, 1
-						RoundedRectangle:
-							size: self.size
-							pos: self.pos
-							radius: [10]
-					Label:
-						size_hint_y: 0.1
-					BoxLayout:
-						orientation: 'horizontal'
-						Label:
-							size_hint_x: 0.1
-						Label:
-							size_hint_x: 0.3
-							text: '₱'
-							text_size: self.size
-							color: 0.4, 0.31, 0.85, 1
-							halign: 'center'
-							valign: 'center'
-							canvas.before:
-								Color:
-									rgba: 0.15, 0.17, 0.23, 0.5
-								RoundedRectangle:
-									size: self.size
-									pos: self.pos
-						Label:
-							size_hint_x: 0.1
-						Label:
-							size_hint_x: 0.3
-							text: '+12%'
-							font_size: dp(12)
-							text_size: self.size
-							color: 0.16, 0.59, 0.33, 1
-							halign: 'center'
-							valign: 'center'
-							canvas.before:
-								Color:
-									rgba: 0.15, 0.17, 0.23, 0.5
-								RoundedRectangle:
-									size: self.size
-									pos: self.pos
-						Label:
-							size_hint_x: 0.1
-					Label:
-						text: '[b]₱1,240[/b]'
-						font_size: dp(16)
-						text_size: self.size
-						markup: True
-						halign: 'center'
-					Label:
-						text: 'Total Earnings'
-						font_size: dp(10)
-						text_size: self.size
-						halign: 'center'
-						valign: 'top'
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(5)
+                    canvas.before:
+                        Color:
+                            rgba: 0.11, 0.12, 0.18, 1
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+                            radius: [10]
+                    Label:
+                        size_hint_y: 0.1
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Label:
+                            size_hint_x: 0.1
+                        Label:
+                            size_hint_x: 0.3
+                            text: '₱'
+                            text_size: self.size
+                            color: 0.4, 0.31, 0.85, 1
+                            halign: 'center'
+                            valign: 'center'
+                            canvas.before:
+                                Color:
+                                    rgba: 0.15, 0.17, 0.23, 0.5
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                        Label:
+                            size_hint_x: 0.1
+                        Label:
+                            size_hint_x: 0.3
+                            text: '+12%'
+                            font_size: dp(12)
+                            text_size: self.size
+                            color: 0.16, 0.59, 0.33, 1
+                            halign: 'center'
+                            valign: 'center'
+                            canvas.before:
+                                Color:
+                                    rgba: 0.15, 0.17, 0.23, 0.5
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                        Label:
+                            size_hint_x: 0.1
+                    Label:
+                        text: '[b]₱1,240[/b]'
+                        font_size: dp(16)
+                        text_size: self.size
+                        markup: True
+                        halign: 'center'
+                    Label:
+                        text: 'Total Earnings'
+                        font_size: dp(10)
+                        text_size: self.size
+                        halign: 'center'
+                        valign: 'top'
 #2------------------------------------------------------------#
-				BoxLayout:
-					orientation: 'vertical'
-					spacing: dp(5)
-					canvas.before:
-						Color:
-							rgba: 0.11, 0.12, 0.18, 1
-						RoundedRectangle:
-							size: self.size
-							pos: self.pos
-							radius: [10]
-					Label:
-						size_hint_y: 0.1
-					BoxLayout:
-						orientation: 'horizontal'
-						Label:
-							size_hint_x: 0.1
-						Image:
-							source: 'assets/product_down.png'
-							size_hint_x: 0.3
-							
-							canvas.before:
-								Color:
-									rgba: 0.15, 0.17, 0.23, 0.5
-								RoundedRectangle:
-									size: self.size
-									pos: self.pos
-						Label:
-							size_hint_x: 0.1
-						Label:
-							size_hint_x: 0.3
-							text: '+2'
-							font_size: dp(12)
-							text_size: self.size
-							color: 0.16, 0.59, 0.33, 1
-							halign: 'center'
-							valign: 'center'
-							canvas.before:
-								Color:
-									rgba: 0.15, 0.17, 0.23, 0.5
-								RoundedRectangle:
-									size: self.size
-									pos: self.pos
-						Label:
-							size_hint_x: 0.1
-					Label:
-						text: '[b]5[/b]'
-						font_size: dp(16)
-						text_size: self.size
-						markup: True
-						halign: 'center'
-					Label:
-						text: 'Active Listing'
-						font_size: dp(10)
-						text_size: self.size
-						halign: 'center'
-						valign: 'top'
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(5)
+                    canvas.before:
+                        Color:
+                            rgba: 0.11, 0.12, 0.18, 1
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+                            radius: [10]
+                    Label:
+                        size_hint_y: 0.1
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Label:
+                            size_hint_x: 0.1
+                        Image:
+                            source: 'assets/product_down.png'
+                            size_hint_x: 0.3
+                           
+                            canvas.before:
+                                Color:
+                                    rgba: 0.15, 0.17, 0.23, 0.5
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                        Label:
+                            size_hint_x: 0.1
+                        Label:
+                            size_hint_x: 0.3
+                            text: '+2'
+                            font_size: dp(12)
+                            text_size: self.size
+                            color: 0.16, 0.59, 0.33, 1
+                            halign: 'center'
+                            valign: 'center'
+                            canvas.before:
+                                Color:
+                                    rgba: 0.15, 0.17, 0.23, 0.5
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                        Label:
+                            size_hint_x: 0.1
+                    Label:
+                        text: '[b]5[/b]'
+                        font_size: dp(16)
+                        text_size: self.size
+                        markup: True
+                        halign: 'center'
+                    Label:
+                        text: 'Active Listing'
+                        font_size: dp(10)
+                        text_size: self.size
+                        halign: 'center'
+                        valign: 'top'
 #3------------------------------------------------------------#
-				BoxLayout:
-					orientation: 'vertical'
-					spacing: dp(5)
-					canvas.before:
-						Color:
-							rgba: 0.11, 0.12, 0.18, 1
-						RoundedRectangle:
-							size: self.size
-							pos: self.pos
-							radius: [10]
-					Label:
-						size_hint_y: 0.1
-					BoxLayout:
-						orientation: 'horizontal'
-						Label:
-							size_hint_x: 0.1
-						Image:
-							source: 'assets/eye.png'
-							size_hint_x: 0.3
-							canvas.before:
-								Color:
-									rgba: 0.15, 0.17, 0.23, 0.5
-								RoundedRectangle:
-									size: self.size
-									pos: self.pos
-						Label:
-							size_hint_x: 0.1
-						Label:
-							size_hint_x: 0.3
-							text: '+2'
-							font_size: dp(12)
-							text_size: self.size
-							color: 0.16, 0.59, 0.33, 1
-							halign: 'center'
-							valign: 'center'
-							canvas.before:
-								Color:
-									rgba: 0.15, 0.17, 0.23, 0.5
-								RoundedRectangle:
-									size: self.size
-									pos: self.pos
-						Label:
-							size_hint_x: 0.1
-					Label:
-						text: '[b]5[/b]'
-						font_size: dp(16)
-						text_size: self.size
-						markup: True
-						halign: 'center'
-					Label:
-						text: 'Active Listing'
-						font_size: dp(10)
-						text_size: self.size
-						halign: 'center'
-						valign: 'top'
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(5)
+                    canvas.before:
+                        Color:
+                            rgba: 0.11, 0.12, 0.18, 1
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+                            radius: [10]
+                    Label:
+                        size_hint_y: 0.1
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Label:
+                            size_hint_x: 0.1
+                        Image:
+                            source: 'assets/eye.png'
+                            size_hint_x: 0.3
+                            canvas.before:
+                                Color:
+                                    rgba: 0.15, 0.17, 0.23, 0.5
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                        Label:
+                            size_hint_x: 0.1
+                        Label:
+                            size_hint_x: 0.3
+                            text: '+2'
+                            font_size: dp(12)
+                            text_size: self.size
+                            color: 0.16, 0.59, 0.33, 1
+                            halign: 'center'
+                            valign: 'center'
+                            canvas.before:
+                                Color:
+                                    rgba: 0.15, 0.17, 0.23, 0.5
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                        Label:
+                            size_hint_x: 0.1
+                    Label:
+                        text: '[b]5[/b]'
+                        font_size: dp(16)
+                        text_size: self.size
+                        markup: True
+                        halign: 'center'
+                    Label:
+                        text: 'Active Listing'
+                        font_size: dp(10)
+                        text_size: self.size
+                        halign: 'center'
+                        valign: 'top'
 #4------------------------------------------------------------#
-				BoxLayout:
-					orientation: 'vertical'
-					canvas.before:
-						Color:
-							rgba: 0.11, 0.12, 0.18, 1
-						RoundedRectangle:
-							size: self.size
-							pos: self.pos
-							radius: [10]
-			
+                BoxLayout:
+                    orientation: 'vertical'
+                    canvas.before:
+                        Color:
+                            rgba: 0.11, 0.12, 0.18, 1
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+                            radius: [10]
+          
 #5----------------------------------------------------------#
-			BoxLayout:
+            BoxLayout:
                 id: graph
-				orientation: 'vertical'
-				canvas.before:
-					Color:
-						rgba: 0.11, 0.12, 0.18, 1
-					RoundedRectangle:
-						size: self.size
-						pos: self.pos
-						radius: [10]
-				Label:
-					size_hint_y: 0.05
+                orientation: 'vertical'
+                canvas.before:
+                    Color:
+                        rgba: 0.11, 0.12, 0.18, 1
+                    RoundedRectangle:
+                        size: self.size
+                        pos: self.pos
+                        radius: [10]
+                Label:
+                    size_hint_y: 0.05
                 BoxLayout:
                     size_hint: 0.9, 0.2
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                     spacing: dp(5)
                     orientation: 'horizontal'
                     BoxLayout:
-                    	orientation: 'horizontal'
-                    	Label:
-                    		text: '[b]EARNINGS[/b]'
-                    		markup: True
-                    		text_size: self.size
-                    		halign: 'left'
-                    		valign: 'center'
-                    	Image:
-                    		source: 'assets/bar_graph.png'
-                    		size_hint: None, 1
-                    		canvas.before:
-								Color:
-									rgba: 0.15, 0.17, 0.23, 0.5
-								RoundedRectangle:
-									size: self.size
-									pos: self.pos
-                    		
+                        orientation: 'horizontal'
+                        Label:
+                            text: '[b]EARNINGS[/b]'
+                            markup: True
+                            text_size: self.size
+                            halign: 'left'
+                            valign: 'center'
+                        Image:
+                            source: 'assets/bar_graph.png'
+                            size_hint: None, 1
+                            canvas.before:
+                                Color:
+                                    rgba: 0.15, 0.17, 0.23, 0.5
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                          
                 ScrollView:
                     size_hint: 0.9, 0.3
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
@@ -482,67 +516,66 @@
                                 pos: self.pos
                                 size: self.size
                 Label:
-                	size_hint: 0.9, 0.2   
-                	pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                	
-                	       
+                    size_hint: 0.9, 0.2   
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                  
+                          
 #------------------------------------------------------------#
-			Label:
-				size_hint_y: 0.2
-				text: '[b]RECENT ACTIVITY[/b]'
-				markup: True
-				text_size: self.size
-				valign: 'center'
-				halign: 'center'
-			BoxLayout:
-				size_hint_y: 2
-				id: dynamic_activity
-				orientation: 'vertical'
-				spacing: dp(10)
-				DynamicActivity:
-				DynamicActivity:
-				DynamicActivity:
-				DynamicActivity:
-				DynamicActivity:
-					
-			Label:
-				size_hint_y: 0.05
-			
+            Label:
+                size_hint_y: 0.2
+                text: '[b]RECENT ACTIVITY[/b]'
+                markup: True
+                text_size: self.size
+                valign: 'center'
+                halign: 'center'
+            BoxLayout:
+                size_hint_y: 2
+                id: dynamic_activity
+                orientation: 'vertical'
+                spacing: dp(10)
+                DynamicActivity:
+                DynamicActivity:
+                DynamicActivity:
+                DynamicActivity:
+                DynamicActivity:
+                   
+            Label:
+                size_hint_y: 0.05
+          
 #------------------------------------------------------------#
-#PRODUCT					
+#PRODUCT                   
 #-----------------------------------------------------------#
 <Product>:
-	BoxLayout:
-		size: root.size
-		pos: root.pos
-		orientation: 'vertical'
-		spacing: dp(5)
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        spacing: dp(5)
 #-------------------------------------------------------------#
 # 0
 #-------------------------------------------------------------#
-		BoxLayout:
-			size_hint: 0.95, 0.1
-			pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-			spacing: dp(10)
-			orientation: 'horizontal'
+        BoxLayout:
+            size_hint: 0.95, 0.1
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            spacing: dp(10)
+            orientation: 'horizontal'
 #1------------------------------------------------------------#
-			ScrollView:
+            ScrollView:
                 size_hint_y: None
                 height: dp(40)
                 do_scroll: True, False
                 bar_width: 0
-                
-                # FIX: Mobile constraints for nested horizontal scrolling
+               
                 scroll_timeout: 250 
                 scroll_distance: dp(20)
-                
+               
                 BoxLayout:
                     orientation: 'horizontal'
                     size_hint_x: None
                     width: self.minimum_width
                     padding: [dp(20), 0]
                     spacing: dp(10)
-                   
+                  
                     ToggleButton:
                         group: 'products'
                         state: 'down'
@@ -560,7 +593,7 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-                   
+                  
                     ToggleButton:
                         group: 'products'
                         text: 'Textbooks'
@@ -577,7 +610,7 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-                   
+                  
                     ToggleButton:
                         group: 'products'
                         text: 'Notes'
@@ -629,17 +662,17 @@
                                 pos: self.pos
                                 radius: [dp(20)]
 #6------------------------------------------------------------#
-		ScrollView:
-			id: scroll
-			do_scroll: False, True
-			BoxLayout:
-				size_hint_y: len(self.children) * 0.2
-				id: dynamic_product
-				orientation: 'vertical'
-				spacing: dp(10)
-#Dynamic Prodoct List			
-		Label:
-			size_hint_y: 0.01
+        ScrollView:
+            id: scroll
+            do_scroll: False, True
+            BoxLayout:
+                size_hint_y: len(self.children) * 0.2
+                id: dynamic_product
+                orientation: 'vertical'
+                spacing: dp(10)
+#Dynamic Prodoct List           
+        Label:
+            size_hint_y: 0.01
 
 <EscrowBanner@BoxLayout>:
     size_hint_y: None
@@ -675,7 +708,6 @@
             halign: 'left'
             valign: 'top'
 
-# FIX: Added text_val to alias the internal input text for Python access
 <FormInput@BoxLayout>:
     orientation: 'vertical'
     size_hint_y: None
@@ -732,7 +764,7 @@
         font_size: sp(16)
         pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 #------------------------------------------------------------#
-#SELL				
+#SELL               
 #-----------------------------------------------------------#
 <Sell>:
     ScrollView:
@@ -740,7 +772,7 @@
         pos: root.pos
         do_scroll: False, True
         bar_width: 0
-       
+      
         BoxLayout:
             orientation: 'vertical'
             size_hint_y: None
@@ -764,11 +796,11 @@
                     height: dp(20)
                     text_size: self.size
                     halign: 'left'
-               
+              
                 BoxLayout:
                     orientation: 'horizontal'
                     spacing: dp(10)
-                   
+                  
                     ToggleButton:
                         id: type_textbook
                         group: 'listing_type'
@@ -843,7 +875,7 @@
                 title: 'Description'
                 hint: 'Describe condition, edition, ISBN...'
                 height: dp(120) 
-           
+          
             FormInput:
                 id: price_input
                 title: 'Price'
@@ -863,19 +895,19 @@
                     height: dp(20)
                     text_size: self.size
                     halign: 'left'
-               
+              
                 ScrollView:
                     do_scroll: True, False
                     bar_width: 0
                     scroll_timeout: 250 
                     scroll_distance: dp(20)
-                    
+                   
                     BoxLayout:
                         orientation: 'horizontal'
                         spacing: dp(8)
                         size_hint_x: None
                         width: self.minimum_width
-                       
+                      
                         ToggleButton:
                             group: 'sells'
                             text: 'New'
@@ -891,7 +923,7 @@
                                     size: self.size
                                     pos: self.pos
                                     radius: [dp(15)]
-                       
+                      
                         ToggleButton:
                             group: 'sells'
                             text: 'Like New'
@@ -923,7 +955,7 @@
                                     size: self.size
                                     pos: self.pos
                                     radius: [dp(15)]
-                                   
+                                  
                         ToggleButton:
                             group: 'sells'
                             text: 'Fair'
@@ -957,46 +989,44 @@
                                     radius: [dp(15)]
 
             # PUBLISH BUTTON
-            # FIX: Used valid PrimaryButton template instead of pure ButtonBehavior
             PrimaryButton:
                 id: publish_btn
                 text: '[b]Publish[/b]'
                 on_release: root.add_product()
 #------------------------------------------------------------#
-#SERVICE					
+#SERVICE                   
 #-----------------------------------------------------------#
 <Service>:
-	BoxLayout:
-		size: root.size
-		pos: root.pos
-		orientation: 'vertical'
-		spacing: dp(5)
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        spacing: dp(5)
 #-------------------------------------------------------------#
 # 0
 #-------------------------------------------------------------#
-		BoxLayout:
-			size_hint: 0.95, 0.1
-			pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-			spacing: dp(10)
-			orientation: 'horizontal'
+        BoxLayout:
+            size_hint: 0.95, 0.1
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            spacing: dp(10)
+            orientation: 'horizontal'
 #1------------------------------------------------------------#
-			ScrollView:
+            ScrollView:
                 size_hint_y: None
                 height: dp(40)
                 do_scroll: True, False
                 bar_width: 0
-                
-                # FIX: Mobile constraints for nested horizontal scrolling
+               
                 scroll_timeout: 250 
                 scroll_distance: dp(20)
-                
+               
                 BoxLayout:
                     orientation: 'horizontal'
                     size_hint_x: None
                     width: self.minimum_width
                     padding: [dp(20), 0]
                     spacing: dp(10)
-                   
+                  
                     ToggleButton:
                         group: 'services'
                         state: 'down'
@@ -1014,7 +1044,7 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-                   
+                  
                     ToggleButton:
                         group: 'services'
                         text: 'Tutoring'
@@ -1031,7 +1061,7 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-                   
+                  
                     ToggleButton:
                         group: 'services'
                         text: 'Writing'
@@ -1083,28 +1113,154 @@
                                 pos: self.pos
                                 radius: [dp(20)]
 #6------------------------------------------------------------#
-		ScrollView:
-			id: scroll
-			do_scroll: False, True
-			BoxLayout:
-				size_hint_y: len(self.children) * 0.2
-				id: dynamic_service
-				orientation: 'vertical'
-				spacing: dp(10)
-#Dynamic Service List			
-		Label:
-			size_hint_y: 0.01
-			
+        ScrollView:
+            id: scroll
+            do_scroll: False, True
+            BoxLayout:
+                size_hint_y: len(self.children) * 0.2
+                id: dynamic_service
+                orientation: 'vertical'
+                spacing: dp(10)
+#Dynamic Service List           
+        Label:
+            size_hint_y: 0.01
+           
+#-----------------------------------------------------------#
+# Custom Dynamic Class for NavBackButton
+#-----------------------------------------------------------#
+<NavBackButton@ButtonBehavior+BoxLayout>:
+    size_hint: None, None
+    size: dp(40), dp(40)
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.16, 0.22, 1
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(10)]
+    Label:
+        text: '<'
+        font_size: sp(18)
+        bold: True
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
 #-----------------------------------------------------------#
 # Custom Dynamic Class for Menu List Items
 #-----------------------------------------------------------#
+<CardBase@BoxLayout>:
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.16, 1  # Dark Card Background
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+
+<ListTile>:
+    size_hint_y: None
+    height: dp(70)
+    padding: dp(15)
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.16, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+    
+    # Left Icon
+    FloatLayout:
+        size_hint: None, None
+        size: dp(40), dp(40)
+        pos_hint: {'center_y': 0.5}
+        canvas.before:
+            Color:
+                rgba: 0.15, 0.16, 0.22, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(10)]
+        # Replace with actual image
+        Label:
+            text: '-' # Placeholder for Image: source: root.icon_source
+            color: 0.43, 0.33, 0.85, 1
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+    # Text Content
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(2)
+        pos_hint: {'center_y': 0.5}
+        Label:
+            text: root.title
+            font_size: sp(16)
+            bold: True
+            color: 1, 1, 1, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: root.subtitle
+            font_size: sp(12)
+            color: 0.6, 0.6, 0.6, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+    
+    # Right Arrow (Optional)
+    Label:
+        text: '>' if root.show_arrow else ''
+        size_hint_x: None
+        width: dp(20)
+        color: 0.5, 0.5, 0.5, 1
+        font_size: sp(18)
+
+<ChatBubble>:
+    size_hint_y: None
+    height: self.minimum_height
+    padding: [dp(10), dp(5)]
+    # Anchor left or right based on sender
+    AnchorLayout:
+        anchor_x: 'right' if root.is_sender else 'left'
+        size_hint_y: None
+        height: bubble_container.height
+        
+        BoxLayout:
+            id: bubble_container
+            orientation: 'vertical'
+            size_hint: None, None
+            width: min(dp(250), root.width * 0.75)
+            height: self.minimum_height
+            padding: dp(15)
+            spacing: dp(5)
+            canvas.before:
+                Color:
+                    rgba: (0.43, 0.33, 0.85, 1) if root.is_sender else (0.15, 0.16, 0.22, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(15), dp(15), dp(0) if root.is_sender else dp(15), dp(15) if root.is_sender else dp(0)]
+            Label:
+                text: root.text
+                size_hint_y: None
+                height: self.texture_size[1]
+                text_size: self.width, None
+                color: 1, 1, 1, 1
+            Label:
+                text: root.time
+                font_size: sp(10)
+                size_hint_y: None
+                height: dp(12)
+                text_size: self.width, None
+                halign: 'right' if root.is_sender else 'left'
+                color: 0.8, 0.8, 0.8, 0.7
 <MenuItem@ButtonBehavior+BoxLayout>:
     size_hint_y: None
     height: dp(55)
     spacing: dp(15)
     padding: [dp(10), dp(5), dp(10), dp(5)]
-    
+   
     # Custom properties to easily pass data
     icon_source: ''
     text: ''
@@ -1137,6 +1293,74 @@
         halign: 'left'
         valign: 'middle'
 
+<Divider@Widget>:
+    size_hint_y: None
+    height: dp(1)
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.16, 0.22, 1 # Faint divider line
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<SettingsTile@BoxLayout>:
+    size_hint_y: None
+    height: dp(70)
+    padding: dp(15)
+    spacing: dp(15)
+    
+    # We define custom properties so we can reuse this tile
+    icon_text: '-'
+    title: ''
+    subtitle: ''
+    
+    # Left Icon Background
+    FloatLayout:
+        size_hint: None, None
+        size: dp(40), dp(40)
+        pos_hint: {'center_y': 0.5}
+        canvas.before:
+            Color:
+                rgba: 0.15, 0.16, 0.22, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(10)]
+        Label:
+            text: root.icon_text
+            color: 0.43, 0.33, 0.85, 1
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+    # Text Content
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(2)
+        pos_hint: {'center_y': 0.5}
+        Label:
+            text: root.title
+            font_size: sp(16)
+            bold: True
+            color: 1, 1, 1, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: root.subtitle
+            font_size: sp(12)
+            color: 0.6, 0.6, 0.6, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+    
+    # Right Arrow
+    Label:
+        text: '>'
+        size_hint_x: None
+        width: dp(20)
+        color: 0.5, 0.5, 0.5, 1
+        font_size: sp(18)
+
+
 #-----------------------------------------------------------#
 # MAIN STATUS SCREEN
 #-----------------------------------------------------------#
@@ -1158,7 +1382,7 @@
                 orientation: 'vertical'
                 size: root.size
                 pos: root.pos
-                
+               
                 ScrollView:
                     do_scroll: False, True
                     bar_width: 0
@@ -1306,29 +1530,54 @@
                             MenuItem:
                                 icon_source: 'assets/profile.png'
                                 text: 'My Profile'
-                                on_release: screenmanager.current = 'profile'
-                                
+                                on_release: 
+                                    screenmanager.current = 'profile'
+                                    root.parent.parent.parent.parent.ids.label1.text = '[b]MY PROFILE[/b]'
+                                    root.parent.parent.parent.parent.ids.label2.text = 'view your details'
+                                    root.parent.parent.parent.parent.ids.back_btn.opacity = 1
+                                    root.parent.parent.parent.parent.ids.back_btn.disabled = False
+                               
                             MenuItem:
                                 icon_source: 'assets/chat.png'
                                 text: 'ChatBox'
-                                on_release: screenmanager.current = 'chatbox'
-                                
+                                on_release: 
+                                    screenmanager.current = 'chatbox'
+                                    root.parent.parent.parent.parent.ids.label1.text = '[b]CHATBOX[/b]'
+                                    root.parent.parent.parent.parent.ids.label2.text = 'messages and negotiations'
+                                    root.parent.parent.parent.parent.ids.back_btn.opacity = 1
+                                    root.parent.parent.parent.parent.ids.back_btn.disabled = False
+                               
                             MenuItem:
                                 icon_source: 'assets/wallet.png'
                                 text: 'Wallet'
-                                on_release: screenmanager.current = 'wallet'
-                                
+                                on_release: 
+                                    screenmanager.current = 'wallet'
+                                    root.parent.parent.parent.parent.ids.label1.text = '[b]WALLET[/b]'
+                                    root.parent.parent.parent.parent.ids.label2.text = 'manage your funds'
+                                    root.parent.parent.parent.parent.ids.back_btn.opacity = 1
+                                    root.parent.parent.parent.parent.ids.back_btn.disabled = False
+                               
                             MenuItem:
                                 icon_source: 'assets/settings.png'
                                 text: 'Settings'
-                                on_release: screenmanager.current = 'settings'
-                                
+                                on_release: 
+                                    screenmanager.current = 'settings'
+                                    root.parent.parent.parent.parent.ids.label1.text = '[b]SETTINGS[/b]'
+                                    root.parent.parent.parent.parent.ids.label2.text = 'manage your preferences'
+                                    root.parent.parent.parent.parent.ids.back_btn.opacity = 1
+                                    root.parent.parent.parent.parent.ids.back_btn.disabled = False
+                               
                             MenuItem:
                                 icon_source: 'assets/logout.png'
                                 text: 'Sign Out'
                                 text_color: 0.8, 0.2, 0.2, 1       # Red text
                                 icon_bg_color: 0.15, 0.05, 0.05, 1 # Faint red background
-                                on_release: screenmanager.current = 'logout'
+                                on_release: 
+                                    screenmanager.current = 'logout'
+                                    root.parent.parent.parent.parent.ids.label1.text = '[b]SIGN OUT[/b]'
+                                    root.parent.parent.parent.parent.ids.label2.text = 'disconnect securely'
+                                    root.parent.parent.parent.parent.ids.back_btn.opacity = 1
+                                    root.parent.parent.parent.parent.ids.back_btn.disabled = False
         Screen:
             name: 'profile'
             Profile:
@@ -1352,204 +1601,14 @@
             LogOut:
                 size: root.size
                 pos: root.pos
-            
-
-# -----------------------------------------------------------#
-# GLOBAL SHARED COMPONENTS (Cards, Buttons, Lists)
-# -----------------------------------------------------------#
-<CardBase@BoxLayout>:
-    canvas.before:
-        Color:
-            rgba: 0.11, 0.12, 0.16, 1  # Dark Card Background
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [dp(12)]
-
-<ListTile>:
-    size_hint_y: None
-    height: dp(70)
-    padding: dp(15)
-    spacing: dp(15)
-    canvas.before:
-        Color:
-            rgba: 0.11, 0.12, 0.16, 1
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [dp(12)]
-    
-    # Left Icon
-    FloatLayout:
-        size_hint: None, None
-        size: dp(40), dp(40)
-        pos_hint: {'center_y': 0.5}
-        canvas.before:
-            Color:
-                rgba: 0.15, 0.16, 0.22, 1
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(10)]
-        # Replace with actual image
-        Label:
-            text: '-' # Placeholder for Image: source: root.icon_source
-            color: 0.43, 0.33, 0.85, 1
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-    # Text Content
-    BoxLayout:
-        orientation: 'vertical'
-        spacing: dp(2)
-        pos_hint: {'center_y': 0.5}
-        Label:
-            text: root.title
-            font_size: sp(16)
-            bold: True
-            color: 1, 1, 1, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'bottom'
-        Label:
-            text: root.subtitle
-            font_size: sp(12)
-            color: 0.6, 0.6, 0.6, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'top'
-    
-    # Right Arrow (Optional)
-    Label:
-        text: '>' if root.show_arrow else ''
-        size_hint_x: None
-        width: dp(20)
-        color: 0.5, 0.5, 0.5, 1
-        font_size: sp(18)
-
-<ChatBubble>:
-    size_hint_y: None
-    height: self.minimum_height
-    padding: [dp(10), dp(5)]
-    # Anchor left or right based on sender
-    AnchorLayout:
-        anchor_x: 'right' if root.is_sender else 'left'
-        size_hint_y: None
-        height: bubble_container.height
-        
-        BoxLayout:
-            id: bubble_container
-            orientation: 'vertical'
-            size_hint: None, None
-            width: min(dp(250), root.width * 0.75)
-            height: self.minimum_height
-            padding: dp(15)
-            spacing: dp(5)
-            canvas.before:
-                Color:
-                    rgba: (0.43, 0.33, 0.85, 1) if root.is_sender else (0.15, 0.16, 0.22, 1)
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [dp(15), dp(15), dp(0) if root.is_sender else dp(15), dp(15) if root.is_sender else dp(0)]
-            Label:
-                text: root.text
-                size_hint_y: None
-                height: self.texture_size[1]
-                text_size: self.width, None
-                color: 1, 1, 1, 1
-            Label:
-                text: root.time
-                font_size: sp(10)
-                size_hint_y: None
-                height: dp(12)
-                text_size: self.width, None
-                halign: 'right' if root.is_sender else 'left'
-                color: 0.8, 0.8, 0.8, 0.7
-<Divider@Widget>:
-    size_hint_y: None
-    height: dp(1)
-    canvas.before:
-        Color:
-            rgba: 0.15, 0.16, 0.22, 1 # Faint divider line
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
-<SettingsTile@BoxLayout>:
-    size_hint_y: None
-    height: dp(70)
-    padding: dp(15)
-    spacing: dp(15)
-    
-    # We define custom properties so we can reuse this tile
-    icon_text: '-'
-    title: ''
-    subtitle: ''
-    
-    # Left Icon Background
-    FloatLayout:
-        size_hint: None, None
-        size: dp(40), dp(40)
-        pos_hint: {'center_y': 0.5}
-        canvas.before:
-            Color:
-                rgba: 0.15, 0.16, 0.22, 1
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(10)]
-        Label:
-            text: root.icon_text
-            color: 0.43, 0.33, 0.85, 1
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-    # Text Content
-    BoxLayout:
-        orientation: 'vertical'
-        spacing: dp(2)
-        pos_hint: {'center_y': 0.5}
-        Label:
-            text: root.title
-            font_size: sp(16)
-            bold: True
-            color: 1, 1, 1, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'bottom'
-        Label:
-            text: root.subtitle
-            font_size: sp(12)
-            color: 0.6, 0.6, 0.6, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'top'
-    
-    # Right Arrow
-    Label:
-        text: '>'
-        size_hint_x: None
-        width: dp(20)
-        color: 0.5, 0.5, 0.5, 1
-        font_size: sp(18)
 
 # ------------------- 1. PROFILE SCREEN ------------------- #
 <Profile>:
     size: root.size
     pos: root.pos
     orientation: 'vertical'
-    padding: dp(20)
-    spacing: dp(20)
-
-    # Title
-    Label:
-        text: '[b]My Profile[/b]'
-        markup: True
-        font_size: sp(22)
-        size_hint_y: None
-        height: dp(40)
-        text_size: self.size
-        halign: 'left'
-        valign: 'middle'
+    padding: [dp(20), dp(5), dp(20), dp(20)]
+    spacing: dp(15)
 
     ScrollView:
         do_scroll: False, True
@@ -1594,7 +1653,7 @@
                     color: 0.6, 0.6, 0.6, 1
                     size_hint_y: None
                     height: dp(20)
-            
+          
             # Info Cards
             BoxLayout:
                 orientation: 'vertical'
@@ -1617,7 +1676,7 @@
                     title: 'Location'
                     subtitle: 'Campus Dorm B, Room 204'
                     show_arrow: False
-            
+          
             # Edit Button
             Button:
                 text: 'Edit Profile'
@@ -1637,7 +1696,7 @@
     size: root.size
     pos: root.pos
     orientation: 'vertical'
-    
+   
     # Top Bar
     BoxLayout:
         size_hint_y: None
@@ -1650,10 +1709,7 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-        Label:
-            text: '<'
-            size_hint_x: None
-            width: dp(30)
+                
         FloatLayout:
             size_hint: None, None
             size: dp(40), dp(40)
@@ -1678,7 +1734,7 @@
                 text_size: self.size
                 halign: 'left'
                 valign: 'top'
-    
+   
     # Chat Area
     ScrollView:
         do_scroll: False, True
@@ -1705,7 +1761,7 @@
                 text: "I can do $42, meet in the middle?"
                 time: "10:35 AM"
                 is_sender: True
-    
+   
     # Input Bar
     BoxLayout:
         size_hint_y: None
@@ -1718,12 +1774,12 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-        
+       
         Label:
-            text: '@' # Attachment Icon Placeholder
+            text: '@'
             size_hint_x: None
             width: dp(30)
-        
+       
         TextInput:
             hint_text: 'Type a message...'
             background_color: 0,0,0,0
@@ -1738,9 +1794,9 @@
                     pos: self.pos
                     size: self.size
                     radius: [dp(20)]
-        
+       
         Button:
-            text: 'Send' # Send Icon Placeholder
+            text: 'Send' 
             size_hint_x: None
             width: dp(50)
             background_color: 0,0,0,0
@@ -1757,18 +1813,8 @@
     size: root.size
     pos: root.pos
     orientation: 'vertical'
-    padding: dp(20)
-    spacing: dp(20)
-
-    Label:
-        text: '[b]Wallet[/b]'
-        markup: True
-        font_size: sp(26)
-        size_hint_y: None
-        height: dp(40)
-        text_size: self.size
-        halign: 'left'
-        valign: 'middle'
+    padding: [dp(20), dp(5), dp(20), dp(20)]
+    spacing: dp(15)
 
     ScrollView:
         do_scroll: False, True
@@ -1807,7 +1853,7 @@
                     height: dp(50)
                     text_size: self.size
                     halign: 'left'
-                
+              
                 # Buttons
                 BoxLayout:
                     spacing: dp(15)
@@ -1859,7 +1905,7 @@
 # ------------------- 4. SETTINGS SCREEN ------------------- #
 <UserSettings>:
     orientation: 'vertical'
-    padding: dp(20)
+    padding: [dp(20), dp(5), dp(20), dp(20)]
     spacing: dp(10)
 
     # Master Background for the Settings Screen
@@ -1870,31 +1916,11 @@
             pos: self.pos
             size: self.size
 
-    # Header
-    BoxLayout:
-        orientation: 'vertical'
-        size_hint_y: None
-        height: dp(60)
-        Label:
-            text: '[b]Settings[/b]'
-            markup: True
-            font_size: sp(26)
-            text_size: self.size
-            halign: 'left'
-            valign: 'bottom'
-        Label:
-            text: 'Manage your preferences'
-            color: 0.6, 0.6, 0.6, 1
-            font_size: sp(14)
-            text_size: self.size
-            halign: 'left'
-            valign: 'top'
-
     # Scrollable Settings List
     ScrollView:
         do_scroll: False, True
         bar_width: 0
-        
+       
         BoxLayout:
             orientation: 'vertical'
             size_hint_y: None
@@ -1916,7 +1942,7 @@
                     halign: 'left'
                     size_hint_y: None
                     height: dp(20)
-                
+              
                 # Card Container
                 BoxLayout:
                     orientation: 'vertical'
@@ -1929,7 +1955,7 @@
                             pos: self.pos
                             size: self.size
                             radius: [dp(12)]
-                    
+                  
                     SettingsTile:
                         icon_text: 'L' # Placeholder for lock icon
                         title: 'Privacy & Security'
@@ -1959,7 +1985,7 @@
                     halign: 'left'
                     size_hint_y: None
                     height: dp(20)
-                
+              
                 # Card Container
                 BoxLayout:
                     orientation: 'vertical'
@@ -1972,7 +1998,7 @@
                             pos: self.pos
                             size: self.size
                             radius: [dp(12)]
-                    
+                  
                     SettingsTile:
                         icon_text: 'N'
                         title: 'Notifications'
@@ -2002,7 +2028,7 @@
                     halign: 'left'
                     size_hint_y: None
                     height: dp(20)
-                
+              
                 # Card Container
                 BoxLayout:
                     orientation: 'vertical'
@@ -2015,7 +2041,7 @@
                             pos: self.pos
                             size: self.size
                             radius: [dp(12)]
-                    
+                  
                     SettingsTile:
                         icon_text: '?' 
                         title: 'Help Center'
@@ -2031,7 +2057,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
-    
+   
     BoxLayout:
         orientation: 'vertical'
         size_hint: 0.85, None
@@ -2050,7 +2076,7 @@
                     pos: [self.center_x - dp(40), self.y]
                     size: dp(80), dp(80)
             Label:
-                text: 'Icon' # Placeholder
+                text: 'Icon' 
                 color: 0.88, 0.25, 0.25, 1
                 pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
@@ -2094,7 +2120,7 @@
                         pos: self.pos
                         size: self.size
                         radius: [dp(12)]
-            
+          
             Button:
                 text: '[b]Cancel[/b]'
                 markup: True
@@ -2111,4 +2137,10 @@
                     Line:
                         rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
                         width: dp(1)
-                        
+                # Wired Up LogOut Cancel button to hide the global back button
+                on_release:
+                    root.parent.manager.current = 'menu'
+                    root.parent.parent.parent.parent.parent.parent.parent.ids.label1.text = '[b]MENU[/b]'
+                    root.parent.parent.parent.parent.parent.parent.parent.ids.label2.text = 'manage your account'
+                    root.parent.parent.parent.parent.parent.parent.parent.ids.back_btn.opacity = 0
+                    root.parent.parent.parent.parent.parent.parent.parent.ids.back_btn.disabled = True
