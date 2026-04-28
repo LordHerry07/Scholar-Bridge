@@ -1144,189 +1144,971 @@
     # 1. Main Background Color
     canvas.before:
         Color:
-            rgba: 0.08, 0.09, 0.13, 1  # Dark blue/black background
+            rgba: 0,0,0,0
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    ScreenManager:
+        size: root.size
+        pos: root.pos
+        id: screenmanager
+        Screen:
+            name: 'menu'
+            BoxLayout:
+                orientation: 'vertical'
+                size: root.size
+                pos: root.pos
+                
+                ScrollView:
+                    do_scroll: False, True
+                    bar_width: 0
+
+                    # 2. Inner Scrolling Layout (Must have size_hint_y: None)
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint_y: None
+                        height: self.minimum_height
+                        padding: dp(20)
+                        spacing: dp(30)
+
+                        # --- TOP SECTION: PROFILE INFO ---
+                        BoxLayout:
+                            orientation: 'vertical'
+                            size_hint_y: None
+                            height: self.minimum_height
+                            spacing: dp(10)
+
+                            # Avatar Container
+                            FloatLayout:
+                                size_hint: None, None
+                                size: dp(100), dp(100)
+                                pos_hint: {'center_x': 0.5}
+
+                                # Purple initials circle
+                                canvas.before:
+                                    Color:
+                                        rgba: 0.12, 0.13, 0.20, 1 # Slightly lighter dark circle
+                                    Ellipse:
+                                        pos: self.pos
+                                        size: self.size
+                                Label:
+                                    text: f'[b]{root.initial}[/b]' # Example: 'JD'
+                                    markup: True
+                                    font_size: sp(36)
+                                    color: 0.4, 0.31, 0.85, 1 # Purple accent
+                                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+                                # Overlapping Camera Badge
+                                FloatLayout:
+                                    size_hint: None, None
+                                    size: dp(32), dp(32)
+                                    pos_hint: {'right': 1.0, 'y': 0}
+                                    canvas.before:
+                                        Color:
+                                            rgba: 0.4, 0.31, 0.85, 1
+                                        Ellipse:
+                                            pos: self.pos
+                                            size: self.size
+                                    Image:
+                                        source: 'assets/camera.png' # Ensure this asset exists
+                                        size_hint: 0.5, 0.5
+                                        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+                            # Names and Handles
+                            Label:
+                                text: f'[b]{root.full_name}[/b]' # Example: 'Jane Doe'
+                                markup: True
+                                font_size: sp(22)
+                                size_hint_y: None
+                                height: dp(30)
+                                color: 1, 1, 1, 1
+
+                            Label:
+                                text: f'{root.email}' # Example: '@janedoe'
+                                font_size: sp(14)
+                                size_hint_y: None
+                                height: dp(20)
+                                color: 0.6, 0.6, 0.6, 1
+
+                            # Badges Row (Verified & Rating)
+                            BoxLayout:
+                                orientation: 'horizontal'
+                                size_hint: None, None
+                                height: dp(35)
+                                width: self.minimum_width
+                                pos_hint: {'center_x': 0.5}
+                                spacing: dp(10)
+
+                                # Verified Badge
+                                BoxLayout:
+                                    size_hint_x: None
+                                    width: dp(95)
+                                    padding: [dp(10), dp(5), dp(10), dp(5)]
+                                    spacing: dp(5)
+                                    canvas.before:
+                                        Color:
+                                            rgba: 0.10, 0.15, 0.15, 1 # Subtle dark green BG
+                                        RoundedRectangle:
+                                            pos: self.pos
+                                            size: self.size
+                                            radius: [dp(15)]
+                                        Color:
+                                            rgba: 0.2, 0.8, 0.4, 0.5 # Green Border Line
+                                        Line:
+                                            rounded_rectangle: [self.x, self.y, self.width, self.height, dp(15)]
+                                            width: dp(1)
+                                    Image:
+                                        source: 'assets/green_shield.png'
+                                        size_hint_x: None
+                                        width: dp(15)
+                                    Label:
+                                        text: 'Verified'
+                                        color: 0.2, 0.8, 0.4, 1
+                                        font_size: sp(12)
+                                        bold: True
+
+                                # Rating Badge
+                                BoxLayout:
+                                    size_hint_x: None
+                                    width: dp(75)
+                                    padding: [dp(10), dp(5), dp(10), dp(5)]
+                                    spacing: dp(5)
+                                    canvas.before:
+                                        Color:
+                                            rgba: 0.15, 0.12, 0.20, 1 # Subtle dark purple BG
+                                        RoundedRectangle:
+                                            pos: self.pos
+                                            size: self.size
+                                            radius: [dp(15)]
+                                        Color:
+                                            rgba: 0.4, 0.31, 0.85, 0.5 # Purple Border Line
+                                        Line:
+                                            rounded_rectangle: [self.x, self.y, self.width, self.height, dp(15)]
+                                            width: dp(1)
+                                    Image:
+                                        source: 'assets/star.png'
+                                        size_hint_x: None
+                                        width: dp(15)
+                                    Label:
+                                        text: '4.9'
+                                        color: 0.4, 0.31, 0.85, 1
+                                        font_size: sp(12)
+                                        bold: True
+
+                        # --- BOTTOM SECTION: MENU LIST ---
+                        BoxLayout:
+                            orientation: 'vertical'
+                            size_hint_y: None
+                            height: self.minimum_height
+                            spacing: dp(5)
+
+                            # Instantiate custom MenuItems
+                            MenuItem:
+                                icon_source: 'assets/profile.png'
+                                text: 'My Profile'
+                                on_release: screenmanager.current = 'profile'
+                                
+                            MenuItem:
+                                icon_source: 'assets/chat.png'
+                                text: 'ChatBox'
+                                on_release: screenmanager.current = 'chatbox'
+                                
+                            MenuItem:
+                                icon_source: 'assets/wallet.png'
+                                text: 'Wallet'
+                                on_release: screenmanager.current = 'wallet'
+                                
+                            MenuItem:
+                                icon_source: 'assets/settings.png'
+                                text: 'Settings'
+                                on_release: screenmanager.current = 'settings'
+                                
+                            MenuItem:
+                                icon_source: 'assets/logout.png'
+                                text: 'Sign Out'
+                                text_color: 0.8, 0.2, 0.2, 1       # Red text
+                                icon_bg_color: 0.15, 0.05, 0.05, 1 # Faint red background
+                                on_release: screenmanager.current = 'logout'
+        Screen:
+            name: 'profile'
+            Profile:
+                size: root.size
+                pos: root.pos
+        Screen:
+            name: 'chatbox'
+            ChatBox:
+                size: root.size
+                pos: root.pos
+        Screen:
+            name: 'settings'
+            UserSettings:
+        Screen:
+            name: 'wallet'
+            Wallet:
+                size: root.size
+                pos: root.pos
+        Screen:
+            name: 'logout'
+            LogOut:
+                size: root.size
+                pos: root.pos
+            
+
+# -----------------------------------------------------------#
+# GLOBAL SHARED COMPONENTS (Cards, Buttons, Lists)
+# -----------------------------------------------------------#
+<CardBase@BoxLayout>:
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.16, 1  # Dark Card Background
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+
+<ListTile>:
+    size_hint_y: None
+    height: dp(70)
+    padding: dp(15)
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.16, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+    
+    # Left Icon
+    FloatLayout:
+        size_hint: None, None
+        size: dp(40), dp(40)
+        pos_hint: {'center_y': 0.5}
+        canvas.before:
+            Color:
+                rgba: 0.15, 0.16, 0.22, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(10)]
+        # Replace with actual image
+        Label:
+            text: '-' # Placeholder for Image: source: root.icon_source
+            color: 0.43, 0.33, 0.85, 1
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+    # Text Content
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(2)
+        pos_hint: {'center_y': 0.5}
+        Label:
+            text: root.title
+            font_size: sp(16)
+            bold: True
+            color: 1, 1, 1, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: root.subtitle
+            font_size: sp(12)
+            color: 0.6, 0.6, 0.6, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+    
+    # Right Arrow (Optional)
+    Label:
+        text: '>' if root.show_arrow else ''
+        size_hint_x: None
+        width: dp(20)
+        color: 0.5, 0.5, 0.5, 1
+        font_size: sp(18)
+
+<ChatBubble>:
+    size_hint_y: None
+    height: self.minimum_height
+    padding: [dp(10), dp(5)]
+    # Anchor left or right based on sender
+    AnchorLayout:
+        anchor_x: 'right' if root.is_sender else 'left'
+        size_hint_y: None
+        height: bubble_container.height
+        
+        BoxLayout:
+            id: bubble_container
+            orientation: 'vertical'
+            size_hint: None, None
+            width: min(dp(250), root.width * 0.75)
+            height: self.minimum_height
+            padding: dp(15)
+            spacing: dp(5)
+            canvas.before:
+                Color:
+                    rgba: (0.43, 0.33, 0.85, 1) if root.is_sender else (0.15, 0.16, 0.22, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(15), dp(15), dp(0) if root.is_sender else dp(15), dp(15) if root.is_sender else dp(0)]
+            Label:
+                text: root.text
+                size_hint_y: None
+                height: self.texture_size[1]
+                text_size: self.width, None
+                color: 1, 1, 1, 1
+            Label:
+                text: root.time
+                font_size: sp(10)
+                size_hint_y: None
+                height: dp(12)
+                text_size: self.width, None
+                halign: 'right' if root.is_sender else 'left'
+                color: 0.8, 0.8, 0.8, 0.7
+<Divider@Widget>:
+    size_hint_y: None
+    height: dp(1)
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.16, 0.22, 1 # Faint divider line
         Rectangle:
             pos: self.pos
             size: self.size
 
+<SettingsTile@BoxLayout>:
+    size_hint_y: None
+    height: dp(70)
+    padding: dp(15)
+    spacing: dp(15)
+    
+    # We define custom properties so we can reuse this tile
+    icon_text: '-'
+    title: ''
+    subtitle: ''
+    
+    # Left Icon Background
+    FloatLayout:
+        size_hint: None, None
+        size: dp(40), dp(40)
+        pos_hint: {'center_y': 0.5}
+        canvas.before:
+            Color:
+                rgba: 0.15, 0.16, 0.22, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(10)]
+        Label:
+            text: root.icon_text
+            color: 0.43, 0.33, 0.85, 1
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+    # Text Content
     BoxLayout:
         orientation: 'vertical'
-        size: root.size
-        pos: root.pos
-        
-        ScrollView:
-            do_scroll: False, True
-            bar_width: 0
+        spacing: dp(2)
+        pos_hint: {'center_y': 0.5}
+        Label:
+            text: root.title
+            font_size: sp(16)
+            bold: True
+            color: 1, 1, 1, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: root.subtitle
+            font_size: sp(12)
+            color: 0.6, 0.6, 0.6, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+    
+    # Right Arrow
+    Label:
+        text: '>'
+        size_hint_x: None
+        width: dp(20)
+        color: 0.5, 0.5, 0.5, 1
+        font_size: sp(18)
 
-            # 2. Inner Scrolling Layout (Must have size_hint_y: None)
+# ------------------- 1. PROFILE SCREEN ------------------- #
+<Profile>:
+    size: root.size
+    pos: root.pos
+    orientation: 'vertical'
+    padding: dp(20)
+    spacing: dp(20)
+
+    # Title
+    Label:
+        text: '[b]My Profile[/b]'
+        markup: True
+        font_size: sp(22)
+        size_hint_y: None
+        height: dp(40)
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
+
+    ScrollView:
+        do_scroll: False, True
+        bar_width: 0
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: dp(20)
+
+            # Avatar Header (Similar to your current code)
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: dp(150)
+                spacing: dp(5)
+                FloatLayout:
+                    size_hint: None, None
+                    size: dp(90), dp(90)
+                    pos_hint: {'center_x': 0.5}
+                    canvas.before:
+                        Color:
+                            rgba: 0.12, 0.13, 0.20, 1
+                        Ellipse:
+                            pos: self.pos
+                            size: self.size
+                    Label:
+                        text: '[b]JD[/b]'
+                        markup: True
+                        font_size: sp(32)
+                        color: 0.43, 0.33, 0.85, 1
+                        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                Label:
+                    text: '[b]Jane Doe[/b]'
+                    markup: True
+                    font_size: sp(20)
+                    size_hint_y: None
+                    height: dp(25)
+                Label:
+                    text: '@janedoe'
+                    font_size: sp(14)
+                    color: 0.6, 0.6, 0.6, 1
+                    size_hint_y: None
+                    height: dp(20)
+            
+            # Info Cards
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
                 height: self.minimum_height
+                spacing: dp(10)
+                ListTile:
+                    title: 'Email'
+                    subtitle: 'jane.doe@university.edu'
+                    show_arrow: False
+                ListTile:
+                    title: 'Phone'
+                    subtitle: '+1 (555) 123-4567'
+                    show_arrow: False
+                ListTile:
+                    title: 'University'
+                    subtitle: 'State University'
+                    show_arrow: False
+                ListTile:
+                    title: 'Location'
+                    subtitle: 'Campus Dorm B, Room 204'
+                    show_arrow: False
+            
+            # Edit Button
+            Button:
+                text: 'Edit Profile'
+                size_hint_y: None
+                height: dp(50)
+                background_color: 0,0,0,0
+                canvas.before:
+                    Color:
+                        rgba: 0.43, 0.33, 0.85, 1
+                    Line:
+                        rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
+                        width: dp(1.2)
+                color: 1, 1, 1, 1
+
+# ------------------- 2. CHATBOX SCREEN ------------------- #
+<ChatBox>:
+    size: root.size
+    pos: root.pos
+    orientation: 'vertical'
+    
+    # Top Bar
+    BoxLayout:
+        size_hint_y: None
+        height: dp(60)
+        padding: dp(10)
+        spacing: dp(10)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: '<'
+            size_hint_x: None
+            width: dp(30)
+        FloatLayout:
+            size_hint: None, None
+            size: dp(40), dp(40)
+            canvas.before:
+                Color:
+                    rgba: 0.15, 0.12, 0.25, 1
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: '[b]Alex M.[/b]'
+                markup: True
+                text_size: self.size
+                halign: 'left'
+                valign: 'bottom'
+            Label:
+                text: 'Online'
+                color: 0.2, 0.8, 0.4, 1
+                font_size: sp(12)
+                text_size: self.size
+                halign: 'left'
+                valign: 'top'
+    
+    # Chat Area
+    ScrollView:
+        do_scroll: False, True
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: self.minimum_height
+            padding: dp(15)
+            spacing: dp(15)
+            
+            ChatBubble:
+                text: "Hey! Is the Organic Chemistry textbook still available?"
+                time: "10:32 AM"
+                is_sender: False
+            ChatBubble:
+                text: "Yes it is! It's in great condition, barely used."
+                time: "10:33 AM"
+                is_sender: True
+            ChatBubble:
+                text: "Awesome! Can you do $40 instead of $45?"
+                time: "10:34 AM"
+                is_sender: False
+            ChatBubble:
+                text: "I can do $42, meet in the middle?"
+                time: "10:35 AM"
+                is_sender: True
+    
+    # Input Bar
+    BoxLayout:
+        size_hint_y: None
+        height: dp(70)
+        padding: dp(15)
+        spacing: dp(10)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        Label:
+            text: '@' # Attachment Icon Placeholder
+            size_hint_x: None
+            width: dp(30)
+        
+        TextInput:
+            hint_text: 'Type a message...'
+            background_color: 0,0,0,0
+            foreground_color: 1,1,1,1
+            hint_text_color: 0.5, 0.5, 0.5, 1
+            multiline: False
+            padding: [dp(15), dp(10)]
+            canvas.before:
+                Color:
+                    rgba: 0.15, 0.16, 0.22, 1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(20)]
+        
+        Button:
+            text: 'Send' # Send Icon Placeholder
+            size_hint_x: None
+            width: dp(50)
+            background_color: 0,0,0,0
+            canvas.before:
+                Color:
+                    rgba: 0.43, 0.33, 0.85, 1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(25)]
+
+# ------------------- 3. WALLET SCREEN ------------------- #
+<Wallet>:
+    size: root.size
+    pos: root.pos
+    orientation: 'vertical'
+    padding: dp(20)
+    spacing: dp(20)
+
+    Label:
+        text: '[b]Wallet[/b]'
+        markup: True
+        font_size: sp(26)
+        size_hint_y: None
+        height: dp(40)
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
+
+    ScrollView:
+        do_scroll: False, True
+        bar_width: 0
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: dp(25)
+
+            # Big Purple Card
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: dp(180)
                 padding: dp(20)
-                spacing: dp(30)
-
-                # --- TOP SECTION: PROFILE INFO ---
-                BoxLayout:
-                    orientation: 'vertical'
+                canvas.before:
+                    Color:
+                        rgba: 0.43, 0.33, 0.85, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(20)]
+                Label:
+                    text: 'Available Balance'
+                    font_size: sp(14)
                     size_hint_y: None
-                    height: self.minimum_height
-                    spacing: dp(10)
-
-                    # Avatar Container
-                    FloatLayout:
-                        size_hint: None, None
-                        size: dp(100), dp(100)
-                        pos_hint: {'center_x': 0.5}
-
-                        # Purple initials circle
+                    height: dp(20)
+                    text_size: self.size
+                    halign: 'left'
+                Label:
+                    text: '[b]$1,152.00[/b]'
+                    markup: True
+                    font_size: sp(36)
+                    size_hint_y: None
+                    height: dp(50)
+                    text_size: self.size
+                    halign: 'left'
+                
+                # Buttons
+                BoxLayout:
+                    spacing: dp(15)
+                    padding: [0, dp(15), 0, 0]
+                    Button:
+                        text: 'Deposit'
+                        background_color: 0,0,0,0
                         canvas.before:
                             Color:
-                                rgba: 0.12, 0.13, 0.20, 1 # Slightly lighter dark circle
-                            Ellipse:
+                                rgba: 1, 1, 1, 0.2
+                            RoundedRectangle:
                                 pos: self.pos
                                 size: self.size
-                        Label:
-                            text: f'[b]{root.initial}[/b]' # Example: 'JD'
-                            markup: True
-                            font_size: sp(36)
-                            color: 0.4, 0.31, 0.85, 1 # Purple accent
-                            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                                radius: [dp(10)]
+                    Button:
+                        text: 'Withdraw'
+                        background_color: 0,0,0,0
+                        canvas.before:
+                            Color:
+                                rgba: 1, 1, 1, 0.2
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [dp(10)]
 
-                        # Overlapping Camera Badge
-                        FloatLayout:
-                            size_hint: None, None
-                            size: dp(32), dp(32)
-                            pos_hint: {'right': 1.0, 'y': 0}
-                            canvas.before:
-                                Color:
-                                    rgba: 0.4, 0.31, 0.85, 1
-                                Ellipse:
-                                    pos: self.pos
-                                    size: self.size
-                            Image:
-                                source: 'assets/camera.png' # Ensure this asset exists
-                                size_hint: 0.5, 0.5
-                                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            # Payment Methods
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(10)
+                Label:
+                    text: 'PAYMENT METHODS'
+                    font_size: sp(12)
+                    color: 0.6, 0.6, 0.6, 1
+                    size_hint_y: None
+                    height: dp(20)
+                    text_size: self.size
+                    halign: 'left'
+                ListTile:
+                    title: 'Visa •••• 4242'
+                    subtitle: 'Expires 08/27'
+                    show_arrow: False
+                ListTile:
+                    title: 'Bank Account •••• 8901'
+                    subtitle: 'Checking'
+                    show_arrow: True
 
-                    # Names and Handles
-                    Label:
-                        text: f'[b]{root.full_name}[/b]' # Example: 'Jane Doe'
-                        markup: True
-                        font_size: sp(22)
-                        size_hint_y: None
-                        height: dp(30)
-                        color: 1, 1, 1, 1
+# ------------------- 4. SETTINGS SCREEN ------------------- #
+<UserSettings>:
+    orientation: 'vertical'
+    padding: dp(20)
+    spacing: dp(10)
 
-                    Label:
-                        text: f'{root.email}' # Example: '@janedoe'
-                        font_size: sp(14)
-                        size_hint_y: None
-                        height: dp(20)
-                        color: 0.6, 0.6, 0.6, 1
+    # Master Background for the Settings Screen
+    canvas.before:
+        Color:
+            rgba: 0.07, 0.08, 0.11, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
 
-                    # Badges Row (Verified & Rating)
-                    BoxLayout:
-                        orientation: 'horizontal'
-                        size_hint: None, None
-                        height: dp(35)
-                        width: self.minimum_width
-                        pos_hint: {'center_x': 0.5}
-                        spacing: dp(10)
+    # Header
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_y: None
+        height: dp(60)
+        Label:
+            text: '[b]Settings[/b]'
+            markup: True
+            font_size: sp(26)
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: 'Manage your preferences'
+            color: 0.6, 0.6, 0.6, 1
+            font_size: sp(14)
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
 
-                        # Verified Badge
-                        BoxLayout:
-                            size_hint_x: None
-                            width: dp(95)
-                            padding: [dp(10), dp(5), dp(10), dp(5)]
-                            spacing: dp(5)
-                            canvas.before:
-                                Color:
-                                    rgba: 0.10, 0.15, 0.15, 1 # Subtle dark green BG
-                                RoundedRectangle:
-                                    pos: self.pos
-                                    size: self.size
-                                    radius: [dp(15)]
-                                Color:
-                                    rgba: 0.2, 0.8, 0.4, 0.5 # Green Border Line
-                                Line:
-                                    rounded_rectangle: [self.x, self.y, self.width, self.height, dp(15)]
-                                    width: dp(1)
-                            Image:
-                                source: 'assets/verified.png'
-                                size_hint_x: None
-                                width: dp(15)
-                            Label:
-                                text: 'Verified'
-                                color: 0.2, 0.8, 0.4, 1
-                                font_size: sp(12)
-                                bold: True
+    # Scrollable Settings List
+    ScrollView:
+        do_scroll: False, True
+        bar_width: 0
+        
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: dp(25)
+            padding: [0, dp(15), 0, dp(20)]
 
-                        # Rating Badge
-                        BoxLayout:
-                            size_hint_x: None
-                            width: dp(75)
-                            padding: [dp(10), dp(5), dp(10), dp(5)]
-                            spacing: dp(5)
-                            canvas.before:
-                                Color:
-                                    rgba: 0.15, 0.12, 0.20, 1 # Subtle dark purple BG
-                                RoundedRectangle:
-                                    pos: self.pos
-                                    size: self.size
-                                    radius: [dp(15)]
-                                Color:
-                                    rgba: 0.4, 0.31, 0.85, 0.5 # Purple Border Line
-                                Line:
-                                    rounded_rectangle: [self.x, self.y, self.width, self.height, dp(15)]
-                                    width: dp(1)
-                            Image:
-                                source: 'assets/star.png'
-                                size_hint_x: None
-                                width: dp(15)
-                            Label:
-                                text: '4.9'
-                                color: 0.4, 0.31, 0.85, 1
-                                font_size: sp(12)
-                                bold: True
-
-                # --- BOTTOM SECTION: MENU LIST ---
+            # --- ACCOUNT SECTION ---
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(10)
+                Label:
+                    text: 'ACCOUNT'
+                    font_size: sp(12)
+                    color: 0.6, 0.6, 0.6, 1
+                    text_size: self.size
+                    halign: 'left'
+                    size_hint_y: None
+                    height: dp(20)
+                
+                # Card Container
                 BoxLayout:
                     orientation: 'vertical'
                     size_hint_y: None
                     height: self.minimum_height
-                    spacing: dp(5)
+                    canvas.before:
+                        Color:
+                            rgba: 0.11, 0.12, 0.16, 1
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [dp(12)]
+                    
+                    SettingsTile:
+                        icon_text: 'L' # Placeholder for lock icon
+                        title: 'Privacy & Security'
+                        subtitle: 'Password, 2FA, sessions'
+                    Divider:
+                    SettingsTile:
+                        icon_text: 'C' # Placeholder for card icon
+                        title: 'Payment Methods'
+                        subtitle: 'Cards, wallets, escrow'
+                    Divider:
+                    SettingsTile:
+                        icon_text: 'U' # Placeholder for globe icon
+                        title: 'University'
+                        subtitle: 'State University'
 
-                    # Instantiate custom MenuItems
-                    MenuItem:
-                        icon_source: 'assets/profile.png'
-                        text: 'My Profile'
-                        on_release: print("Navigate to Profile")
-                        
-                    MenuItem:
-                        icon_source: 'assets/chat.png'
-                        text: 'ChatBox'
-                        on_release: print("Navigate to Chat")
-                        
-                    MenuItem:
-                        icon_source: 'assets/wallet.png'
-                        text: 'Wallet'
-                        on_release: print("Navigate to Wallet")
-                        
-                    MenuItem:
-                        icon_source: 'assets/settings.png'
-                        text: 'Settings'
-                        on_release: print("Navigate to Settings")
-                        
-                    # Spacer to push Sign Out down slightly if desired
-                    Widget:
-                        size_hint_y: None
-                        height: dp(10)
+            # --- PREFERENCES SECTION ---
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(10)
+                Label:
+                    text: 'PREFERENCES'
+                    font_size: sp(12)
+                    color: 0.6, 0.6, 0.6, 1
+                    text_size: self.size
+                    halign: 'left'
+                    size_hint_y: None
+                    height: dp(20)
+                
+                # Card Container
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    canvas.before:
+                        Color:
+                            rgba: 0.11, 0.12, 0.16, 1
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [dp(12)]
+                    
+                    SettingsTile:
+                        icon_text: 'N'
+                        title: 'Notifications'
+                        subtitle: 'Push, email, SMS'
+                    Divider:
+                    SettingsTile:
+                        icon_text: 'A'
+                        title: 'Appearance'
+                        subtitle: 'Theme & display'
+                    Divider:
+                    SettingsTile:
+                        icon_text: 'T'
+                        title: 'Language'
+                        subtitle: 'English (US)'
 
-                    MenuItem:
-                        icon_source: 'assets/logout.png'
-                        text: 'Sign Out'
-                        text_color: 0.8, 0.2, 0.2, 1       # Red text
-                        icon_bg_color: 0.15, 0.05, 0.05, 1 # Faint red background
-                        on_release: print("Sign Out Triggered")
+            # --- SUPPORT SECTION ---
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(10)
+                Label:
+                    text: 'SUPPORT'
+                    font_size: sp(12)
+                    color: 0.6, 0.6, 0.6, 1
+                    text_size: self.size
+                    halign: 'left'
+                    size_hint_y: None
+                    height: dp(20)
+                
+                # Card Container
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    canvas.before:
+                        Color:
+                            rgba: 0.11, 0.12, 0.16, 1
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [dp(12)]
+                    
+                    SettingsTile:
+                        icon_text: '?' 
+                        title: 'Help Center'
+                        subtitle: 'FAQs & guides'
+
+# ------------------- 5. LOGOUT SCREEN ------------------- #
+<LogOut>:
+    size: root.size
+    pos: root.pos
+    canvas.before:
+        Color:
+            rgba: 0.07, 0.08, 0.11, 0.95 # Slight opacity for overlay feel
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint: 0.85, None
+        height: self.minimum_height
+        pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+        spacing: dp(20)
+
+        # Red Icon
+        FloatLayout:
+            size_hint_y: None
+            height: dp(80)
+            canvas.before:
+                Color:
+                    rgba: 0.15, 0.05, 0.05, 1
+                Ellipse:
+                    pos: [self.center_x - dp(40), self.y]
+                    size: dp(80), dp(80)
+            Label:
+                text: 'Icon' # Placeholder
+                color: 0.88, 0.25, 0.25, 1
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+        # Text
+        Label:
+            text: '[b]Sign Out?[/b]'
+            markup: True
+            font_size: sp(24)
+            size_hint_y: None
+            height: dp(30)
+        Label:
+            text: 'Are you sure you want to sign out of ScholarBridge?'
+            color: 0.6, 0.6, 0.6, 1
+            text_size: self.width, None
+            halign: 'center'
+            size_hint_y: None
+            height: self.texture_size[1]
+        Label:
+            text: 'Active escrow transactions are safe'
+            color: 0.16, 0.67, 0.38, 1
+            font_size: sp(12)
+            size_hint_y: None
+            height: dp(20)
+
+        # Buttons
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(120)
+            spacing: dp(15)
+            padding: [0, dp(10), 0, 0]
+
+            Button:
+                text: '[b]Sign Out[/b]'
+                markup: True
+                background_color: 0,0,0,0
+                canvas.before:
+                    Color:
+                        rgba: 0.88, 0.25, 0.25, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(12)]
+            
+            Button:
+                text: '[b]Cancel[/b]'
+                markup: True
+                background_color: 0,0,0,0
+                canvas.before:
+                    Color:
+                        rgba: 0.11, 0.12, 0.16, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(12)]
+                    Color:
+                        rgba: 0.3, 0.3, 0.3, 1
+                    Line:
+                        rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
+                        width: dp(1)
                         

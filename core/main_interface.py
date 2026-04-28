@@ -1,13 +1,15 @@
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.widget import Widget
-from kivy.properties import BooleanProperty, StringProperty, ListProperty, NumericProperty, DictProperty
+from kivy.properties import BooleanProperty, StringProperty, ListProperty, NumericProperty, ColorProperty
 from kivy.clock import Clock
 import random
 from datetime import datetime, timedelta
 import requests
 from core import request_http as request
 from kivy.graphics import Color, Rectangle
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 
 import requests
 from core import request_http as request
@@ -55,21 +57,54 @@ class Signup(Widget):
             return
         request.add_user(full_name, email, password)
         
+
+# ---------------------------------------------------
+# Custom Component Classes for KV
+# ---------------------------------------------------
+class MenuItem(BoxLayout):
+    icon_source = StringProperty('')
+    text = StringProperty('')
+    text_color = ColorProperty((1, 1, 1, 1))
+    icon_bg_color = ColorProperty((0.15, 0.12, 0.20, 1))
+
+class ListTile(BoxLayout):
+    icon_source = StringProperty('')
+    title = StringProperty('')
+    subtitle = StringProperty('')
+    show_arrow = BooleanProperty(True)
+
+class TransactionTile(BoxLayout):
+    icon_source = StringProperty('')
+    title = StringProperty('')
+    date = StringProperty('')
+    amount = StringProperty('')
+    status = StringProperty('')
+    is_positive = BooleanProperty(True)
+
+class ChatBubble(BoxLayout):
+    text = StringProperty('')
+    time = StringProperty('')
+    is_sender = BooleanProperty(False)
+
 #-----------------------------------------------------------#
 #-----------------------------------------------------------#
 # Mini_Interface
 #-----------------------------------------------------------#
 #-----------------------------------------------------------# 
-class Profile(Widget):
-	pass
-class ChatBox(Widget):
-	pass  
-class Wallet(Widget):
-	pass
-class Settings(Widget):
-	pass
-class LogOut(Widget):
-	pass
+class Profile(BoxLayout):
+    pass
+
+class ChatBox(BoxLayout):
+    pass  
+
+class Wallet(BoxLayout):
+    pass
+
+class UserSettings(BoxLayout):
+    pass
+
+class LogOut(FloatLayout):
+    pass
 #-----------------------------------------------------------#
 #-----------------------------------------------------------#
 # Dynamic_Box
