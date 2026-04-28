@@ -16,7 +16,7 @@
             BoxLayout:
                 size_hint: 0.9, 0.1
                 pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                orientation: 'horizontal' # Set to horizontal to split Left (Text) and Right (Button)
+                orientation: 'horizontal'
                 
                 # Left Side: Vertically Stacked Labels
                 BoxLayout:
@@ -28,23 +28,22 @@
                         font_size: dp(19)
                         markup: True
                         valign: 'bottom'
-                        halign: 'left' # Align text to the far left
+                        halign: 'left'
                     Label:
                         id: label2
                         text: 'you activity overview'
                         color: 1,1,1,0.5
                         text_size: self.size
                         valign: 'top'
-                        halign: 'left' # Align text to the far left
+                        halign: 'left'
                         
                 # Right Side: Global Back Button
                 NavBackButton:
                     id: back_btn
-                    opacity: 0     # Hidden by default
-                    disabled: True # Unclickable by default
+                    opacity: 0     
+                    disabled: True 
                     pos_hint: {'center_y': 0.5}
                     on_release:
-                        # Return to menu and reset header
                         screenmanager.get_screen('info').children[0].ids.screenmanager.current = 'menu'
                         label1.text = '[b]MENU[/b]'
                         label2.text = 'manage your account'
@@ -110,7 +109,7 @@
                             self.parent.source = 'assets/dashboard_normal.png' if self.state == 'normal' else 'assets/dashboard_down.png'
                             if self.state == 'down': screenmanager.current = 'dashboard'
                             if self.state == 'down': label1.text = '[b]DASHBOARD[/b]'
-                            if self.state == 'down': label2.text = 'you activity overview'       
+                            if self.state == 'down': label2.text = 'you activity overview'      
                             if self.state == 'down': back_btn.opacity = 0
                             if self.state == 'down': back_btn.disabled = True
                 Label:   
@@ -242,7 +241,6 @@
                         on_state:
                             self.parent.source = 'assets/person_normal.png' if self.state == 'normal' else 'assets/person_down.png'
                             if self.state == 'down': screenmanager.current = 'info'
-                            # Reset the Status inner screen manager back to the root menu
                             if self.state == 'down': screenmanager.get_screen('info').children[0].ids.screenmanager.current = 'menu'
                             if self.state == 'down': label1.text = '[b]MENU[/b]'
                             if self.state == 'down': label2.text = 'manage your account'
@@ -358,7 +356,7 @@
                         Image:
                             source: 'assets/product_down.png'
                             size_hint_x: 0.3
-                           
+                          
                             canvas.before:
                                 Color:
                                     rgba: 0.15, 0.17, 0.23, 0.5
@@ -461,7 +459,7 @@
                             size: self.size
                             pos: self.pos
                             radius: [10]
-          
+         
 #5----------------------------------------------------------#
             BoxLayout:
                 id: graph
@@ -497,7 +495,7 @@
                                 RoundedRectangle:
                                     size: self.size
                                     pos: self.pos
-                          
+                         
                 ScrollView:
                     size_hint: 0.9, 0.3
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
@@ -518,8 +516,8 @@
                 Label:
                     size_hint: 0.9, 0.2   
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                  
-                          
+                 
+                         
 #------------------------------------------------------------#
             Label:
                 size_hint_y: 0.2
@@ -538,12 +536,12 @@
                 DynamicActivity:
                 DynamicActivity:
                 DynamicActivity:
-                   
+                  
             Label:
                 size_hint_y: 0.05
-          
+         
 #------------------------------------------------------------#
-#PRODUCT                   
+#PRODUCT                  
 #-----------------------------------------------------------#
 <Product>:
     BoxLayout:
@@ -565,17 +563,17 @@
                 height: dp(40)
                 do_scroll: True, False
                 bar_width: 0
-               
+              
                 scroll_timeout: 250 
                 scroll_distance: dp(20)
-               
+              
                 BoxLayout:
                     orientation: 'horizontal'
                     size_hint_x: None
                     width: self.minimum_width
                     padding: [dp(20), 0]
                     spacing: dp(10)
-                  
+                 
                     ToggleButton:
                         group: 'products'
                         state: 'down'
@@ -593,7 +591,7 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-                  
+                 
                     ToggleButton:
                         group: 'products'
                         text: 'Textbooks'
@@ -610,7 +608,7 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-                  
+                 
                     ToggleButton:
                         group: 'products'
                         text: 'Notes'
@@ -670,7 +668,7 @@
                 id: dynamic_product
                 orientation: 'vertical'
                 spacing: dp(10)
-#Dynamic Prodoct List           
+#Dynamic Prodoct List          
         Label:
             size_hint_y: 0.01
 
@@ -764,7 +762,7 @@
         font_size: sp(16)
         pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 #------------------------------------------------------------#
-#SELL               
+#SELL              
 #-----------------------------------------------------------#
 <Sell>:
     ScrollView:
@@ -796,11 +794,11 @@
                     height: dp(20)
                     text_size: self.size
                     halign: 'left'
-              
+             
                 BoxLayout:
                     orientation: 'horizontal'
                     spacing: dp(10)
-                  
+                 
                     ToggleButton:
                         id: type_textbook
                         group: 'listing_type'
@@ -875,7 +873,7 @@
                 title: 'Description'
                 hint: 'Describe condition, edition, ISBN...'
                 height: dp(120) 
-          
+         
             FormInput:
                 id: price_input
                 title: 'Price'
@@ -895,14 +893,15 @@
                     height: dp(20)
                     text_size: self.size
                     halign: 'left'
-              
+             
                 ScrollView:
                     do_scroll: True, False
                     bar_width: 0
                     scroll_timeout: 250 
                     scroll_distance: dp(20)
-                   
+                  
                     BoxLayout:
+                        id: condition_group
                         orientation: 'horizontal'
                         spacing: dp(8)
                         size_hint_x: None
@@ -923,7 +922,7 @@
                                     size: self.size
                                     pos: self.pos
                                     radius: [dp(15)]
-                      
+                     
                         ToggleButton:
                             group: 'sells'
                             text: 'Like New'
@@ -955,7 +954,7 @@
                                     size: self.size
                                     pos: self.pos
                                     radius: [dp(15)]
-                                  
+                                 
                         ToggleButton:
                             group: 'sells'
                             text: 'Fair'
@@ -994,7 +993,7 @@
                 text: '[b]Publish[/b]'
                 on_release: root.add_product()
 #------------------------------------------------------------#
-#SERVICE                   
+#SERVICE                  
 #-----------------------------------------------------------#
 <Service>:
     BoxLayout:
@@ -1016,17 +1015,17 @@
                 height: dp(40)
                 do_scroll: True, False
                 bar_width: 0
-               
+              
                 scroll_timeout: 250 
                 scroll_distance: dp(20)
-               
+              
                 BoxLayout:
                     orientation: 'horizontal'
                     size_hint_x: None
                     width: self.minimum_width
                     padding: [dp(20), 0]
                     spacing: dp(10)
-                  
+                 
                     ToggleButton:
                         group: 'services'
                         state: 'down'
@@ -1044,7 +1043,7 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-                  
+                 
                     ToggleButton:
                         group: 'services'
                         text: 'Tutoring'
@@ -1061,7 +1060,7 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-                  
+                 
                     ToggleButton:
                         group: 'services'
                         text: 'Writing'
@@ -1121,10 +1120,10 @@
                 id: dynamic_service
                 orientation: 'vertical'
                 spacing: dp(10)
-#Dynamic Service List           
+#Dynamic Service List          
         Label:
             size_hint_y: 0.01
-           
+          
 #-----------------------------------------------------------#
 # Custom Dynamic Class for NavBackButton
 #-----------------------------------------------------------#
@@ -1168,7 +1167,7 @@
             pos: self.pos
             size: self.size
             radius: [dp(12)]
-    
+   
     # Left Icon
     FloatLayout:
         size_hint: None, None
@@ -1207,7 +1206,7 @@
             text_size: self.size
             halign: 'left'
             valign: 'top'
-    
+   
     # Right Arrow (Optional)
     Label:
         text: '>' if root.show_arrow else ''
@@ -1225,7 +1224,7 @@
         anchor_x: 'right' if root.is_sender else 'left'
         size_hint_y: None
         height: bubble_container.height
-        
+       
         BoxLayout:
             id: bubble_container
             orientation: 'vertical'
@@ -1308,12 +1307,12 @@
     height: dp(70)
     padding: dp(15)
     spacing: dp(15)
-    
+   
     # We define custom properties so we can reuse this tile
-    icon_text: '-'
+    icon_source: ''
     title: ''
     subtitle: ''
-    
+   
     # Left Icon Background
     FloatLayout:
         size_hint: None, None
@@ -1326,9 +1325,9 @@
                 pos: self.pos
                 size: self.size
                 radius: [dp(10)]
-        Label:
-            text: root.icon_text
-            color: 0.43, 0.33, 0.85, 1
+        Image:
+            source: root.icon_source
+            size_hint: 0.5, 0.5
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
     # Text Content
@@ -1351,7 +1350,7 @@
             text_size: self.size
             halign: 'left'
             valign: 'top'
-    
+   
     # Right Arrow
     Label:
         text: '>'
@@ -1382,7 +1381,7 @@
                 orientation: 'vertical'
                 size: root.size
                 pos: root.pos
-               
+              
                 ScrollView:
                     do_scroll: False, True
                     bar_width: 0
@@ -1536,7 +1535,7 @@
                                     root.parent.parent.parent.parent.ids.label2.text = 'view your details'
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
                                     root.parent.parent.parent.parent.ids.back_btn.disabled = False
-                               
+                              
                             MenuItem:
                                 icon_source: 'assets/chat.png'
                                 text: 'ChatBox'
@@ -1546,7 +1545,7 @@
                                     root.parent.parent.parent.parent.ids.label2.text = 'messages and negotiations'
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
                                     root.parent.parent.parent.parent.ids.back_btn.disabled = False
-                               
+                              
                             MenuItem:
                                 icon_source: 'assets/wallet.png'
                                 text: 'Wallet'
@@ -1556,7 +1555,7 @@
                                     root.parent.parent.parent.parent.ids.label2.text = 'manage your funds'
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
                                     root.parent.parent.parent.parent.ids.back_btn.disabled = False
-                               
+                              
                             MenuItem:
                                 icon_source: 'assets/settings.png'
                                 text: 'Settings'
@@ -1566,7 +1565,7 @@
                                     root.parent.parent.parent.parent.ids.label2.text = 'manage your preferences'
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
                                     root.parent.parent.parent.parent.ids.back_btn.disabled = False
-                               
+                              
                             MenuItem:
                                 icon_source: 'assets/logout.png'
                                 text: 'Sign Out'
@@ -1653,7 +1652,7 @@
                     color: 0.6, 0.6, 0.6, 1
                     size_hint_y: None
                     height: dp(20)
-          
+         
             # Info Cards
             BoxLayout:
                 orientation: 'vertical'
@@ -1676,7 +1675,7 @@
                     title: 'Location'
                     subtitle: 'Campus Dorm B, Room 204'
                     show_arrow: False
-          
+         
             # Edit Button
             Button:
                 text: 'Edit Profile'
@@ -1709,7 +1708,7 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-                
+               
         FloatLayout:
             size_hint: None, None
             size: dp(40), dp(40)
@@ -1744,7 +1743,7 @@
             height: self.minimum_height
             padding: dp(15)
             spacing: dp(15)
-            
+           
             ChatBubble:
                 text: "Hey! Is the Organic Chemistry textbook still available?"
                 time: "10:32 AM"
@@ -1853,7 +1852,7 @@
                     height: dp(50)
                     text_size: self.size
                     halign: 'left'
-              
+             
                 # Buttons
                 BoxLayout:
                     spacing: dp(15)
@@ -1920,7 +1919,7 @@
     ScrollView:
         do_scroll: False, True
         bar_width: 0
-       
+      
         BoxLayout:
             orientation: 'vertical'
             size_hint_y: None
@@ -1942,7 +1941,7 @@
                     halign: 'left'
                     size_hint_y: None
                     height: dp(20)
-              
+             
                 # Card Container
                 BoxLayout:
                     orientation: 'vertical'
@@ -1955,19 +1954,19 @@
                             pos: self.pos
                             size: self.size
                             radius: [dp(12)]
-                  
+                 
                     SettingsTile:
-                        icon_text: 'L' # Placeholder for lock icon
+                        icon_source: 'assets/lock.png'
                         title: 'Privacy & Security'
                         subtitle: 'Password, 2FA, sessions'
                     Divider:
                     SettingsTile:
-                        icon_text: 'C' # Placeholder for card icon
+                        icon_source: 'assets/bank.png'
                         title: 'Payment Methods'
                         subtitle: 'Cards, wallets, escrow'
                     Divider:
                     SettingsTile:
-                        icon_text: 'U' # Placeholder for globe icon
+                        icon_source: 'assets/university.png'
                         title: 'University'
                         subtitle: 'State University'
 
@@ -1985,7 +1984,7 @@
                     halign: 'left'
                     size_hint_y: None
                     height: dp(20)
-              
+             
                 # Card Container
                 BoxLayout:
                     orientation: 'vertical'
@@ -1998,19 +1997,19 @@
                             pos: self.pos
                             size: self.size
                             radius: [dp(12)]
-                  
+                 
                     SettingsTile:
-                        icon_text: 'N'
+                        icon_source: 'assets/notifaction.png'
                         title: 'Notifications'
                         subtitle: 'Push, email, SMS'
                     Divider:
                     SettingsTile:
-                        icon_text: 'A'
+                        icon_source: 'assets/visibility.png'
                         title: 'Appearance'
                         subtitle: 'Theme & display'
                     Divider:
                     SettingsTile:
-                        icon_text: 'T'
+                        icon_source: 'assets/language.png'
                         title: 'Language'
                         subtitle: 'English (US)'
 
@@ -2028,7 +2027,7 @@
                     halign: 'left'
                     size_hint_y: None
                     height: dp(20)
-              
+             
                 # Card Container
                 BoxLayout:
                     orientation: 'vertical'
@@ -2041,9 +2040,9 @@
                             pos: self.pos
                             size: self.size
                             radius: [dp(12)]
-                  
+                 
                     SettingsTile:
-                        icon_text: '?' 
+                        icon_source: 'assets/help.png' 
                         title: 'Help Center'
                         subtitle: 'FAQs & guides'
 
@@ -2075,10 +2074,11 @@
                 Ellipse:
                     pos: [self.center_x - dp(40), self.y]
                     size: dp(80), dp(80)
-            Label:
-                text: 'Icon' 
-                color: 0.88, 0.25, 0.25, 1
+            Image:
+                source: 'assets/logout.png' 
+                size_hint: 0.5, 0.5
                 pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                color: 0.88, 0.25, 0.25, 1
 
         # Text
         Label:
@@ -2120,7 +2120,7 @@
                         pos: self.pos
                         size: self.size
                         radius: [dp(12)]
-          
+         
             Button:
                 text: '[b]Cancel[/b]'
                 markup: True
