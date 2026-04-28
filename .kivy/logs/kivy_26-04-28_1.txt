@@ -1,0 +1,142 @@
+[INFO   ] Logger: Record log in /storage/emulated/0/Download/ScholarBridge/.kivy/logs/kivy_26-04-28_1.txt
+[INFO   ] Kivy: v2.3.1
+[INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
+[INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
+[INFO   ] Python: Interpreter at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/bin/python3"
+[INFO   ] Logger: Purge log fired. Processing...
+[INFO   ] Logger: Purge finished!
+[INFO   ] Factory: 195 symbols loaded
+[INFO   ] Image: Providers: img_tex, img_dds, img_sdl2, img_pil (img_ffpyplayer ignored)
+[INFO   ] Window: Provider: sdl2
+[INFO   ] GL: Using the "OpenGL ES 2" graphics system
+[INFO   ] GL: Backend used <sdl2>
+[INFO   ] GL: OpenGL version <b'OpenGL ES 3.2 V@0502.0 (GIT@03dd3ba, I13854cb805, 1603903465) (Date:10/28/20)'>
+[INFO   ] GL: OpenGL vendor <b'Qualcomm'>
+[INFO   ] GL: OpenGL renderer <b'Adreno (TM) 505'>
+[INFO   ] GL: OpenGL parsed version: 3, 2
+[INFO   ] GL: Texture max size <16384>
+[INFO   ] GL: Texture max units <16>
+[INFO   ] Window: auto add sdl2 input provider
+[INFO   ] Window: virtual keyboard not allowed, single mode, not docked
+[INFO   ] Text: Provider: sdl2
+[INFO   ] GL: NPOT texture support is available
+[WARNING] Base: Unknown <android> provider
+[INFO   ] Base: Start application main loop
+[DEBUG  ] Starting new HTTP connection (1): 192.168.254.110:5000
+[INFO   ] Base: Leaving application in progress...
+[WARNING] stderr: Traceback (most recent call last):
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/urllib3/connection.py", line 204, in _new_conn
+[WARNING] stderr:     sock = connection.create_connection(
+[WARNING] stderr:         (self._dns_host, self.port),
+[WARNING] stderr:     ...<2 lines>...
+[WARNING] stderr:         socket_options=self.socket_options,
+[WARNING] stderr:     )
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/urllib3/util/connection.py", line 85, in create_connection
+[WARNING] stderr:     raise err
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/urllib3/util/connection.py", line 73, in create_connection
+[WARNING] stderr:     sock.connect(sa)
+[WARNING] stderr:     ~~~~~~~~~~~~^^^^
+[WARNING] stderr: OSError: [Errno 101] Network is unreachable
+[WARNING] stderr: 
+[WARNING] stderr: The above exception was the direct cause of the following exception:
+[WARNING] stderr: 
+[WARNING] stderr: Traceback (most recent call last):
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+[WARNING] stderr:     response = self._make_request(
+[WARNING] stderr:         conn,
+[WARNING] stderr:     ...<10 lines>...
+[WARNING] stderr:         **response_kw,
+[WARNING] stderr:     )
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/urllib3/connectionpool.py", line 493, in _make_request
+[WARNING] stderr:     conn.request(
+[WARNING] stderr:     ~~~~~~~~~~~~^
+[WARNING] stderr:         method,
+[WARNING] stderr:         ^^^^^^^
+[WARNING] stderr:     ...<6 lines>...
+[WARNING] stderr:         enforce_content_length=enforce_content_length,
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:     )
+[WARNING] stderr:     ^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/urllib3/connection.py", line 500, in request
+[WARNING] stderr:     self.endheaders()
+[WARNING] stderr:     ~~~~~~~~~~~~~~~^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/http/client.py", line 1333, in endheaders
+[WARNING] stderr:     self._send_output(message_body, encode_chunked=encode_chunked)
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/http/client.py", line 1093, in _send_output
+[WARNING] stderr:     self.send(msg)
+[WARNING] stderr:     ~~~~~~~~~^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/http/client.py", line 1037, in send
+[WARNING] stderr:     self.connect()
+[WARNING] stderr:     ~~~~~~~~~~~~^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/urllib3/connection.py", line 331, in connect
+[WARNING] stderr:     self.sock = self._new_conn()
+[WARNING] stderr:                 ~~~~~~~~~~~~~~^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/urllib3/connection.py", line 219, in _new_conn
+[WARNING] stderr:     raise NewConnectionError(
+[WARNING] stderr:         self, f"Failed to establish a new connection: {e}"
+[WARNING] stderr:     ) from e
+[WARNING] stderr: urllib3.exceptions.NewConnectionError: HTTPConnection(host='192.168.254.110', port=5000): Failed to establish a new connection: [Errno 101] Network is unreachable
+[WARNING] stderr: 
+[WARNING] stderr: The above exception was the direct cause of the following exception:
+[WARNING] stderr: 
+[WARNING] stderr: Traceback (most recent call last):
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/requests/adapters.py", line 645, in send
+[WARNING] stderr:     resp = conn.urlopen(
+[WARNING] stderr:         method=request.method,
+[WARNING] stderr:     ...<9 lines>...
+[WARNING] stderr:         chunked=chunked,
+[WARNING] stderr:     )
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+[WARNING] stderr:     retries = retries.increment(
+[WARNING] stderr:         method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+[WARNING] stderr:     )
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/urllib3/util/retry.py", line 535, in increment
+[WARNING] stderr:     raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+[WARNING] stderr:     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr: urllib3.exceptions.MaxRetryError: HTTPConnectionPool(host='192.168.254.110', port=5000): Max retries exceeded with url: /products (Caused by NewConnectionError("HTTPConnection(host='192.168.254.110', port=5000): Failed to establish a new connection: [Errno 101] Network is unreachable"))
+[WARNING] stderr: 
+[WARNING] stderr: During handling of the above exception, another exception occurred:
+[WARNING] stderr: 
+[WARNING] stderr: Traceback (most recent call last):
+[WARNING] stderr:   File "/storage/emulated/0/Download/ScholarBridge/main.py", line 28, in <module>
+[WARNING] stderr:     ScholarBridge().run()
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 956, in run
+[WARNING] stderr:     runTouchApp()
+[WARNING] stderr:     ~~~~~~~~~~~^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/base.py", line 574, in runTouchApp
+[WARNING] stderr:     EventLoop.mainloop()
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/base.py", line 339, in mainloop
+[WARNING] stderr:     self.idle()
+[WARNING] stderr:     ~~~~~~~~~^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/base.py", line 379, in idle
+[WARNING] stderr:     Clock.tick()
+[WARNING] stderr:     ~~~~~~~~~~^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/clock.py", line 733, in tick
+[WARNING] stderr:     self.post_idle(ts, self.idle())
+[WARNING] stderr:     ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/clock.py", line 776, in post_idle
+[WARNING] stderr:     self._process_events()
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~^^
+[WARNING] stderr:   File "kivy/_clock.pyx", line 620, in kivy._clock.CyClockBase._process_events
+[WARNING] stderr:   File "kivy/_clock.pyx", line 653, in kivy._clock.CyClockBase._process_events
+[WARNING] stderr:   File "kivy/_clock.pyx", line 649, in kivy._clock.CyClockBase._process_events
+[WARNING] stderr:   File "kivy/_clock.pyx", line 218, in kivy._clock.ClockEvent.tick
+[WARNING] stderr:   File "/storage/emulated/0/Download/ScholarBridge/core/main_interface.py", line 234, in get_products
+[WARNING] stderr:     response = request.get_products()  # make sure this is YOUR module
+[WARNING] stderr:   File "/storage/emulated/0/Download/ScholarBridge/core/request_http.py", line 72, in get_products
+[WARNING] stderr:     response = requests.get(f"{BASE_URL}/products", params=params)
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/requests/api.py", line 73, in get
+[WARNING] stderr:     return request("get", url, params=params, **kwargs)
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/requests/api.py", line 59, in request
+[WARNING] stderr:     return session.request(method=method, url=url, **kwargs)
+[WARNING] stderr:            ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/requests/sessions.py", line 592, in request
+[WARNING] stderr:     resp = self.send(prep, **send_kwargs)
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/requests/sessions.py", line 706, in send
+[WARNING] stderr:     r = adapter.send(request, **kwargs)
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/requests/adapters.py", line 678, in send
+[WARNING] stderr:     raise ConnectionError(e, request=request)
+[WARNING] stderr: requests.exceptions.ConnectionError: HTTPConnectionPool(host='192.168.254.110', port=5000): Max retries exceeded with url: /products (Caused by NewConnectionError("HTTPConnection(host='192.168.254.110', port=5000): Failed to establish a new connection: [Errno 101] Network is unreachable"))

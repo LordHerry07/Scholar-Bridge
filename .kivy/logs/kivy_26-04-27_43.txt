@@ -1,0 +1,182 @@
+[INFO   ] Logger: Record log in /storage/emulated/0/Download/ScholarBridge/ScholarBridge/.kivy/logs/kivy_26-04-27_43.txt
+[INFO   ] Kivy: v2.3.1
+[INFO   ] Kivy: Installed at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/__init__.py"
+[INFO   ] Python: v3.13.2 (main, Apr 27 2025, 04:34:27) [GCC 11.4.0]
+[INFO   ] Python: Interpreter at "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/bin/python3"
+[INFO   ] Logger: Purge log fired. Processing...
+[INFO   ] Logger: Purge finished!
+[INFO   ] Factory: 195 symbols loaded
+[INFO   ] Image: Providers: img_tex, img_dds, img_sdl2, img_pil (img_ffpyplayer ignored)
+[INFO   ] Window: Provider: sdl2
+[INFO   ] GL: Using the "OpenGL ES 2" graphics system
+[INFO   ] GL: Backend used <sdl2>
+[INFO   ] GL: OpenGL version <b'OpenGL ES 3.2 V@0502.0 (GIT@03dd3ba, I13854cb805, 1603903465) (Date:10/28/20)'>
+[INFO   ] GL: OpenGL vendor <b'Qualcomm'>
+[INFO   ] GL: OpenGL renderer <b'Adreno (TM) 505'>
+[INFO   ] GL: OpenGL parsed version: 3, 2
+[INFO   ] GL: Texture max size <16384>
+[INFO   ] GL: Texture max units <16>
+[INFO   ] Window: auto add sdl2 input provider
+[INFO   ] Window: virtual keyboard not allowed, single mode, not docked
+[INFO   ] Text: Provider: sdl2
+[INFO   ] GL: NPOT texture support is available
+[WARNING] stderr: Traceback (most recent call last):
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 245, in create_handler
+[WARNING] stderr:     return eval(value, idmap), bound_list
+[WARNING] stderr:            ~~~~^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/storage/emulated/0/Download/ScholarBridge/ScholarBridge/design/main_system.kv", line 656, in <module>
+[WARNING] stderr:     size_hint_y: float(1 + self.children/25)
+[WARNING] stderr:           ^^^^^^^^^^^^^^^^
+[WARNING] stderr: TypeError: unsupported operand type(s) for /: 'ObservableList' and 'int'
+[WARNING] stderr: 
+[WARNING] stderr: During handling of the above exception, another exception occurred:
+[WARNING] stderr: 
+[WARNING] stderr: Traceback (most recent call last):
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 699, in _apply_rule
+[WARNING] stderr:     value, bound = create_handler(
+[WARNING] stderr:                    ~~~~~~~~~~~~~~^
+[WARNING] stderr:         widget_set, widget_set, key, value, rule,
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:         rctx['ids'])
+[WARNING] stderr:         ^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 248, in create_handler
+[WARNING] stderr:     raise BuilderException(rule.ctx, rule.line,
+[WARNING] stderr:                            '{}: {}'.format(e.__class__.__name__, e),
+[WARNING] stderr:                            cause=tb)
+[WARNING] stderr: kivy.lang.builder.BuilderException: Parser: File "/storage/emulated/0/Download/ScholarBridge/ScholarBridge/design/main_system.kv", line 656:
+[WARNING] stderr: ...
+[WARNING] stderr:     654:			do_scroll: False, True
+[WARNING] stderr:     655:			BoxLayout:
+[WARNING] stderr: >>  656:				size_hint_y: float(1 + self.children/25)
+[WARNING] stderr:     657:				id: dynamic_product
+[WARNING] stderr:     658:				orientation: 'vertical'
+[WARNING] stderr: ...
+[WARNING] stderr: TypeError: unsupported operand type(s) for /: 'ObservableList' and 'int'
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 245, in create_handler
+[WARNING] stderr:     return eval(value, idmap), bound_list
+[WARNING] stderr:            ~~~~^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/storage/emulated/0/Download/ScholarBridge/ScholarBridge/design/main_system.kv", line 656, in <module>
+[WARNING] stderr:     size_hint_y: float(1 + self.children/25)
+[WARNING] stderr:           ^^^^^^^^^^^^^^^^
+[WARNING] stderr: 
+[WARNING] stderr: 
+[WARNING] stderr: During handling of the above exception, another exception occurred:
+[WARNING] stderr: 
+[WARNING] stderr: Traceback (most recent call last):
+[WARNING] stderr:   File "/storage/emulated/0/Download/ScholarBridge/ScholarBridge/main.py", line 28, in <module>
+[WARNING] stderr:     ScholarBridge().run()
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 955, in run
+[WARNING] stderr:     self._run_prepare()
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/app.py", line 925, in _run_prepare
+[WARNING] stderr:     root = self.build()
+[WARNING] stderr:   File "/storage/emulated/0/Download/ScholarBridge/ScholarBridge/main.py", line 25, in build
+[WARNING] stderr:     return MainInterface()
+[WARNING] stderr:   File "/storage/emulated/0/Download/ScholarBridge/ScholarBridge/core/main_interface.py", line 80, in __init__
+[WARNING] stderr:     super().__init__(**kwargs)
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/relativelayout.py", line 274, in __init__
+[WARNING] stderr:     super(RelativeLayout, self).__init__(**kw)
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/floatlayout.py", line 65, in __init__
+[WARNING] stderr:     super(FloatLayout, self).__init__(**kwargs)
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/layout.py", line 76, in __init__
+[WARNING] stderr:     super(Layout, self).__init__(**kwargs)
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/widget.py", line 366, in __init__
+[WARNING] stderr:     self.apply_class_lang_rules(
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[WARNING] stderr:         ignored_consts=self._kwargs_applied_init,
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:         rule_children=rule_children)
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/widget.py", line 470, in apply_class_lang_rules
+[WARNING] stderr:     Builder.apply(
+[WARNING] stderr:     ~~~~~~~~~~~~~^
+[WARNING] stderr:         self, ignored_consts=ignored_consts,
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:         rule_children=rule_children)
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 545, in apply
+[WARNING] stderr:     self._apply_rule(
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~^
+[WARNING] stderr:         widget, rule, rule, ignored_consts=ignored_consts,
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:         rule_children=rule_children)
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 667, in _apply_rule
+[WARNING] stderr:     self._apply_rule(
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~^
+[WARNING] stderr:         child, crule, rootrule, rule_children=rule_children)
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 667, in _apply_rule
+[WARNING] stderr:     self._apply_rule(
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~^
+[WARNING] stderr:         child, crule, rootrule, rule_children=rule_children)
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 667, in _apply_rule
+[WARNING] stderr:     self._apply_rule(
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~^
+[WARNING] stderr:         child, crule, rootrule, rule_children=rule_children)
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 665, in _apply_rule
+[WARNING] stderr:     child.apply_class_lang_rules(
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[WARNING] stderr:         root=rctx['ids']['root'], rule_children=rule_children)
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/uix/widget.py", line 470, in apply_class_lang_rules
+[WARNING] stderr:     Builder.apply(
+[WARNING] stderr:     ~~~~~~~~~~~~~^
+[WARNING] stderr:         self, ignored_consts=ignored_consts,
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:         rule_children=rule_children)
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 545, in apply
+[WARNING] stderr:     self._apply_rule(
+[WARNING] stderr:     ~~~~~~~~~~~~~~~~^
+[WARNING] stderr:         widget, rule, rule, ignored_consts=ignored_consts,
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:         rule_children=rule_children)
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 714, in _apply_rule
+[WARNING] stderr:     raise BuilderException(rule.ctx, rule.line,
+[WARNING] stderr:                            '{}: {}'.format(e.__class__.__name__,
+[WARNING] stderr:                                            e), cause=tb)
+[WARNING] stderr: kivy.lang.builder.BuilderException: Parser: File "/storage/emulated/0/Download/ScholarBridge/ScholarBridge/design/main_system.kv", line 656:
+[WARNING] stderr: ...
+[WARNING] stderr:     654:			do_scroll: False, True
+[WARNING] stderr:     655:			BoxLayout:
+[WARNING] stderr: >>  656:				size_hint_y: float(1 + self.children/25)
+[WARNING] stderr:     657:				id: dynamic_product
+[WARNING] stderr:     658:				orientation: 'vertical'
+[WARNING] stderr: ...
+[WARNING] stderr: BuilderException: Parser: File "/storage/emulated/0/Download/ScholarBridge/ScholarBridge/design/main_system.kv", line 656:
+[WARNING] stderr: ...
+[WARNING] stderr:     654:			do_scroll: False, True
+[WARNING] stderr:     655:			BoxLayout:
+[WARNING] stderr: >>  656:				size_hint_y: float(1 + self.children/25)
+[WARNING] stderr:     657:				id: dynamic_product
+[WARNING] stderr:     658:				orientation: 'vertical'
+[WARNING] stderr: ...
+[WARNING] stderr: TypeError: unsupported operand type(s) for /: 'ObservableList' and 'int'
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 245, in create_handler
+[WARNING] stderr:     return eval(value, idmap), bound_list
+[WARNING] stderr:            ~~~~^^^^^^^^^^^^^^
+[WARNING] stderr:   File "/storage/emulated/0/Download/ScholarBridge/ScholarBridge/design/main_system.kv", line 656, in <module>
+[WARNING] stderr:     size_hint_y: float(1 + self.children/25)
+[WARNING] stderr:           ^^^^^^^^^^^^^^^^
+[WARNING] stderr: 
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 699, in _apply_rule
+[WARNING] stderr:     value, bound = create_handler(
+[WARNING] stderr:                    ~~~~~~~~~~~~~~^
+[WARNING] stderr:         widget_set, widget_set, key, value, rule,
+[WARNING] stderr:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[WARNING] stderr:         rctx['ids'])
+[WARNING] stderr:         ^^^^^^^^^^^^
+[WARNING] stderr:   File "/data/user/0/ru.iiec.pydroid3/files/aarch64-linux-android/lib/python3.13/site-packages/kivy/lang/builder.py", line 248, in create_handler
+[WARNING] stderr:     raise BuilderException(rule.ctx, rule.line,
+[WARNING] stderr:                            '{}: {}'.format(e.__class__.__name__, e),
+[WARNING] stderr:                            cause=tb)
+[WARNING] stderr: 

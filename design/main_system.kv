@@ -1,0 +1,1332 @@
+<MainInterface>:
+	canvas.before:
+		Color:
+			rgba: 0.08, 0.09, 0.14, 1
+		Rectangle:
+			size: root.size
+			pos: root.pos
+	BoxLayout:
+		orientation: 'vertical'
+		BoxLayout:
+			size_hint_y: 0.1
+			orientation: 'vertical'
+			spacing: dp(10)
+			BoxLayout:
+				size_hint: 0.9, 0.1
+				pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+				orientation: 'vertical'
+				Label:
+					id: label1
+					text: '[b]DASHBOARD[/b]'
+					text_size: self.size
+					font_size: dp(19)
+					markup: True
+					valign: 'bottom'
+				Label:
+					id: label2
+					text: 'you activity overview'
+					color: 1,1,1,0.5
+					text_size: self.size
+					valign: 'top'
+#-------------------------------------------------------------#
+
+#-------------------------------------------------------------#
+		ScreenManager:
+			id: screenmanager
+			size_hint: 0.9, 0.95
+			pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+			Screen:
+				name: 'dashboard'
+				Dashboard:
+			Screen:
+				name: 'product'
+				Product:
+			Screen:
+				name: 'sell'
+				Sell:
+			Screen:
+				name: 'service'
+				Service:
+			Screen:
+				name: 'info'
+				Status:
+#-------------------------------------------------------------#
+
+#-------------------------------------------------------------#
+		BoxLayout:
+			size_hint: 0.98, 0.1
+			pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+			orientation: 'horizontal'
+			canvas.before:
+				Color:
+					rgba: 1,1,1,0.1
+				Rectangle:
+					size: self.size[0] + dp(50), self.size[1] + dp(2)
+					pos: self.pos[0] - dp(25), self.pos[1] - dp(1)	
+				Color:
+					rgba: 0.11, 0.12, 0.18, 1
+				Rectangle:
+					size: self.size[0] + dp(48), self.size[1] 
+					pos: self.pos[0] - dp(24), self.pos[1]
+#-------------------------------------------------------------#
+			BoxLayout:
+				orientation: 'vertical'
+				pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+				Image:
+					size_hint: 0.5, 0.5
+					pos_hint: {'center_x': 0.5, 'center_y': 0}
+					source: 'assets/dashboard_down.png'
+					ToggleButton:
+						id: dashboard
+						size: self.parent.parent.size
+						pos: self.parent.parent.pos
+						group: "footer"
+						background_color: 0,0,0,0
+						disabled: True if self.state == 'down' else False
+						state: 'down'
+						on_state:
+							self.parent.source = 'assets/dashboard_normal.png' if self.state == 'normal' else 'assets/dashboard_down.png'
+							if self.state == 'down': screenmanager.current = 'dashboard'
+							if self.state == 'down': label1.text = '[b]DASHBOARD[/b]'
+							if self.state == 'down': label2.text = 'you activity overview'		
+				Label:	
+					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+					size_hint_y: 0.5
+					text: "[b]DASHBOARD[/b]"
+					color: (1,1,1,1) if dashboard.state == 'normal' else (0.20, 0.11, 0.44, 1)
+					font_size: dp(10)
+					text_size: self.size
+					markup: True
+					halign: 'center'
+					valign: 'top'
+#-------------------------------------------------------------#
+			BoxLayout:
+				orientation: 'vertical'
+				pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+				Image:
+					size_hint: 0.5, 0.5
+					pos_hint: {'center_x': 0.5, 'center_y': 0}
+					source: 'assets/product_normal.png'
+					ToggleButton:
+						id: product
+						size: self.parent.parent.size
+						pos: self.parent.parent.pos
+						group: "footer"
+						background_color: 0,0,0,0
+						disabled: True if self.state == 'down' else False
+						on_state:
+							self.parent.source = 'assets/product_normal.png' if self.state == 'normal' else 'assets/product_down.png'
+							if self.state == 'down': screenmanager.current = 'product'
+							if self.state == 'down': label1.text = '[b]PRODUCT[/b]'
+							if self.state == 'down': label2.text = 'textbooks, notes & materials'
+				Label:
+					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+					size_hint_y: 0.5
+					text: "[b]PRODUCT[/b]"
+					font_size: dp(10)
+					color: (1,1,1,1) if product.state == 'normal' else (0.20, 0.11, 0.44, 1)
+					text_size: self.size
+					markup: True
+					halign: 'center'
+					valign: 'top'
+#-------------------------------------------------------------#
+			BoxLayout:
+				orientation: 'vertical'
+				pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+				Image:
+					size_hint: 0.5, 0.5
+					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+					source: 'assets/sell.png'
+					canvas.before:
+						Color:
+							rgba: 0.4, 0.31, 0.85, 1
+						Ellipse:
+							size: self.parent.size
+							pos: self.pos[0] - self.size[0] // 2, self.pos[1] - self.size[1] // 2
+					ToggleButton:
+						id: sell
+						size: self.parent.parent.size
+						pos: self.parent.parent.pos
+					    group: "footer"
+						background_color: 0,0,0,0
+						disabled: True if self.state == 'down' else False
+						on_state:
+							if self.state == 'down': screenmanager.current = 'sell'
+							if self.state == 'down': label1.text = '[b]CREATE LISTING[/b]'
+							if self.state == 'down': label2.text = 'publish your products & services'
+				Label:
+					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+					size_hint_y: 0.5
+					text: "[b]SELL[/b]"
+					color: (1,1,1,1) if sell.state == 'normal' else (0.20, 0.11, 0.44, 1)
+					font_size: dp(10)
+					text_size: self.size
+					markup: True
+					halign: 'center'
+					valign: 'bottom'
+#-------------------------------------------------------------#
+			BoxLayout:
+				orientation: 'vertical'
+				pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+				Image:
+					size_hint: 0.5, 0.5
+					pos_hint: {'center_x': 0.5, 'center_y': 0}
+					source: 'assets/service_normal.png'
+					ToggleButton:
+						id: service
+						size: self.parent.parent.size
+						pos: self.parent.parent.pos
+						group: "footer"
+						background_color: 0,0,0,0
+						disabled: True if self.state == 'down' else False
+						on_state:
+							self.parent.source = 'assets/service_normal.png' if self.state == 'normal' else 'assets/service_down.png'
+							if self.state == 'down': screenmanager.current = 'service'
+							if self.state == 'down': label1.text = '[b]SERVICE[/b]'
+							if self.state == 'down': label2.text = 'tutoring, review & freelance help'
+				Label:
+					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+					size_hint_y: 0.5
+					text: "[b]SERVICE[/b]"
+					color: (1,1,1,1) if service.state == 'normal' else (0.20, 0.11, 0.44, 1)
+					font_size: dp(10)
+					text_size: self.size
+					markup: True
+					halign: 'center'
+					valign: 'top'
+#-------------------------------------------------------------#
+			BoxLayout:
+				orientation: 'vertical'
+				pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+				Image:
+					size_hint: 0.5, 0.5
+					pos_hint: {'center_x': 0.5, 'center_y': 0}
+					source: 'assets/person_normal.png'
+					ToggleButton:
+						id: info
+						size: self.parent.parent.size
+						pos: self.parent.parent.pos
+						group: "footer"
+						background_color: 0,0,0,0
+						disabled: True if self.state == 'down' else False
+						on_state:
+							self.parent.source = 'assets/person_normal.png' if self.state == 'normal' else 'assets/person_down.png'
+							if self.state == 'down': screenmanager.current = 'info'
+							if self.state == 'down': label1.text = ''
+							if self.state == 'down': label2.text = ''
+				Label:
+					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+					size_hint_y: 0.5
+					text: "[b]STATUS[/b]"
+					color: (1,1,1,1) if info.state == 'normal' else (0.20, 0.11, 0.44, 1)
+					font_size: dp(10)
+					text_size: self.size
+					markup: True
+					halign: 'center'
+					valign: 'top'
+#------------------------------------------------------------#
+#DASHBOARD					
+#-----------------------------------------------------------#
+<Dashboard>:
+	ScrollView:
+		size: root.size
+		pos: root.pos
+		do_scroll: False, True
+		bar_width: 0
+		BoxLayout:
+			orientation: 'vertical'
+			size_hint_y: 1.5
+			spacing: dp(10)
+#-------------------------------------------------------------#
+# 0
+#-------------------------------------------------------------#
+			GridLayout:
+				rows: 2
+				cols: 2
+				spacing: dp(10)
+#1------------------------------------------------------------#
+				BoxLayout:
+					orientation: 'vertical'
+					spacing: dp(5)
+					canvas.before:
+						Color:
+							rgba: 0.11, 0.12, 0.18, 1
+						RoundedRectangle:
+							size: self.size
+							pos: self.pos
+							radius: [10]
+					Label:
+						size_hint_y: 0.1
+					BoxLayout:
+						orientation: 'horizontal'
+						Label:
+							size_hint_x: 0.1
+						Label:
+							size_hint_x: 0.3
+							text: '₱'
+							text_size: self.size
+							color: 0.4, 0.31, 0.85, 1
+							halign: 'center'
+							valign: 'center'
+							canvas.before:
+								Color:
+									rgba: 0.15, 0.17, 0.23, 0.5
+								RoundedRectangle:
+									size: self.size
+									pos: self.pos
+						Label:
+							size_hint_x: 0.1
+						Label:
+							size_hint_x: 0.3
+							text: '+12%'
+							font_size: dp(12)
+							text_size: self.size
+							color: 0.16, 0.59, 0.33, 1
+							halign: 'center'
+							valign: 'center'
+							canvas.before:
+								Color:
+									rgba: 0.15, 0.17, 0.23, 0.5
+								RoundedRectangle:
+									size: self.size
+									pos: self.pos
+						Label:
+							size_hint_x: 0.1
+					Label:
+						text: '[b]₱1,240[/b]'
+						font_size: dp(16)
+						text_size: self.size
+						markup: True
+						halign: 'center'
+					Label:
+						text: 'Total Earnings'
+						font_size: dp(10)
+						text_size: self.size
+						halign: 'center'
+						valign: 'top'
+#2------------------------------------------------------------#
+				BoxLayout:
+					orientation: 'vertical'
+					spacing: dp(5)
+					canvas.before:
+						Color:
+							rgba: 0.11, 0.12, 0.18, 1
+						RoundedRectangle:
+							size: self.size
+							pos: self.pos
+							radius: [10]
+					Label:
+						size_hint_y: 0.1
+					BoxLayout:
+						orientation: 'horizontal'
+						Label:
+							size_hint_x: 0.1
+						Image:
+							source: 'assets/product_down.png'
+							size_hint_x: 0.3
+							
+							canvas.before:
+								Color:
+									rgba: 0.15, 0.17, 0.23, 0.5
+								RoundedRectangle:
+									size: self.size
+									pos: self.pos
+						Label:
+							size_hint_x: 0.1
+						Label:
+							size_hint_x: 0.3
+							text: '+2'
+							font_size: dp(12)
+							text_size: self.size
+							color: 0.16, 0.59, 0.33, 1
+							halign: 'center'
+							valign: 'center'
+							canvas.before:
+								Color:
+									rgba: 0.15, 0.17, 0.23, 0.5
+								RoundedRectangle:
+									size: self.size
+									pos: self.pos
+						Label:
+							size_hint_x: 0.1
+					Label:
+						text: '[b]5[/b]'
+						font_size: dp(16)
+						text_size: self.size
+						markup: True
+						halign: 'center'
+					Label:
+						text: 'Active Listing'
+						font_size: dp(10)
+						text_size: self.size
+						halign: 'center'
+						valign: 'top'
+#3------------------------------------------------------------#
+				BoxLayout:
+					orientation: 'vertical'
+					spacing: dp(5)
+					canvas.before:
+						Color:
+							rgba: 0.11, 0.12, 0.18, 1
+						RoundedRectangle:
+							size: self.size
+							pos: self.pos
+							radius: [10]
+					Label:
+						size_hint_y: 0.1
+					BoxLayout:
+						orientation: 'horizontal'
+						Label:
+							size_hint_x: 0.1
+						Image:
+							source: 'assets/eye.png'
+							size_hint_x: 0.3
+							canvas.before:
+								Color:
+									rgba: 0.15, 0.17, 0.23, 0.5
+								RoundedRectangle:
+									size: self.size
+									pos: self.pos
+						Label:
+							size_hint_x: 0.1
+						Label:
+							size_hint_x: 0.3
+							text: '+2'
+							font_size: dp(12)
+							text_size: self.size
+							color: 0.16, 0.59, 0.33, 1
+							halign: 'center'
+							valign: 'center'
+							canvas.before:
+								Color:
+									rgba: 0.15, 0.17, 0.23, 0.5
+								RoundedRectangle:
+									size: self.size
+									pos: self.pos
+						Label:
+							size_hint_x: 0.1
+					Label:
+						text: '[b]5[/b]'
+						font_size: dp(16)
+						text_size: self.size
+						markup: True
+						halign: 'center'
+					Label:
+						text: 'Active Listing'
+						font_size: dp(10)
+						text_size: self.size
+						halign: 'center'
+						valign: 'top'
+#4------------------------------------------------------------#
+				BoxLayout:
+					orientation: 'vertical'
+					canvas.before:
+						Color:
+							rgba: 0.11, 0.12, 0.18, 1
+						RoundedRectangle:
+							size: self.size
+							pos: self.pos
+							radius: [10]
+			
+#5----------------------------------------------------------#
+			BoxLayout:
+                id: graph
+				orientation: 'vertical'
+				canvas.before:
+					Color:
+						rgba: 0.11, 0.12, 0.18, 1
+					RoundedRectangle:
+						size: self.size
+						pos: self.pos
+						radius: [10]
+				Label:
+					size_hint_y: 0.05
+                BoxLayout:
+                    size_hint: 0.9, 0.2
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    spacing: dp(5)
+                    orientation: 'horizontal'
+                    BoxLayout:
+                    	orientation: 'horizontal'
+                    	Label:
+                    		text: '[b]EARNINGS[/b]'
+                    		markup: True
+                    		text_size: self.size
+                    		halign: 'left'
+                    		valign: 'center'
+                    	Image:
+                    		source: 'assets/bar_graph.png'
+                    		size_hint: None, 1
+                    		canvas.before:
+								Color:
+									rgba: 0.15, 0.17, 0.23, 0.5
+								RoundedRectangle:
+									size: self.size
+									pos: self.pos
+                    		
+                ScrollView:
+                    size_hint: 0.9, 0.3
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    id: scroll
+                    do_scroll_y: False
+                    bar_width: 0
+                    Widget:
+                        id: chart
+                        size_hint_x: None
+                        height: root.height
+                        width: 100
+                        canvas:
+                            Color:
+                                rgba: 0.11, 0.12, 0.18, 1
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
+                Label:
+                	size_hint: 0.9, 0.2   
+                	pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                	
+                	       
+#------------------------------------------------------------#
+			Label:
+				size_hint_y: 0.2
+				text: '[b]RECENT ACTIVITY[/b]'
+				markup: True
+				text_size: self.size
+				valign: 'center'
+				halign: 'center'
+			BoxLayout:
+				size_hint_y: 2
+				id: dynamic_activity
+				orientation: 'vertical'
+				spacing: dp(10)
+				DynamicActivity:
+				DynamicActivity:
+				DynamicActivity:
+				DynamicActivity:
+				DynamicActivity:
+					
+			Label:
+				size_hint_y: 0.05
+			
+#------------------------------------------------------------#
+#PRODUCT					
+#-----------------------------------------------------------#
+<Product>:
+	BoxLayout:
+		size: root.size
+		pos: root.pos
+		orientation: 'vertical'
+		spacing: dp(5)
+#-------------------------------------------------------------#
+# 0
+#-------------------------------------------------------------#
+		BoxLayout:
+			size_hint: 0.95, 0.1
+			pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+			spacing: dp(10)
+			orientation: 'horizontal'
+#1------------------------------------------------------------#
+			ScrollView:
+                size_hint_y: None
+                height: dp(40)
+                do_scroll: True, False
+                bar_width: 0
+                
+                # FIX: Mobile constraints for nested horizontal scrolling
+                scroll_timeout: 250 
+                scroll_distance: dp(20)
+                
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_x: None
+                    width: self.minimum_width
+                    padding: [dp(20), 0]
+                    spacing: dp(10)
+                   
+                    ToggleButton:
+                        group: 'products'
+                        state: 'down'
+                        text: 'All'
+                        size_hint_x: None
+                        width: dp(60)
+                        font_size: sp(14)
+                        bold: True
+                        background_color: 0,0,0,0
+                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        canvas.before:
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+                                radius: [dp(20)]
+                   
+                    ToggleButton:
+                        group: 'products'
+                        text: 'Textbooks'
+                        size_hint_x: None
+                        width: dp(100)
+                        font_size: sp(14)
+                        bold: True
+                        background_color: 0,0,0,0
+                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        canvas.before:
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+                                radius: [dp(20)]
+                   
+                    ToggleButton:
+                        group: 'products'
+                        text: 'Notes'
+                        size_hint_x: None
+                        width: dp(70)
+                        font_size: sp(14)
+                        bold: True
+                        background_color: 0,0,0,0
+                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        canvas.before:
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+                                radius: [dp(20)]
+
+                    ToggleButton:
+                        group: 'products'
+                        text: 'Guides'
+                        size_hint_x: None
+                        width: dp(80)
+                        font_size: sp(14)
+                        bold: True
+                        background_color: 0,0,0,0
+                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        canvas.before:
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+                                radius: [dp(20)]
+
+                    ToggleButton:
+                        group: 'products'
+                        text: 'Materials'
+                        size_hint_x: None
+                        width: dp(90)
+                        font_size: sp(14)
+                        bold: True
+                        background_color: 0,0,0,0
+                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        canvas.before:
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+                                radius: [dp(20)]
+#6------------------------------------------------------------#
+		ScrollView:
+			id: scroll
+			do_scroll: False, True
+			BoxLayout:
+				size_hint_y: len(self.children) * 0.2
+				id: dynamic_product
+				orientation: 'vertical'
+				spacing: dp(10)
+#Dynamic Prodoct List			
+		Label:
+			size_hint_y: 0.01
+
+<EscrowBanner@BoxLayout>:
+    size_hint_y: None
+    height: dp(60)
+    padding: dp(15)
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.08, 0.14, 0.16, 1 
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(12)]
+    Image:
+        source: 'assets/green_shield.png'
+        size_hint_x: None
+        width: dp(24)
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: '[b]Escrow Protected[/b]'
+            markup: True
+            color: 0.15, 0.76, 0.51, 1
+            font_size: sp(14)
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: 'Payment held securely until the buyer confirms receipt'
+            color: 1, 1, 1, 0.6
+            font_size: sp(11)
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+
+# FIX: Added text_val to alias the internal input text for Python access
+<FormInput@BoxLayout>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: dp(80)
+    spacing: dp(8)
+    title: ''
+    hint: ''
+    text_val: internal_input.text
+
+    Label:
+        text: root.title
+        font_size: sp(14)
+        bold: True
+        size_hint_y: None
+        height: dp(20)
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
+    TextInput:
+        id: internal_input
+        hint_text: root.hint
+        hint_text_color: 1, 1, 1, 0.4
+        foreground_color: 1, 1, 1, 1
+        background_color: 0, 0, 0, 0
+        cursor_color: 0.42, 0.35, 0.88, 1
+        multiline: False
+        padding: [dp(15), dp(15)]
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.13, 0.18, 1
+            RoundedRectangle:
+                size: self.size
+                pos: self.pos
+                radius: [dp(8)]
+            Color:
+                rgba: 1, 1, 1, 0.1
+            Line:
+                rounded_rectangle: [self.x, self.y, self.width, self.height, dp(8)]
+                width: dp(1)
+<PrimaryButton@ButtonBehavior+FloatLayout>:
+    text: ''
+    size_hint_y: None
+    height: dp(55)
+    canvas.before:
+        Color:
+            rgba: (0.42, 0.35, 0.88, 1) if self.state == 'normal' else (0.3, 0.25, 0.7, 1)
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(27)] 
+    Label:
+        text: root.text
+        markup: True
+        font_size: sp(16)
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+#------------------------------------------------------------#
+#SELL				
+#-----------------------------------------------------------#
+<Sell>:
+    ScrollView:
+        size: root.size
+        pos: root.pos
+        do_scroll: False, True
+        bar_width: 0
+       
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: self.minimum_height
+            padding: [dp(20), dp(40), dp(20), dp(100)] 
+            spacing: dp(24)
+
+            EscrowBanner:
+
+            # TYPE SELECTION
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: dp(75)
+                spacing: dp(10)
+                Label:
+                    text: 'Type'
+                    bold: True
+                    font_size: sp(14)
+                    size_hint_y: None
+                    height: dp(20)
+                    text_size: self.size
+                    halign: 'left'
+               
+                BoxLayout:
+                    orientation: 'horizontal'
+                    spacing: dp(10)
+                   
+                    ToggleButton:
+                        id: type_textbook
+                        group: 'listing_type'
+                        text: 'Textbook'
+                        bold: True
+                        font_size: sp(14)
+                        background_color: 0, 0, 0, 0
+                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        canvas.before:
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1, 1, 1, 0.05)
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+                                radius: [dp(12)]
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0, 0, 0, 0)
+                            Line:
+                                rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
+                                width: dp(1.2)
+
+                    ToggleButton:
+                        id: type_service
+                        group: 'listing_type'
+                        text: 'Service'
+                        bold: True
+                        font_size: sp(14)
+                        background_color: 0, 0, 0, 0
+                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        canvas.before:
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1, 1, 1, 0.05)
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+                                radius: [dp(12)]
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0, 0, 0, 0)
+                            Line:
+                                rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
+                                width: dp(1.2)
+
+                    ToggleButton:
+                        id: type_notes
+                        group: 'listing_type'
+                        text: 'Notes'
+                        bold: True
+                        font_size: sp(14)
+                        background_color: 0, 0, 0, 0
+                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        canvas.before:
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1, 1, 1, 0.05)
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+                                radius: [dp(12)]
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0, 0, 0, 0)
+                            Line:
+                                rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
+                                width: dp(1.2)
+
+            # INPUT FIELDS
+            FormInput:
+                id: title_input
+                title: 'Title'
+                hint: 'e.g. Organic Chemistry 8th Edition'
+
+            FormInput:
+                id: desc_input
+                title: 'Description'
+                hint: 'Describe condition, edition, ISBN...'
+                height: dp(120) 
+           
+            FormInput:
+                id: price_input
+                title: 'Price'
+                hint: '₱0.00'
+
+            # CONDITION SELECTION
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: dp(75)
+                spacing: dp(10)
+                Label:
+                    text: 'Condition'
+                    bold: True
+                    font_size: sp(14)
+                    size_hint_y: None
+                    height: dp(20)
+                    text_size: self.size
+                    halign: 'left'
+               
+                ScrollView:
+                    do_scroll: True, False
+                    bar_width: 0
+                    scroll_timeout: 250 
+                    scroll_distance: dp(20)
+                    
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: dp(8)
+                        size_hint_x: None
+                        width: self.minimum_width
+                       
+                        ToggleButton:
+                            group: 'sells'
+                            text: 'New'
+                            size_hint_x: None
+                            width: dp(70)
+                            font_size: sp(12)
+                            background_color: 0, 0, 0, 0
+                            color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                            canvas.before:
+                                Color:
+                                    rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (1, 1, 1, 0.05)
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                                    radius: [dp(15)]
+                       
+                        ToggleButton:
+                            group: 'sells'
+                            text: 'Like New'
+                            size_hint_x: None
+                            width: dp(90)
+                            font_size: sp(12)
+                            background_color: 0, 0, 0, 0
+                            color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                            canvas.before:
+                                Color:
+                                    rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (1, 1, 1, 0.05)
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                                    radius: [dp(15)]
+
+                        ToggleButton:
+                            group: 'sells'
+                            text: 'Good'
+                            size_hint_x: None
+                            width: dp(70)
+                            font_size: sp(12)
+                            background_color: 0, 0, 0, 0
+                            color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                            canvas.before:
+                                Color:
+                                    rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (1, 1, 1, 0.05)
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                                    radius: [dp(15)]
+                                   
+                        ToggleButton:
+                            group: 'sells'
+                            text: 'Fair'
+                            size_hint_x: None
+                            width: dp(70)
+                            font_size: sp(12)
+                            background_color: 0, 0, 0, 0
+                            color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                            canvas.before:
+                                Color:
+                                    rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (1, 1, 1, 0.05)
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                                    radius: [dp(15)]
+
+                        ToggleButton:
+                            group: 'sells'
+                            text: 'Digital'
+                            size_hint_x: None
+                            width: dp(80)
+                            font_size: sp(12)
+                            background_color: 0, 0, 0, 0
+                            color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                            canvas.before:
+                                Color:
+                                    rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (1, 1, 1, 0.05)
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                                    radius: [dp(15)]
+
+            # PUBLISH BUTTON
+            # FIX: Used valid PrimaryButton template instead of pure ButtonBehavior
+            PrimaryButton:
+                id: publish_btn
+                text: '[b]Publish[/b]'
+                on_release: root.add_product()
+#------------------------------------------------------------#
+#SERVICE					
+#-----------------------------------------------------------#
+<Service>:
+	BoxLayout:
+		size: root.size
+		pos: root.pos
+		orientation: 'vertical'
+		spacing: dp(5)
+#-------------------------------------------------------------#
+# 0
+#-------------------------------------------------------------#
+		BoxLayout:
+			size_hint: 0.95, 0.1
+			pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+			spacing: dp(10)
+			orientation: 'horizontal'
+#1------------------------------------------------------------#
+			ScrollView:
+                size_hint_y: None
+                height: dp(40)
+                do_scroll: True, False
+                bar_width: 0
+                
+                # FIX: Mobile constraints for nested horizontal scrolling
+                scroll_timeout: 250 
+                scroll_distance: dp(20)
+                
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_x: None
+                    width: self.minimum_width
+                    padding: [dp(20), 0]
+                    spacing: dp(10)
+                   
+                    ToggleButton:
+                        group: 'services'
+                        state: 'down'
+                        text: 'All'
+                        size_hint_x: None
+                        width: dp(60)
+                        font_size: sp(14)
+                        bold: True
+                        background_color: 0,0,0,0
+                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        canvas.before:
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+                                radius: [dp(20)]
+                   
+                    ToggleButton:
+                        group: 'services'
+                        text: 'Tutoring'
+                        size_hint_x: None
+                        width: dp(90)
+                        font_size: sp(14)
+                        bold: True
+                        background_color: 0,0,0,0
+                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        canvas.before:
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+                                radius: [dp(20)]
+                   
+                    ToggleButton:
+                        group: 'services'
+                        text: 'Writing'
+                        size_hint_x: None
+                        width: dp(80)
+                        font_size: sp(14)
+                        bold: True
+                        background_color: 0,0,0,0
+                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        canvas.before:
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+                                radius: [dp(20)]
+
+                    ToggleButton:
+                        group: 'services'
+                        text: 'Career'
+                        size_hint_x: None
+                        width: dp(80)
+                        font_size: sp(14)
+                        bold: True
+                        background_color: 0,0,0,0
+                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        canvas.before:
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+                                radius: [dp(20)]
+
+                    ToggleButton:
+                        group: 'services'
+                        text: 'Test Prep'
+                        size_hint_x: None
+                        width: dp(100)
+                        font_size: sp(14)
+                        bold: True
+                        background_color: 0,0,0,0
+                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        canvas.before:
+                            Color:
+                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+                                radius: [dp(20)]
+#6------------------------------------------------------------#
+		ScrollView:
+			id: scroll
+			do_scroll: False, True
+			BoxLayout:
+				size_hint_y: len(self.children) * 0.2
+				id: dynamic_service
+				orientation: 'vertical'
+				spacing: dp(10)
+#Dynamic Service List			
+		Label:
+			size_hint_y: 0.01
+			
+
+#-----------------------------------------------------------#
+# Custom Dynamic Class for Menu List Items
+#-----------------------------------------------------------#
+<MenuItem@ButtonBehavior+BoxLayout>:
+    size_hint_y: None
+    height: dp(55)
+    spacing: dp(15)
+    padding: [dp(10), dp(5), dp(10), dp(5)]
+    
+    # Custom properties to easily pass data
+    icon_source: ''
+    text: ''
+    text_color: 1, 1, 1, 1
+    icon_bg_color: 0.12, 0.13, 0.20, 1
+
+    # Icon Container with Rounded Background
+    FloatLayout:
+        size_hint_x: None
+        width: dp(45)
+        canvas.before:
+            Color:
+                rgba: root.icon_bg_color
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(12)]
+        Image:
+            source: root.icon_source
+            size_hint: 0.5, 0.5
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+    # Left-Aligned Text Label
+    Label:
+        text: root.text
+        color: root.text_color
+        font_size: sp(16)
+        bold: True
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
+
+#-----------------------------------------------------------#
+# MAIN STATUS SCREEN
+#-----------------------------------------------------------#
+<Status>:
+    # 1. Main Background Color
+    canvas.before:
+        Color:
+            rgba: 0.08, 0.09, 0.13, 1  # Dark blue/black background
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        size: root.size
+        pos: root.pos
+        
+        ScrollView:
+            do_scroll: False, True
+            bar_width: 0
+
+            # 2. Inner Scrolling Layout (Must have size_hint_y: None)
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(20)
+                spacing: dp(30)
+
+                # --- TOP SECTION: PROFILE INFO ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    spacing: dp(10)
+
+                    # Avatar Container
+                    FloatLayout:
+                        size_hint: None, None
+                        size: dp(100), dp(100)
+                        pos_hint: {'center_x': 0.5}
+
+                        # Purple initials circle
+                        canvas.before:
+                            Color:
+                                rgba: 0.12, 0.13, 0.20, 1 # Slightly lighter dark circle
+                            Ellipse:
+                                pos: self.pos
+                                size: self.size
+                        Label:
+                            text: f'[b]{root.initial}[/b]' # Example: 'JD'
+                            markup: True
+                            font_size: sp(36)
+                            color: 0.4, 0.31, 0.85, 1 # Purple accent
+                            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+                        # Overlapping Camera Badge
+                        FloatLayout:
+                            size_hint: None, None
+                            size: dp(32), dp(32)
+                            pos_hint: {'right': 1.0, 'y': 0}
+                            canvas.before:
+                                Color:
+                                    rgba: 0.4, 0.31, 0.85, 1
+                                Ellipse:
+                                    pos: self.pos
+                                    size: self.size
+                            Image:
+                                source: 'assets/camera.png' # Ensure this asset exists
+                                size_hint: 0.5, 0.5
+                                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+                    # Names and Handles
+                    Label:
+                        text: f'[b]{root.full_name}[/b]' # Example: 'Jane Doe'
+                        markup: True
+                        font_size: sp(22)
+                        size_hint_y: None
+                        height: dp(30)
+                        color: 1, 1, 1, 1
+
+                    Label:
+                        text: f'{root.email}' # Example: '@janedoe'
+                        font_size: sp(14)
+                        size_hint_y: None
+                        height: dp(20)
+                        color: 0.6, 0.6, 0.6, 1
+
+                    # Badges Row (Verified & Rating)
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        size_hint: None, None
+                        height: dp(35)
+                        width: self.minimum_width
+                        pos_hint: {'center_x': 0.5}
+                        spacing: dp(10)
+
+                        # Verified Badge
+                        BoxLayout:
+                            size_hint_x: None
+                            width: dp(95)
+                            padding: [dp(10), dp(5), dp(10), dp(5)]
+                            spacing: dp(5)
+                            canvas.before:
+                                Color:
+                                    rgba: 0.10, 0.15, 0.15, 1 # Subtle dark green BG
+                                RoundedRectangle:
+                                    pos: self.pos
+                                    size: self.size
+                                    radius: [dp(15)]
+                                Color:
+                                    rgba: 0.2, 0.8, 0.4, 0.5 # Green Border Line
+                                Line:
+                                    rounded_rectangle: [self.x, self.y, self.width, self.height, dp(15)]
+                                    width: dp(1)
+                            Image:
+                                source: 'assets/verified.png'
+                                size_hint_x: None
+                                width: dp(15)
+                            Label:
+                                text: 'Verified'
+                                color: 0.2, 0.8, 0.4, 1
+                                font_size: sp(12)
+                                bold: True
+
+                        # Rating Badge
+                        BoxLayout:
+                            size_hint_x: None
+                            width: dp(75)
+                            padding: [dp(10), dp(5), dp(10), dp(5)]
+                            spacing: dp(5)
+                            canvas.before:
+                                Color:
+                                    rgba: 0.15, 0.12, 0.20, 1 # Subtle dark purple BG
+                                RoundedRectangle:
+                                    pos: self.pos
+                                    size: self.size
+                                    radius: [dp(15)]
+                                Color:
+                                    rgba: 0.4, 0.31, 0.85, 0.5 # Purple Border Line
+                                Line:
+                                    rounded_rectangle: [self.x, self.y, self.width, self.height, dp(15)]
+                                    width: dp(1)
+                            Image:
+                                source: 'assets/star.png'
+                                size_hint_x: None
+                                width: dp(15)
+                            Label:
+                                text: '4.9'
+                                color: 0.4, 0.31, 0.85, 1
+                                font_size: sp(12)
+                                bold: True
+
+                # --- BOTTOM SECTION: MENU LIST ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    spacing: dp(5)
+
+                    # Instantiate custom MenuItems
+                    MenuItem:
+                        icon_source: 'assets/profile.png'
+                        text: 'My Profile'
+                        on_release: print("Navigate to Profile")
+                        
+                    MenuItem:
+                        icon_source: 'assets/chat.png'
+                        text: 'ChatBox'
+                        on_release: print("Navigate to Chat")
+                        
+                    MenuItem:
+                        icon_source: 'assets/wallet.png'
+                        text: 'Wallet'
+                        on_release: print("Navigate to Wallet")
+                        
+                    MenuItem:
+                        icon_source: 'assets/settings.png'
+                        text: 'Settings'
+                        on_release: print("Navigate to Settings")
+                        
+                    # Spacer to push Sign Out down slightly if desired
+                    Widget:
+                        size_hint_y: None
+                        height: dp(10)
+
+                    MenuItem:
+                        icon_source: 'assets/logout.png'
+                        text: 'Sign Out'
+                        text_color: 0.8, 0.2, 0.2, 1       # Red text
+                        icon_bg_color: 0.15, 0.05, 0.05, 1 # Faint red background
+                        on_release: print("Sign Out Triggered")
+                        
