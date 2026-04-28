@@ -1154,7 +1154,6 @@
             pos: self.pos
             size: self.size
             radius: [dp(12)]
-
 <ListTile>:
     size_hint_y: None
     height: dp(70)
@@ -1180,10 +1179,10 @@
                 pos: self.pos
                 size: self.size
                 radius: [dp(10)]
-        # Replace with actual image
-        Label:
-            text: '-' # Placeholder for Image: source: root.icon_source
-            color: 0.43, 0.33, 0.85, 1
+        # Replaced the placeholder Label with the actual Image
+        Image:
+            source: root.icon_source
+            size_hint: 0.5, 0.5
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
     # Text Content
@@ -1214,6 +1213,31 @@
         width: dp(20)
         color: 0.5, 0.5, 0.5, 1
         font_size: sp(18)
+
+<WalletAction@ButtonBehavior+BoxLayout>:
+    orientation: 'horizontal'
+    padding: [dp(20), dp(10)]
+    spacing: dp(10)
+    icon: ''
+    text: ''
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 0.2
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(10)]
+    Image:
+        source: root.icon
+        size_hint_x: None
+        width: dp(24)
+    Label:
+        text: root.text
+        bold: True
+        font_size: sp(14)
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
 
 <ChatBubble>:
     size_hint_y: None
@@ -1601,6 +1625,59 @@
                 size: root.size
                 pos: root.pos
 
+<EditProfileButton@ButtonBehavior+FloatLayout>:
+    size_hint_y: None
+    height: dp(50)
+    canvas.before:
+        Color:
+            rgba: 0.43, 0.33, 0.85, 1
+        Line:
+            rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
+            width: dp(1.2)
+            
+    BoxLayout:
+        spacing: dp(8)
+        size_hint: None, 1
+        width: self.minimum_width
+        pos_hint: {'center_x': 0.5}
+        Image:
+            source: 'assets/edit.png'
+            size_hint_x: None
+            width: dp(18)
+        Label:
+            text: '[b]Edit Profile[/b]'
+            markup: True
+            color: 1, 1, 1, 1
+            size_hint_x: None
+            width: self.texture_size[0]
+
+<IconButton@ButtonBehavior+AnchorLayout>:
+    icon_source: ''
+    icon_size_hint: 0.5, 0.5
+    canvas.before:
+        Color:
+            rgba: (1, 1, 1, 0) # Default transparent
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    Image:
+        source: root.icon_source
+        size_hint: root.icon_size_hint
+
+# FIX: Specialized Send Button with background styling
+<SendButton@ButtonBehavior+AnchorLayout>:
+    icon_source: 'assets/send.png'
+    canvas.before:
+        Color:
+            rgba: 0.43, 0.33, 0.85, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(25)]
+    Image:
+        source: root.icon_source
+        size_hint: 0.45, 0.45
+
 # ------------------- 1. PROFILE SCREEN ------------------- #
 <Profile>:
     size: root.size
@@ -1612,13 +1689,18 @@
     ScrollView:
         do_scroll: False, True
         bar_width: 0
+        
+        # Priority Mobile Constraint: Limit touch dispatching to prevent lock-ups
+        scroll_timeout: 250
+        scroll_distance: dp(20)
+
         BoxLayout:
             orientation: 'vertical'
             size_hint_y: None
             height: self.minimum_height
             spacing: dp(20)
 
-            # Avatar Header (Similar to your current code)
+            # Avatar Header
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
@@ -1659,36 +1741,32 @@
                 size_hint_y: None
                 height: self.minimum_height
                 spacing: dp(10)
+                
+                # Assuming <ListTile> is successfully defined elsewhere in your .kv
                 ListTile:
+                    icon_source: 'assets/email.png'
                     title: 'Email'
                     subtitle: 'jane.doe@university.edu'
                     show_arrow: False
                 ListTile:
+                    icon_source: 'assets/phone.png'
                     title: 'Phone'
                     subtitle: '+1 (555) 123-4567'
                     show_arrow: False
                 ListTile:
+                    icon_source: 'assets/school.png'
                     title: 'University'
                     subtitle: 'State University'
                     show_arrow: False
                 ListTile:
+                    icon_source: 'assets/location.png'
                     title: 'Location'
                     subtitle: 'Campus Dorm B, Room 204'
                     show_arrow: False
          
-            # Edit Button
-            Button:
-                text: 'Edit Profile'
-                size_hint_y: None
-                height: dp(50)
-                background_color: 0,0,0,0
-                canvas.before:
-                    Color:
-                        rgba: 0.43, 0.33, 0.85, 1
-                    Line:
-                        rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
-                        width: dp(1.2)
-                color: 1, 1, 1, 1
+            # FIX: Call the valid dynamic class instead of the abstract ButtonBehavior
+            EditProfileButton:
+                on_release: print("Edit profile triggered")
 
 # ------------------- 2. CHATBOX SCREEN ------------------- #
 <ChatBox>:
@@ -1737,6 +1815,8 @@
     # Chat Area
     ScrollView:
         do_scroll: False, True
+        scroll_timeout: 250 # Mobile Responsiveness fix
+        scroll_distance: dp(20)
         BoxLayout:
             orientation: 'vertical'
             size_hint_y: None
@@ -1744,6 +1824,7 @@
             padding: dp(15)
             spacing: dp(15)
            
+            # Assuming <ChatBubble> is defined in your dynamic_box.kv
             ChatBubble:
                 text: "Hey! Is the Organic Chemistry textbook still available?"
                 time: "10:32 AM"
@@ -1751,14 +1832,6 @@
             ChatBubble:
                 text: "Yes it is! It's in great condition, barely used."
                 time: "10:33 AM"
-                is_sender: True
-            ChatBubble:
-                text: "Awesome! Can you do $40 instead of $45?"
-                time: "10:34 AM"
-                is_sender: False
-            ChatBubble:
-                text: "I can do $42, meet in the middle?"
-                time: "10:35 AM"
                 is_sender: True
    
     # Input Bar
@@ -1774,10 +1847,13 @@
                 pos: self.pos
                 size: self.size
        
-        Label:
-            text: '@'
+        # FIX: Replaced raw ButtonBehavior with valid IconButton
+        IconButton:
             size_hint_x: None
             width: dp(30)
+            icon_source: 'assets/attach.png'
+            icon_size_hint: 0.8, 0.8
+            on_release: print("Attach file triggered")
        
         TextInput:
             hint_text: 'Type a message...'
@@ -1794,18 +1870,11 @@
                     size: self.size
                     radius: [dp(20)]
        
-        Button:
-            text: 'Send' 
+        # FIX: Replaced raw ButtonBehavior with valid SendButton
+        SendButton:
             size_hint_x: None
             width: dp(50)
-            background_color: 0,0,0,0
-            canvas.before:
-                Color:
-                    rgba: 0.43, 0.33, 0.85, 1
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [dp(25)]
+            on_release: print("Message sent")
 
 # ------------------- 3. WALLET SCREEN ------------------- #
 <Wallet>:
@@ -1853,30 +1922,16 @@
                     text_size: self.size
                     halign: 'left'
              
-                # Buttons
+                # Action Buttons
                 BoxLayout:
                     spacing: dp(15)
                     padding: [0, dp(15), 0, 0]
-                    Button:
+                    WalletAction:
+                        icon: 'assets/green_up.png'
                         text: 'Deposit'
-                        background_color: 0,0,0,0
-                        canvas.before:
-                            Color:
-                                rgba: 1, 1, 1, 0.2
-                            RoundedRectangle:
-                                pos: self.pos
-                                size: self.size
-                                radius: [dp(10)]
-                    Button:
+                    WalletAction:
+                        icon: 'assets/red_down.png'
                         text: 'Withdraw'
-                        background_color: 0,0,0,0
-                        canvas.before:
-                            Color:
-                                rgba: 1, 1, 1, 0.2
-                            RoundedRectangle:
-                                pos: self.pos
-                                size: self.size
-                                radius: [dp(10)]
 
             # Payment Methods
             BoxLayout:
@@ -1893,10 +1948,12 @@
                     text_size: self.size
                     halign: 'left'
                 ListTile:
+                    icon_source: 'assets/visa.png'
                     title: 'Visa •••• 4242'
                     subtitle: 'Expires 08/27'
                     show_arrow: False
                 ListTile:
+                    icon_source: 'assets/bank.png'
                     title: 'Bank Account •••• 8901'
                     subtitle: 'Checking'
                     show_arrow: True
