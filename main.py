@@ -22,7 +22,7 @@ Window.size = 360, 702
 
 class ScholarBridge(App):
 	def build(self):
-		return MainInterface()
+		return Interface()
 
 if __name__ == "__main__":
 	ScholarBridge().run()

@@ -1,3 +1,12 @@
+<Interface>:
+	id: interface
+    MainInterface:
+		name: "main"
+		id: main
+	StartInterface:
+		name: "start"
+		id: start
+
 <MainInterface>:
     canvas.before:
         Color:
@@ -2177,6 +2186,9 @@
                         pos: self.pos
                         size: self.size
                         radius: [dp(12)]
+                on_release:
+                    app.root.logged = False
+                    app.root.current = "start"
          
             Button:
                 text: '[b]Cancel[/b]'

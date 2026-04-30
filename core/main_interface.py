@@ -20,8 +20,6 @@ Builder.load_file('design/main_system.kv')
 
 Builder.load_file('design/start_system.kv')
 
-Builder.load_file('design/main_interface.kv')
-
 Builder.load_file('design/dynamic_box.kv') 
 
 #-----------------------------------------------------------#
@@ -49,7 +47,7 @@ class Login(Widget):
         if response.status_code == 200:
             data = response.json()
             Data.user = data.get('user', {})
-            self.parent.parent.parent.parent.parent.current = "main"
+            self.app.root.current = "main"
 
 class Signup(Widget):
     def __init__(self, **kwargs):
@@ -317,5 +315,19 @@ class Status(Widget):
         self.initial = "".join([x[0] for x in name.split() if x])
 
 class Interface(ScreenManager):
+    logged = False
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        Clock.schedule_once(self.set_interface, 2)
+        
+    def set_interface(self, dt):
+        try:
+            with open('logged.txt', 'r', encoding='utf-8') as file:
+                self.logged = bool(file.read())
+        except FileNotFoundError as e:
+            print(e)
+        if self.logged:
+            self.current = "main"
+        else:
+            self.current = "start"
+        
