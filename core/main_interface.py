@@ -3,7 +3,9 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.widget import Widget
 from kivy.properties import BooleanProperty, StringProperty, ListProperty, NumericProperty, ColorProperty
 from kivy.clock import Clock
-import random
+from kivy.app import App
+from kivy.uix.modalview import ModalView
+from kivy.uix.behaviors import ButtonBehavior
 from datetime import datetime, timedelta
 from kivy.graphics import Color, Rectangle
 from kivy.uix.boxlayout import BoxLayout
@@ -13,6 +15,245 @@ import os
 
 import requests
 from core import request_http as request
+
+Builder.load_string('''
+<ProductDetailsModal>:
+    size_hint: 0.85, 0.65
+    background: '' 
+    background_color: 0, 0, 0, 0 
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(15)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1  
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+                
+        # Header: Title & Price
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            orientation: 'vertical'
+            Label:
+                text: f'[b]{root.title}[/b]'
+                markup: True
+                font_size: sp(18)
+                text_size: self.size
+                halign: 'left'
+                valign: 'bottom'
+            Label:
+                text: f'[color=#6b59e0]₱{root.price:,.2f}[/color] • Condition: {root.condition}'
+                markup: True
+                font_size: sp(14)
+                color: 0.6, 0.6, 0.6, 1
+                text_size: self.size
+                halign: 'left'
+                valign: 'top'
+
+        # Scrollable Description
+        ScrollView:
+            do_scroll: False, True
+            bar_width: dp(4)
+            Label:
+                text: root.description
+                size_hint_y: None
+                height: self.texture_size[1]
+                text_size: self.width, None
+                font_size: sp(14)
+                color: 0.8, 0.8, 0.8, 1
+                halign: 'left'
+                valign: 'top'
+
+        # Seller Info Block
+        BoxLayout:
+            size_hint_y: None
+            height: dp(50)
+            spacing: dp(10)
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 0.05
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(10)]
+            # Avatar
+            FloatLayout:
+                size_hint_x: None
+                width: dp(50)
+                canvas.before:
+                    Color:
+                        rgba: 0.43, 0.33, 0.85, 1
+                    Ellipse:
+                        pos: [self.center_x - dp(17.5), self.center_y - dp(17.5)]
+                        size: dp(35), dp(35)
+                Label:
+                    text: f'[b]{root.initial}[/b]'
+                    markup: True
+                    font_size: sp(14)
+            # Name & Status
+            BoxLayout:
+                orientation: 'vertical'
+                padding: [0, dp(8), 0, dp(8)]
+                Label:
+                    text: f'[b]{root.fullname}[/b]'
+                    markup: True
+                    font_size: sp(14)
+                    text_size: self.size
+                    halign: 'left'
+                Label:
+                    text: '● Online Now'
+                    color: 0.16, 0.67, 0.38, 1
+                    font_size: sp(11)
+                    text_size: self.size
+                    halign: 'left'
+
+        # Action Buttons
+        BoxLayout:
+            size_hint_y: None
+            height: dp(45)
+            spacing: dp(10)
+            
+            # Interested (Heart) Button
+            ToggleButton:
+                text: '❤ Interested'
+                size_hint_x: 0.4
+                font_size: sp(13)
+                background_color: 0,0,0,0
+                color: (1, 0.3, 0.3, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                canvas.before:
+                    Color:
+                        rgba: (1, 0.3, 0.3, 0.2) if self.state == 'down' else (1, 1, 1, 0.1)
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(10)]
+                        
+            # Chat Now Button
+            Button:
+                text: '[b]Chat Now[/b]'
+                markup: True
+                size_hint_x: 0.6
+                font_size: sp(14)
+                background_color: 0,0,0,0
+                on_release: root.go_to_chat()
+                canvas.before:
+                    Color:
+                        rgba: 0.43, 0.33, 0.85, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(10)]
+
+        # View Profile Button
+        Button:
+            size_hint_y: None
+            height: dp(30)
+            text: 'View Full Profile'
+            font_size: sp(12)
+            color: 0.5, 0.5, 0.5, 1
+            background_color: 0,0,0,0
+            on_release: root.view_profile()
+''')
+# --------------------------------------------------------
+
+class ProductDetailsModal(ModalView):
+    title = StringProperty("")
+    description = StringProperty("")
+    price = NumericProperty(0)
+    fullname = StringProperty("")
+    initial = StringProperty("")
+    condition = StringProperty("")
+
+
+#-----------------------------------------------------------#
+# Dynamic_Box
+#-----------------------------------------------------------#
+class ProductDetailsModal(ModalView):
+    title = StringProperty("")
+    description = StringProperty("")
+    price = NumericProperty(0)
+    fullname = StringProperty("")
+    initial = StringProperty("")
+    condition = StringProperty("")
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+    def go_to_chat(self):
+        self.dismiss()
+        app = App.get_running_app()
+        # Navigate to the Status (info) tab
+        app.root.current = 'main'
+        main_interface = app.root.get_screen('main')
+        main_interface.ids.screenmanager.current = 'info'
+        
+        # Navigate the inner screenmanager to the ChatBox
+        status_screen = main_interface.ids.screenmanager.get_screen('info').children[0]
+        status_screen.ids.screenmanager.current = 'chatbox'
+        
+        # Update Global Header
+        main_interface.ids.label1.text = '[b]CHATBOX[/b]'
+        main_interface.ids.label2.text = f'Negotiating with {self.fullname}'
+        main_interface.ids.back_btn.opacity = 1
+        main_interface.ids.back_btn.disabled = False
+        
+    def view_profile(self):
+        self.dismiss()
+        app = App.get_running_app()
+        # Navigate to Profile
+        main_interface = app.root.get_screen('main')
+        main_interface.ids.screenmanager.current = 'info'
+        status_screen = main_interface.ids.screenmanager.get_screen('info').children[0]
+        status_screen.ids.screenmanager.current = 'profile'
+        
+        # Update Global Header
+        main_interface.ids.label1.text = f'[b]{self.fullname.upper()}[/b]'
+        main_interface.ids.label2.text = 'Seller Profile'
+        main_interface.ids.back_btn.opacity = 1
+        main_interface.ids.back_btn.disabled = False
+
+class DynamicActivity(Widget):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+class DynamicProduct(ButtonBehavior, BoxLayout):
+    initial = StringProperty('N.A')
+    fullname = StringProperty('N.A')
+    subject = StringProperty('N.A')
+    rating = NumericProperty(0)
+    title = StringProperty('N.A')
+    price = NumericProperty(0)
+    condition = StringProperty('N.A')
+    product_type = StringProperty('N.A')
+    description = StringProperty('No description provided.')
+    review = NumericProperty(0)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Ensure description is safely pulled from kwargs if you mapped review -> description previously
+        self.description = kwargs.get('description', 'This seller has not provided a description for this listing.')
+    
+    def on_release(self, *args):
+        # Open the pop-up panel when the card is clicked
+        modal = ProductDetailsModal(
+            title=self.title,
+            description=self.description,
+            price=self.price,
+            fullname=self.fullname,
+            initial=self.initial,
+            condition=self.condition
+        )
+        modal.open()
+
+class DynamicService(Widget):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
 
 # Assuming you combine the KV into one file for testing, 
 # or keep your original Builder.load_file routing if you prefer them separated.
@@ -118,34 +359,6 @@ class UserSettings(BoxLayout):
 
 class LogOut(FloatLayout):
     pass
-
-#-----------------------------------------------------------#
-# Dynamic_Box
-#-----------------------------------------------------------#
-class DynamicActivity(Widget):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        
-class DynamicProduct(Widget):
-    initial = StringProperty('N.A')
-    fullname = StringProperty('N.A')
-    subject = StringProperty('N.A')
-    rating = NumericProperty(0)
-    title = StringProperty('N.A')
-    price = NumericProperty(0)
-    condition = StringProperty('N.A')
-    product_type = StringProperty('N.A')
-    review = NumericProperty(0)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        for key, value in kwargs.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
-
-class DynamicService(Widget):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
 #-----------------------------------------------------------#
 # System_Interface
