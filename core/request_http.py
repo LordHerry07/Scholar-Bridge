@@ -63,6 +63,16 @@ def add_product(data):
         print("POST failed:", response.text)
         return None
 
+def get_user_stats(full_name):
+    url = f"{BASE_URL}/stats/{full_name}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print("GET Stats failed:", response.text)
+        return None    
+    
+
 def get_products(satisfied=None):
     params = {}
 

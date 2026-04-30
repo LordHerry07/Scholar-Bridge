@@ -171,6 +171,41 @@ class Dashboard(Widget):
 
         self.bind(size=self.on_resize, pos=self.on_resize)
 
+        Clock.schedule_once(self.load_stats, 1)
+
+    def load_stats(self, dt=0):
+        # 1. Grab the active user
+        user = Data.user or {}
+        full_name = user.get('full_name')
+        if not full_name: 
+            return
+
+        # 2. Fetch the data from our new API endpoint
+        stats = request.get_user_stats(full_name)
+        if stats:
+            # 3. Update the Labels
+            earnings = stats.get('total_earnings', 0)
+            listings = stats.get('active_listings', 0)
+            
+            self.ids.earnings_label.text = f"[b]₱{earnings:,.2f}[/b]"
+            self.ids.active_listings_label.text = f"[b]{listings}[/b]"
+
+            # 4. Update the Bar Graph
+            graph_data = stats.get('graph_data', [])
+            
+            # Pad the list with zeroes if the user has fewer than 15 sales
+            while len(graph_data) < self.MAX_BARS:
+                graph_data.insert(0, 0)
+                
+            self.data = graph_data
+            
+            # Recalculate graph heights based on the highest sale
+            current_max = max(self.data + [10])
+            BUFFER = 1.5
+            self.max_v = max(current_max * BUFFER, 50)
+            
+            self.draw_graph()
+
     def add(self, dt):
         self.ids.dynamic_product.add_widget(DynamicProduct(size_hint=(1,0), height=200))
         
@@ -253,41 +288,45 @@ class Dashboard(Widget):
 class Product(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Fetch products when the widget is first initialized
         Clock.schedule_once(self.get_products, 0.5)
     
     def get_products(self, dt=0):
-        # GET request to API
         response = request.get_products()
-        if response is None:
-            print("Failed to fetch products.")
+        if not response: 
             return
 
         container = self.ids.dynamic_product
         container.clear_widgets() 
         
         for data in response:
-            # Safely get values from the database row, providing fallbacks
-            container.add_widget(DynamicProduct(
-                fullname=data.get('full_name', 'Unknown Seller'), 
-                initial=data.get('initial', 'U'), 
-                title=data.get('title', 'No Title'), 
-                rating=float(data.get('rate', 0)), 
-                condition=data.get('condition_status', 'N/A'), 
-                price=float(data.get('price', 0)), 
-                review=int(data.get('review', 0)), 
-                product_type=data.get('subject', 'General')
-            ))
+            # ONLY render if it's NOT a Service
+            if data.get('subject') != 'Service':
+                container.add_widget(DynamicProduct(
+                    fullname=data.get('full_name', 'Unknown'), 
+                    initial=data.get('initial', 'U'), 
+                    title=data.get('title', 'No Title'), 
+                    rating=float(data.get('rate', 0)), 
+                    condition=data.get('condition_status', 'N/A'), 
+                    price=float(data.get('price', 0)), 
+                    review=int(data.get('review', 0)), 
+                    product_type=data.get('subject', 'General')
+                ))
 
 class Sell(Widget):
     def add_product(self):
-        # 1. Grab inputs via the 'text_val' property defined in your custom FormInput
         title = self.ids.title_input.text_val
         description = self.ids.desc_input.text_val
         price = self.ids.price_input.text_val
 
-        # 2. Get the active condition from the ToggleButtons
-        condition = "New" # Default fallback
+        # 1. Determine the Listing Type based on the toggle buttons
+        listing_type = "Textbook"  # Default fallback
+        if self.ids.type_service.state == 'down':
+            listing_type = "Service"
+        elif self.ids.type_notes.state == 'down':
+            listing_type = "Notes"
+
+        # 2. Determine the Condition
+        condition = "New"
         for btn in self.ids.condition_group.children:
             if btn.state == "down":
                 condition = btn.text.replace('[b]', '').replace('[/b]', '')
@@ -297,41 +336,62 @@ class Sell(Widget):
             print("Missing required fields")
             return
 
-        # 3. Fetch the actual logged-in user dynamically
+        # 3. Grab the active user
         user = Data.user or {}
         full_name = user.get('full_name', 'Guest User')
-        # Generate initials from full name
         initial = "".join([x[0].upper() for x in full_name.split() if x])
 
-        # 4. Construct the payload
+        # 4. Construct payload with the dynamic listing_type
         payload = {
             "initial": initial,
             "full_name": full_name,
             "title": title,
-            "subject": "General", # You can add a subject dropdown later
-            "rate": 0,            # New products start at 0
+            "subject": listing_type,  # <-- Injects 'Textbook', 'Notes', or 'Service'
+            "rate": 0,            
             "price": price,
-            "review": description, # Mapping description to the review column
+            "review": 0, 
             "condition_status": condition,
             "escrow": True,
             "satisfied": False
         }
 
-        # 5. POST to API
         res = request.add_product(payload)
 
         if res:
-            print("✅ Product successfully published to database")
-            # Clear the forms after successful submission
+            print(f"✅ {listing_type} successfully published")
             self.ids.title_input.ids.internal_input.text = ""
             self.ids.desc_input.ids.internal_input.text = ""
             self.ids.price_input.ids.internal_input.text = ""
         else:
-            print("❌ Failed to publish product")
+            print("❌ Failed to publish")
 
 class Service(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # Fetch services when the widget initializes
+        Clock.schedule_once(self.get_services, 0.5)
+
+    def get_services(self, dt=0):
+        response = request.get_products()
+        if not response: 
+            return
+
+        container = self.ids.dynamic_service
+        container.clear_widgets() 
+        
+        for data in response:
+            # ONLY render if it IS a Service
+            if data.get('subject') == 'Service':
+                container.add_widget(DynamicProduct( # Reusing your DynamicProduct UI component
+                    fullname=data.get('full_name', 'Unknown'), 
+                    initial=data.get('initial', 'U'), 
+                    title=data.get('title', 'No Title'), 
+                    rating=float(data.get('rate', 0)), 
+                    condition=data.get('condition_status', 'N/A'), 
+                    price=float(data.get('price', 0)), 
+                    review=int(data.get('review', 0)), 
+                    product_type=data.get('subject', 'Service')
+                ))
 
 class Status(Widget):
     initial = StringProperty("N.A")

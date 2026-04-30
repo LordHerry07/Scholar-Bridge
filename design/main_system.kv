@@ -117,6 +117,7 @@
                         on_state:
                             self.parent.source = 'assets/dashboard_normal.png' if self.state == 'normal' else 'assets/dashboard_down.png'
                             if self.state == 'down': screenmanager.current = 'dashboard'
+                            if self.state == 'down': screenmanager.get_screen('dashboard').children[0].load_stats()
                             if self.state == 'down': label1.text = '[b]DASHBOARD[/b]'
                             if self.state == 'down': label2.text = 'you activity overview'      
                             if self.state == 'down': back_btn.opacity = 0
@@ -219,6 +220,7 @@
                         on_state:
                             self.parent.source = 'assets/service_normal.png' if self.state == 'normal' else 'assets/service_down.png'
                             if self.state == 'down': screenmanager.current = 'service'
+                            if self.state == 'down': screenmanager.get_screen('service').children[0].get_services(0)
                             if self.state == 'down': label1.text = '[b]SERVICE[/b]'
                             if self.state == 'down': label2.text = 'tutoring, review & freelance help'
                             if self.state == 'down': back_btn.opacity = 0
@@ -335,7 +337,8 @@
                         Label:
                             size_hint_x: 0.1
                     Label:
-                        text: '[b]₱1,240[/b]'
+                        id: earnings_label
+                        text: '[b]₱0.00[/b]'
                         font_size: dp(16)
                         text_size: self.size
                         markup: True
@@ -392,7 +395,8 @@
                         Label:
                             size_hint_x: 0.1
                     Label:
-                        text: '[b]5[/b]'
+                        id: active_listings_label
+                        text: '[b]0[/b]'
                         font_size: dp(16)
                         text_size: self.size
                         markup: True
