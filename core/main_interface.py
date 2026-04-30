@@ -27,6 +27,49 @@ Builder.load_file('design/dynamic_box.kv')
 #-----------------------------------------------------------#
 # Dynamic_Box
 #-----------------------------------------------------------#
+
+class PublicProfileModal(ModalView):
+    target_user = StringProperty("")
+    initial = StringProperty("")
+    
+    def load_profile(self, fullname, initial):
+        self.target_user = fullname
+        self.initial = initial
+        
+        # Fetch the data
+        profile_data = request.get_user_profile(fullname)
+        if not profile_data: return
+        
+        products = profile_data.get('products', [])
+        rating = profile_data.get('rating', 5.0)
+        
+        # Update UI text
+        self.ids.profile_name.text = f'[b]{fullname}[/b]'
+        self.ids.profile_stats.text = f'⭐ {rating} Rating • {len(products)} Active Listings'
+        
+        # Populate the active listings using your existing DynamicProduct card!
+        container = self.ids.active_listings
+        container.clear_widgets()
+        
+        for data in products:
+            card = DynamicProduct(
+                product_id=data.get('id'),
+                fullname=data.get('full_name'),
+                initial=data.get('initial', 'U'),
+                title=data.get('title'),
+                price=float(data.get('price', 0)),
+                condition=data.get('condition_status', 'Good'),
+                product_type=data.get('subject', 'Product'),
+                description=str(data.get('review', 'No description'))
+            )
+            # Make sure the nested cards can also open their own modals!
+            card.bind(on_release=lambda instance, c=card: self.open_nested_product(c))
+            container.add_widget(card)
+
+    def open_nested_product(self, card):
+        self.dismiss() # Close profile to look at the specific item
+        card.on_release() # Trigger the standard product modal
+
 class ProductDetailsModal(ModalView):
     product_id = NumericProperty(0)
     title = StringProperty("")
@@ -76,6 +119,9 @@ class ProductDetailsModal(ModalView):
         
     def view_profile(self):
         self.dismiss()
+        profile_modal = PublicProfileModal()
+        profile_modal.load_profile(self.fullname, self.initial)
+        profile_modal.open()
         app = App.get_running_app()
         # Navigate to Profile
         main_interface = app.root.get_screen('main')

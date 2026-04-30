@@ -1,3 +1,94 @@
+<PublicProfileModal>:
+    size_hint: 0.9, 0.85
+    background: '' 
+    background_color: 0, 0, 0, 0 
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(15)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1  
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+                
+        # Header Block
+        BoxLayout:
+            size_hint_y: None
+            height: dp(80)
+            spacing: dp(15)
+            
+            # Avatar
+            FloatLayout:
+                size_hint_x: None
+                width: dp(60)
+                canvas.before:
+                    Color:
+                        rgba: 0.43, 0.33, 0.85, 1
+                    Ellipse:
+                        pos: [self.center_x - dp(30), self.center_y - dp(30)]
+                        size: dp(60), dp(60)
+                Label:
+                    text: f'[b]{root.initial}[/b]'
+                    markup: True
+                    font_size: sp(20)
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    
+            # Name & Stats
+            BoxLayout:
+                orientation: 'vertical'
+                padding: [0, dp(10), 0, dp(10)]
+                Label:
+                    id: profile_name
+                    text: 'Loading...'
+                    markup: True
+                    font_size: sp(18)
+                    text_size: self.size
+                    halign: 'left'
+                    valign: 'bottom'
+                Label:
+                    id: profile_stats
+                    text: '⭐ -- Rating • -- Active Listings'
+                    color: 0.6, 0.6, 0.6, 1
+                    font_size: sp(13)
+                    text_size: self.size
+                    halign: 'left'
+                    valign: 'top'
+                    
+        # Divider Line
+        Widget:
+            size_hint_y: None
+            height: dp(1)
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 0.1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+                    
+        Label:
+            text: '[b]Active Listings[/b]'
+            markup: True
+            size_hint_y: None
+            height: dp(30)
+            font_size: sp(16)
+            text_size: self.size
+            halign: 'left'
+            valign: 'middle'
+            
+        # Scrollable Listings
+        ScrollView:
+            do_scroll: False, True
+            bar_width: 0
+            BoxLayout:
+                id: active_listings
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(10)
 <ProductDetailsModal>:
     size_hint: 0.85, 0.65
     background_color: 0, 0, 0, 0.6
@@ -101,11 +192,12 @@
             
             # Interested (Heart) Button
             ToggleButton:
-                text: '❤ Interested'
+                text: '❤ View Profile'
                 size_hint_x: 0.4
                 font_size: sp(13)
                 background_color: 0,0,0,0
                 color: (1, 0.3, 0.3, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                on_release: root.view_profile()
                 canvas.before:
                     Color:
                         rgba: (1, 0.3, 0.3, 0.2) if self.state == 'down' else (1, 1, 1, 0.1)

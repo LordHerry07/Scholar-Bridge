@@ -143,7 +143,7 @@ def buy_product(product_id, buyer_email):
     }
 
     print(f"🚨 DEBUG -> Sending to API | Product ID: {product_id} | Buyer: {buyer_email}")
-    
+
     response = requests.post(url, json=payload)
     
     if response.status_code == 200:
@@ -171,3 +171,13 @@ def process_wallet_transaction(email, amount, action):
     }
     response = requests.post(url, json=payload)
     return response.status_code == 200
+
+# ---------------------------------------
+# Public Profile
+# ---------------------------------------
+def get_user_profile(fullname):
+    url = f"{BASE_URL}/profile/{fullname}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    return None
