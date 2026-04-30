@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 from kivy.graphics import Color, Rectangle
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
+import json
+import os
 
 import requests
 from core import request_http as request
@@ -47,7 +49,19 @@ class Login(Widget):
         if response.status_code == 200:
             data = response.json()
             Data.user = data.get('user', {})
-            self.app.root.current = "main"
+            
+            # --- NEW: Save the session to a local JSON file ---
+            try:
+                with open('local_state.json', 'w', encoding='utf-8') as f:
+                    json.dump(Data.user, f)
+            except Exception as e:
+                print("Failed to save session:", e)
+            # --------------------------------------------------
+            
+            # Use standard App execution to switch screens
+            from kivy.app import App
+            App.get_running_app().root.logged = True
+            App.get_running_app().root.current = "main"
 
 class Signup(Widget):
     def __init__(self, **kwargs):
@@ -239,32 +253,41 @@ class Dashboard(Widget):
 class Product(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # Fetch products when the widget is first initialized
+        Clock.schedule_once(self.get_products, 0.5)
     
-    def get_products(self, dt):
+    def get_products(self, dt=0):
+        # GET request to API
         response = request.get_products()
+        if response is None:
+            print("Failed to fetch products.")
+            return
+
         container = self.ids.dynamic_product
         container.clear_widgets() 
+        
         for data in response:
-            container.add_widget(DynamicProduct(fullname=data['full_name'], initial=data['initial'], title=data['title'], rating=data['rate'], condition=data['condition'], price=data['price'], review=data['review'], subject=data['subject']))
+            # Safely get values from the database row, providing fallbacks
+            container.add_widget(DynamicProduct(
+                fullname=data.get('full_name', 'Unknown Seller'), 
+                initial=data.get('initial', 'U'), 
+                title=data.get('title', 'No Title'), 
+                rating=float(data.get('rate', 0)), 
+                condition=data.get('condition_status', 'N/A'), 
+                price=float(data.get('price', 0)), 
+                review=int(data.get('review', 0)), 
+                product_type=data.get('subject', 'General')
+            ))
 
 class Sell(Widget):
-    initial = StringProperty("HCA")
-    full_name = StringProperty("Heaven Ajlan")
-    title = StringProperty("")
-    subject = StringProperty("General")
-    review = StringProperty("")
-    price = StringProperty("")
-    condition_status = StringProperty("")
-    rate = NumericProperty(0)
-    escrow = BooleanProperty(True)
-    satisfied = BooleanProperty(False)
-
     def add_product(self):
-        title = self.ids.title_input.text
-        description = self.ids.desc_input.text
-        price = self.ids.price_input.text
+        # 1. Grab inputs via the 'text_val' property defined in your custom FormInput
+        title = self.ids.title_input.text_val
+        description = self.ids.desc_input.text_val
+        price = self.ids.price_input.text_val
 
-        condition = None
+        # 2. Get the active condition from the ToggleButtons
+        condition = "New" # Default fallback
         for btn in self.ids.condition_group.children:
             if btn.state == "down":
                 condition = btn.text.replace('[b]', '').replace('[/b]', '')
@@ -274,25 +297,37 @@ class Sell(Widget):
             print("Missing required fields")
             return
 
-        data = {
-            "initial": self.initial,
-            "full_name": self.full_name,
-            "title": self.title,
-            "subject": self.subject,
-            "rate": self.rate,
-            "price": self.price,
-            "review": self.review,
-            "condition_status": self.condition_status,
-            "escrow": self.escrow,
-            "satisfied": self.satisfied
+        # 3. Fetch the actual logged-in user dynamically
+        user = Data.user or {}
+        full_name = user.get('full_name', 'Guest User')
+        # Generate initials from full name
+        initial = "".join([x[0].upper() for x in full_name.split() if x])
+
+        # 4. Construct the payload
+        payload = {
+            "initial": initial,
+            "full_name": full_name,
+            "title": title,
+            "subject": "General", # You can add a subject dropdown later
+            "rate": 0,            # New products start at 0
+            "price": price,
+            "review": description, # Mapping description to the review column
+            "condition_status": condition,
+            "escrow": True,
+            "satisfied": False
         }
 
-        res = request.add_product(data)
+        # 5. POST to API
+        res = request.add_product(payload)
 
         if res:
-            print("✅ Product added")
+            print("✅ Product successfully published to database")
+            # Clear the forms after successful submission
+            self.ids.title_input.ids.internal_input.text = ""
+            self.ids.desc_input.ids.internal_input.text = ""
+            self.ids.price_input.ids.internal_input.text = ""
         else:
-            print("❌ Failed")
+            print("❌ Failed to publish product")
 
 class Service(Widget):
     def __init__(self, **kwargs):
@@ -305,14 +340,17 @@ class Status(Widget):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # Continuously check for user data updates
         Clock.schedule_interval(self.check_info, 1)
 
     def check_info(self, dt):
         user = Data.user or {}
-        name = user.get('full_name', 'N.A')
+        name = user.get('full_name', 'Guest User')
+        
+        # Update the properties bound to the KV file
         self.full_name = name
-        self.email = user.get('email', 'N.A')
-        self.initial = "".join([x[0] for x in name.split() if x])
+        self.email = user.get('email', 'Not Logged In')
+        self.initial = "".join([x[0].upper() for x in name.split() if x])
 
 class Interface(ScreenManager):
     logged = False
@@ -321,13 +359,20 @@ class Interface(ScreenManager):
         Clock.schedule_once(self.set_interface, 2)
         
     def set_interface(self, dt):
-        try:
-            with open('logged.txt', 'r', encoding='utf-8') as file:
-                self.logged = bool(file.read())
-        except FileNotFoundError as e:
-            print(e)
+        # --- NEW: Read JSON session instead of logged.txt ---
+        if os.path.exists('local_state.json'):
+            try:
+                with open('local_state.json', 'r', encoding='utf-8') as file:
+                    session_data = json.load(file)
+                    # Verify we actually have user data
+                    if session_data and 'email' in session_data:
+                        Data.user = session_data
+                        self.logged = True
+            except Exception as e:
+                print("Error reading session:", e)
+        # ----------------------------------------------------
+        
         if self.logged:
             self.current = "main"
         else:
             self.current = "start"
-        

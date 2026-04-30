@@ -149,6 +149,7 @@
                         on_state:
                             self.parent.source = 'assets/product_normal.png' if self.state == 'normal' else 'assets/product_down.png'
                             if self.state == 'down': screenmanager.current = 'product'
+                            if self.state == 'down': screenmanager.get_screen('product').children[0].get_products(0)
                             if self.state == 'down': label1.text = '[b]PRODUCT[/b]'
                             if self.state == 'down': label2.text = 'textbooks, notes & materials'
                             if self.state == 'down': back_btn.opacity = 0
@@ -2187,6 +2188,10 @@
                         size: self.size
                         radius: [dp(12)]
                 on_release:
+                    import main_interface # Ensure namespace is accessible
+                    import os
+                    main_interface.Data.user = {} # Clear active user cache
+                    if os.path.exists('local_state.json'): os.remove('local_state.json')
                     app.root.logged = False
                     app.root.current = "start"
          
