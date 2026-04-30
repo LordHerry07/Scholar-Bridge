@@ -27,6 +27,15 @@ Builder.load_file('design/dynamic_box.kv')
 #-----------------------------------------------------------#
 # Dynamic_Box
 #-----------------------------------------------------------#
+class TransactionTile(BoxLayout):
+    def set_data(self, txn_type, amount, date, description):
+        # We manually push the text into the IDs we created
+        self.ids.desc_label.text = f'[b]{description}[/b]'
+        self.ids.date_label.text = date
+        
+        # Decide the color
+        color = "#2ECC71" if txn_type == "Deposit" else "#E74C3C"
+        self.ids.amount_label.text = f'[color={color}]{amount}[/color]'
 
 class PublicProfileModal(ModalView):
     target_user = StringProperty("")
@@ -353,8 +362,16 @@ class Wallet(BoxLayout):
         my_email = Data.user.get('email')
         if not my_email: return
         
+        # 1. Load Balance
         balance = request.get_wallet_balance(my_email)
         self.ids.balance_label.text = f'[b]₱{balance:,.2f}[/b]'
+        
+        # 2. Load History (NEW)
+        history = request.get_wallet_history(my_email)
+        container = self.ids.history_list
+        container.clear_widgets()
+        
+        
         
     def process_transaction(self, action):
         my_email = Data.user.get('email')

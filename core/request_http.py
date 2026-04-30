@@ -181,3 +181,10 @@ def get_user_profile(fullname):
     if response.status_code == 200:
         return response.json()
     return None
+
+def get_wallet_history(email):
+    url = f"{BASE_URL}/wallet/history/{email}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    return []

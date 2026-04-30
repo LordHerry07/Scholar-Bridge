@@ -2034,9 +2034,11 @@
                     WalletAction:
                         icon: 'assets/green_up.png'
                         text: 'Deposit'
+                        on_release: root.process_transaction('deposit')
                     WalletAction:
                         icon: 'assets/red_down.png'
                         text: 'Withdraw'
+                        on_release: root.process_transaction('withdraw')
 
             # Payment Methods
             BoxLayout:
@@ -2045,23 +2047,25 @@
                 height: self.minimum_height
                 spacing: dp(10)
                 Label:
-                    text: 'PAYMENT METHODS'
-                    font_size: sp(12)
-                    color: 0.6, 0.6, 0.6, 1
+                    text: '[b]Recent Transactions[/b]'
+                    markup: True
+                    font_size: sp(16)
+                    color: 1, 1, 1, 1
                     size_hint_y: None
-                    height: dp(20)
+                    height: dp(40)
                     text_size: self.size
                     halign: 'left'
-                ListTile:
-                    icon_source: 'assets/visa.png'
-                    title: 'Visa •••• 4242'
-                    subtitle: 'Expires 08/27'
-                    show_arrow: False
-                ListTile:
-                    icon_source: 'assets/bank.png'
-                    title: 'Bank Account •••• 8901'
-                    subtitle: 'Checking'
-                    show_arrow: True
+                    valign: 'middle'
+
+                ScrollView:
+                    do_scroll: False, True
+                    bar_width: 0
+                    BoxLayout:
+                        id: history_list  # <-- The Python logic looks for this!
+                        orientation: 'vertical'
+                        size_hint_y: None
+                        height: self.minimum_height
+                        spacing: dp(10)
 
 # ------------------- 4. SETTINGS SCREEN ------------------- #
 <UserSettings>:

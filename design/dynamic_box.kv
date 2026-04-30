@@ -331,3 +331,44 @@
 			size: self.size
 			pos: self.pos					
 
+<TransactionTile>:
+    size_hint_y: None
+    height: dp(65)
+    padding: dp(15)
+    spacing: dp(10)
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 0.05
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            id: desc_label       # Using ID instead of root.property
+            text: ''
+            markup: True
+            font_size: sp(14)
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            id: date_label       # Using ID instead of root.property
+            text: ''
+            color: 0.6, 0.6, 0.6, 1
+            font_size: sp(11)
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+    Label:
+        id: amount_label         # Using ID instead of root.property
+        text: ''
+        markup: True
+        font_size: sp(15)
+        bold: True
+        size_hint_x: None
+        width: dp(90)
+        text_size: self.size
+        halign: 'right'
+        valign: 'middle'
