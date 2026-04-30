@@ -104,3 +104,70 @@ def delete_satisfied_products():
     else:
         print("DELETE failed:", response.text)
         return None
+
+# ---------------------------------------
+# Chat Messages
+# ---------------------------------------
+def send_message(sender, receiver, text):
+    url = f"{BASE_URL}/messages"
+    payload = {
+        "sender_name": sender,
+        "receiver_name": receiver,
+        "message_text": text
+    }
+    response = requests.post(url, json=payload)
+    return response.status_code == 201
+
+def get_messages(user1, user2):
+    url = f"{BASE_URL}/messages/{user1}/{user2}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    return []
+
+def get_inbox(username):
+    url = f"{BASE_URL}/inbox/{username}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    return []
+
+# ---------------------------------------
+# Escrow / Purchasing
+# ---------------------------------------
+def buy_product(product_id, buyer_email):
+    url = f"{BASE_URL}/buy"
+    payload = {
+        "product_id": product_id,
+        "buyer_email": buyer_email
+    }
+
+    print(f"🚨 DEBUG -> Sending to API | Product ID: {product_id} | Buyer: {buyer_email}")
+    
+    response = requests.post(url, json=payload)
+    
+    if response.status_code == 200:
+        return True
+    else:
+        print("Purchase failed:", response.text)
+        return False
+
+# ---------------------------------------
+# Wallet
+# ---------------------------------------
+def get_wallet_balance(email):
+    url = f"{BASE_URL}/wallet/{email}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json().get('balance', 0.0)
+    return 0.0
+
+def process_wallet_transaction(email, amount, action):
+    url = f"{BASE_URL}/wallet/transaction"
+    payload = {
+        "email": email,
+        "amount": amount,
+        "action": action
+    }
+    response = requests.post(url, json=payload)
+    return response.status_code == 200

@@ -16,164 +16,19 @@ import os
 import requests
 from core import request_http as request
 
-Builder.load_string('''
-<ProductDetailsModal>:
-    size_hint: 0.85, 0.65
-    background: '' 
-    background_color: 0, 0, 0, 0 
-    
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(20)
-        spacing: dp(15)
-        canvas.before:
-            Color:
-                rgba: 0.11, 0.12, 0.16, 1  
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(20)]
-                
-        # Header: Title & Price
-        BoxLayout:
-            size_hint_y: None
-            height: dp(60)
-            orientation: 'vertical'
-            Label:
-                text: f'[b]{root.title}[/b]'
-                markup: True
-                font_size: sp(18)
-                text_size: self.size
-                halign: 'left'
-                valign: 'bottom'
-            Label:
-                text: f'[color=#6b59e0]₱{root.price:,.2f}[/color] • Condition: {root.condition}'
-                markup: True
-                font_size: sp(14)
-                color: 0.6, 0.6, 0.6, 1
-                text_size: self.size
-                halign: 'left'
-                valign: 'top'
 
-        # Scrollable Description
-        ScrollView:
-            do_scroll: False, True
-            bar_width: dp(4)
-            Label:
-                text: root.description
-                size_hint_y: None
-                height: self.texture_size[1]
-                text_size: self.width, None
-                font_size: sp(14)
-                color: 0.8, 0.8, 0.8, 1
-                halign: 'left'
-                valign: 'top'
-
-        # Seller Info Block
-        BoxLayout:
-            size_hint_y: None
-            height: dp(50)
-            spacing: dp(10)
-            canvas.before:
-                Color:
-                    rgba: 1, 1, 1, 0.05
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [dp(10)]
-            # Avatar
-            FloatLayout:
-                size_hint_x: None
-                width: dp(50)
-                canvas.before:
-                    Color:
-                        rgba: 0.43, 0.33, 0.85, 1
-                    Ellipse:
-                        pos: [self.center_x - dp(17.5), self.center_y - dp(17.5)]
-                        size: dp(35), dp(35)
-                Label:
-                    text: f'[b]{root.initial}[/b]'
-                    markup: True
-                    font_size: sp(14)
-            # Name & Status
-            BoxLayout:
-                orientation: 'vertical'
-                padding: [0, dp(8), 0, dp(8)]
-                Label:
-                    text: f'[b]{root.fullname}[/b]'
-                    markup: True
-                    font_size: sp(14)
-                    text_size: self.size
-                    halign: 'left'
-                Label:
-                    text: '● Online Now'
-                    color: 0.16, 0.67, 0.38, 1
-                    font_size: sp(11)
-                    text_size: self.size
-                    halign: 'left'
-
-        # Action Buttons
-        BoxLayout:
-            size_hint_y: None
-            height: dp(45)
-            spacing: dp(10)
-            
-            # Interested (Heart) Button
-            ToggleButton:
-                text: '❤ Interested'
-                size_hint_x: 0.4
-                font_size: sp(13)
-                background_color: 0,0,0,0
-                color: (1, 0.3, 0.3, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                canvas.before:
-                    Color:
-                        rgba: (1, 0.3, 0.3, 0.2) if self.state == 'down' else (1, 1, 1, 0.1)
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [dp(10)]
-                        
-            # Chat Now Button
-            Button:
-                text: '[b]Chat Now[/b]'
-                markup: True
-                size_hint_x: 0.6
-                font_size: sp(14)
-                background_color: 0,0,0,0
-                on_release: root.go_to_chat()
-                canvas.before:
-                    Color:
-                        rgba: 0.43, 0.33, 0.85, 1
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [dp(10)]
-
-        # View Profile Button
-        Button:
-            size_hint_y: None
-            height: dp(30)
-            text: 'View Full Profile'
-            font_size: sp(12)
-            color: 0.5, 0.5, 0.5, 1
-            background_color: 0,0,0,0
-            on_release: root.view_profile()
-''')
-# --------------------------------------------------------
-
-class ProductDetailsModal(ModalView):
-    title = StringProperty("")
-    description = StringProperty("")
-    price = NumericProperty(0)
-    fullname = StringProperty("")
-    initial = StringProperty("")
-    condition = StringProperty("")
-
+# Assuming you combine the KV into one file for testing, 
+# or keep your original Builder.load_file routing if you prefer them separated.
+Builder.load_file('design/mini_interface.kv')
+Builder.load_file('design/main_system.kv')
+Builder.load_file('design/start_system.kv')
+Builder.load_file('design/dynamic_box.kv') 
 
 #-----------------------------------------------------------#
 # Dynamic_Box
 #-----------------------------------------------------------#
 class ProductDetailsModal(ModalView):
+    product_id = NumericProperty(0)
     title = StringProperty("")
     description = StringProperty("")
     price = NumericProperty(0)
@@ -183,24 +38,41 @@ class ProductDetailsModal(ModalView):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    def buy_item(self):
+        my_email = Data.user.get('email')
+        if not my_email: 
+            print("Not logged in!")
+            return
         
+        # Call the API to process the transaction
+        success = request.buy_product(self.product_id, my_email)
+        
+        if success:
+            print(f"Successfully purchased {self.title}!")
+            self.dismiss()
+            # Refresh the product list so the bought item disappears
+            app = App.get_running_app()
+            app.root.get_screen('main').ids.screenmanager.get_screen('product').children[0].get_products()
+        else:
+            print("Transaction failed (insufficient funds or item already sold).")
+
     def go_to_chat(self):
         self.dismiss()
         app = App.get_running_app()
-        # Navigate to the Status (info) tab
-        app.root.current = 'main'
         main_interface = app.root.get_screen('main')
         main_interface.ids.screenmanager.current = 'info'
-        
-        # Navigate the inner screenmanager to the ChatBox
         status_screen = main_interface.ids.screenmanager.get_screen('info').children[0]
         status_screen.ids.screenmanager.current = 'chatbox'
         
-        # Update Global Header
         main_interface.ids.label1.text = '[b]CHATBOX[/b]'
         main_interface.ids.label2.text = f'Negotiating with {self.fullname}'
         main_interface.ids.back_btn.opacity = 1
         main_interface.ids.back_btn.disabled = False
+        
+        # --- NEW: Tell the ChatBox who we are chatting with and load history ---
+        chatbox_widget = status_screen.ids.screenmanager.get_screen('chatbox').children[0]
+        chatbox_widget.set_target_user(self.fullname)
         
     def view_profile(self):
         self.dismiss()
@@ -222,6 +94,7 @@ class DynamicActivity(Widget):
         super().__init__(**kwargs)
         
 class DynamicProduct(ButtonBehavior, BoxLayout):
+    product_id = NumericProperty(0)
     initial = StringProperty('N.A')
     fullname = StringProperty('N.A')
     subject = StringProperty('N.A')
@@ -240,6 +113,7 @@ class DynamicProduct(ButtonBehavior, BoxLayout):
     
     def on_release(self, *args):
         # Open the pop-up panel when the card is clicked
+        print(f"DEBUG: Tapped Product ID: {self.product_id}")
         modal = ProductDetailsModal(
             title=self.title,
             description=self.description,
@@ -248,22 +122,56 @@ class DynamicProduct(ButtonBehavior, BoxLayout):
             initial=self.initial,
             condition=self.condition
         )
+        modal.product_id = self.product_id
         modal.open()
 
 class DynamicService(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+# -----------------------------------------------------------
+# Inbox Components
+# -----------------------------------------------------------
+class InboxTile(ButtonBehavior, BoxLayout):
+    partner_name = StringProperty("")
+    last_message = StringProperty("")
+    time = StringProperty("")
 
-# Assuming you combine the KV into one file for testing, 
-# or keep your original Builder.load_file routing if you prefer them separated.
-Builder.load_file('design/mini_interface.kv')
+    def open_chat(self):
+        app = App.get_running_app()
+        main_interface = app.root.get_screen('main')
+        status_screen = main_interface.ids.screenmanager.get_screen('info').children[0]
+        
+        # Navigate from the Inbox to the ChatBox
+        status_screen.ids.screenmanager.current = 'chatbox'
+        
+        # Update headers
+        main_interface.ids.label1.text = '[b]CHATBOX[/b]'
+        main_interface.ids.label2.text = f'Chatting with {self.partner_name}'
+        
+        # Inject the partner name and load the messages
+        chatbox_widget = status_screen.ids.screenmanager.get_screen('chatbox').children[0]
+        chatbox_widget.set_target_user(self.partner_name)
 
-Builder.load_file('design/main_system.kv')
+class InboxScreen(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-Builder.load_file('design/start_system.kv')
+    def load_inbox(self, dt=0):
+        my_name = Data.user.get('full_name')
+        if not my_name: 
+            return
 
-Builder.load_file('design/dynamic_box.kv') 
+        inbox_data = request.get_inbox(my_name)
+        container = self.ids.inbox_list
+        container.clear_widgets()
+
+        for convo in inbox_data:
+            container.add_widget(InboxTile(
+                partner_name=convo['partner_name'],
+                last_message=convo['last_message'],
+                time=convo['timestamp']
+            ))
 
 #-----------------------------------------------------------#
 # Starting_Interface
@@ -349,10 +257,78 @@ class Profile(BoxLayout):
     pass
 
 class ChatBox(BoxLayout):
-    pass  
+    target_user = StringProperty("")
+    
+    def set_target_user(self, full_name):
+        self.target_user = full_name
+        self.ids.chat_header_name.text = f'[b]{full_name}[/b]'
+        self.load_messages()
+        
+    def load_messages(self, dt=0):
+        if not self.target_user: return
+        
+        my_name = Data.user.get('full_name', '')
+        history = request.get_messages(my_name, self.target_user)
+        
+        # Clear old dummy messages
+        chat_container = self.ids.chat_history
+        chat_container.clear_widgets()
+        
+        for msg in history:
+            # If the sender is me, is_sender is True (purple bubble right side)
+            is_me = (msg['sender_name'] == my_name)
+            chat_container.add_widget(ChatBubble(
+                text=msg['message_text'],
+                time=msg['timestamp'],
+                is_sender=is_me
+            ))
+            
+    def send_new_message(self):
+        text_input = self.ids.chat_input
+        message_text = text_input.text.strip()
+        
+        if not message_text or not self.target_user:
+            return
+            
+        my_name = Data.user.get('full_name', '')
+        
+        # Send to DB
+        success = request.send_message(my_name, self.target_user, message_text)
+        
+        if success:
+            text_input.text = "" # Clear the input box
+            self.load_messages() # Reload to show the new message
 
 class Wallet(BoxLayout):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+    def load_balance(self):
+        my_email = Data.user.get('email')
+        if not my_email: return
+        
+        balance = request.get_wallet_balance(my_email)
+        self.ids.balance_label.text = f'[b]₱{balance:,.2f}[/b]'
+        
+    def process_transaction(self, action):
+        my_email = Data.user.get('email')
+        amount_text = self.ids.amount_input.text.strip()
+        
+        if not my_email or not amount_text:
+            return
+            
+        try:
+            amount = float(amount_text)
+        except ValueError:
+            print("Invalid amount")
+            return
+            
+        success = request.process_wallet_transaction(my_email, amount, action)
+        if success:
+            self.ids.amount_input.text = "" # Clear input
+            self.load_balance() # Refresh UI
+        else:
+            print(f"Failed to {action} funds.")
 
 class UserSettings(BoxLayout):
     pass
@@ -504,7 +480,7 @@ class Product(Widget):
         Clock.schedule_once(self.get_products, 0.5)
     
     def get_products(self, dt=0):
-        response = request.get_products()
+        response = request.get_products(satisfied=0)
         if not response: 
             return
 
@@ -515,14 +491,15 @@ class Product(Widget):
             # ONLY render if it's NOT a Service
             if data.get('subject') != 'Service':
                 container.add_widget(DynamicProduct(
-                    fullname=data.get('full_name', 'Unknown'), 
-                    initial=data.get('initial', 'U'), 
-                    title=data.get('title', 'No Title'), 
-                    rating=float(data.get('rate', 0)), 
-                    condition=data.get('condition_status', 'N/A'), 
-                    price=float(data.get('price', 0)), 
-                    review=int(data.get('review', 0)), 
-                    product_type=data.get('subject', 'General')
+                    # This line is critical to fix the 400 error
+                    product_id=data.get('id'), 
+                    fullname=data.get('full_name'), 
+                    initial=data.get('initial'), 
+                    title=data.get('title'), 
+                    price=float(data.get('price', 0)),
+                    condition=data.get('condition_status'),
+                    product_type=data.get('subject'),
+                    description=str(data.get('review')) # Assuming review stores description
                 ))
 
 class Sell(Widget):
@@ -585,7 +562,7 @@ class Service(Widget):
         Clock.schedule_once(self.get_services, 0.5)
 
     def get_services(self, dt=0):
-        response = request.get_products()
+        response = request.get_products(satisfied=0)
         if not response: 
             return
 
@@ -596,6 +573,7 @@ class Service(Widget):
             # ONLY render if it IS a Service
             if data.get('subject') == 'Service':
                 container.add_widget(DynamicProduct( # Reusing your DynamicProduct UI component
+                    product_id=data.get('id'),
                     fullname=data.get('full_name', 'Unknown'), 
                     initial=data.get('initial', 'U'), 
                     title=data.get('title', 'No Title'), 

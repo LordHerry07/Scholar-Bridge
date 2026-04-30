@@ -1,3 +1,227 @@
+<ProductDetailsModal>:
+    size_hint: 0.85, 0.65
+    background_color: 0, 0, 0, 0.6
+    background: '' # Removes default Kivy modal background
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(15)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1  # Dark modal background
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+                
+        # Header: Title & Price
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            orientation: 'vertical'
+            Label:
+                text: f'[b]{root.title}[/b]'
+                markup: True
+                font_size: sp(18)
+                text_size: self.size
+                halign: 'left'
+                valign: 'bottom'
+            Label:
+                text: f'[color=#6b59e0]₱{root.price:,.2f}[/color] • Condition: {root.condition}'
+                markup: True
+                font_size: sp(14)
+                color: 0.6, 0.6, 0.6, 1
+                text_size: self.size
+                halign: 'left'
+                valign: 'top'
+
+        # Scrollable Description
+        ScrollView:
+            do_scroll: False, True
+            bar_width: dp(4)
+            Label:
+                text: root.description
+                size_hint_y: None
+                height: self.texture_size[1]
+                text_size: self.width, None
+                font_size: sp(14)
+                color: 0.8, 0.8, 0.8, 1
+                halign: 'left'
+                valign: 'top'
+
+        # Seller Info Block
+        BoxLayout:
+            size_hint_y: None
+            height: dp(50)
+            spacing: dp(10)
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 0.05
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(10)]
+            # Avatar
+            FloatLayout:
+                size_hint_x: None
+                width: dp(50)
+                canvas.before:
+                    Color:
+                        rgba: 0.43, 0.33, 0.85, 1
+                    Ellipse:
+                        pos: [self.center_x - dp(17.5), self.center_y - dp(17.5)]
+                        size: dp(35), dp(35)
+                Label:
+                    text: f'[b]{root.initial}[/b]'
+                    markup: True
+                    font_size: sp(14)
+            # Name & Status
+            BoxLayout:
+                orientation: 'vertical'
+                padding: [0, dp(8), 0, dp(8)]
+                Label:
+                    text: f'[b]{root.fullname}[/b]'
+                    markup: True
+                    font_size: sp(14)
+                    text_size: self.size
+                    halign: 'left'
+                Label:
+                    text: '● Online Now'
+                    color: 0.16, 0.67, 0.38, 1
+                    font_size: sp(11)
+                    text_size: self.size
+                    halign: 'left'
+
+        # Action Buttons
+        BoxLayout:
+            size_hint_y: None
+            height: dp(45)
+            spacing: dp(10)
+            
+            # Interested (Heart) Button
+            ToggleButton:
+                text: '❤ Interested'
+                size_hint_x: 0.4
+                font_size: sp(13)
+                background_color: 0,0,0,0
+                color: (1, 0.3, 0.3, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                canvas.before:
+                    Color:
+                        rgba: (1, 0.3, 0.3, 0.2) if self.state == 'down' else (1, 1, 1, 0.1)
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(10)]
+                        
+            # Chat Now Button
+            Button:
+                text: '[b]Chat Now[/b]'
+                markup: True
+                size_hint_x: 0.6
+                font_size: sp(14)
+                background_color: 0,0,0,0
+                on_release: root.go_to_chat()
+                canvas.before:
+                    Color:
+                        rgba: 0.43, 0.33, 0.85, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(10)]
+
+        # View Profile Button (Faint text button at bottom)
+        # Secure Buy Button
+        Button:
+            size_hint_y: None
+            height: dp(45)
+            text: '🔒 Buy Securely via Escrow'
+            font_size: sp(14)
+            bold: True
+            color: 1, 1, 1, 1
+            background_color: 0,0,0,0
+            on_release: root.buy_item()
+            canvas.before:
+                Color:
+                    rgba: 0.16, 0.67, 0.38, 1  # A trustworthy green!
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(10)]
+
+# -----------------------------------------------------------
+# Polished Listing Card (Used for both Product and Service)
+# -----------------------------------------------------------
+<DynamicProduct>:
+    size_hint_y: None
+    height: dp(110)
+    padding: dp(15)
+    spacing: dp(15)
+    # Background click animation
+    canvas.before:
+        Color:
+            rgba: (0.15, 0.16, 0.22, 1) if self.state == 'normal' else (0.20, 0.21, 0.28, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(15)]
+            
+    # Avatar Box
+    FloatLayout:
+        size_hint_x: None
+        width: dp(50)
+        canvas.before:
+            Color:
+                rgba: 0.43, 0.33, 0.85, 1
+            Ellipse:
+                pos: [self.center_x - dp(25), self.center_y - dp(25)]
+                size: dp(50), dp(50)
+        Label:
+			pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            text: f'[b]{root.initial}[/b]'
+            markup: True
+            font_size: sp(16)
+            
+    # Details Box
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(2)
+        Label:
+            text: f'[b]{root.title}[/b]'
+            markup: True
+            font_size: sp(15)
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+            color: 1, 1, 1, 1
+        Label:
+            text: f'{root.product_type} • {root.condition}'
+            font_size: sp(12)
+            color: 0.6, 0.6, 0.6, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'middle'
+        Label:
+            text: f'By {root.fullname}'
+            font_size: sp(11)
+            color: 0.4, 0.4, 0.4, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+            
+    # Price Box
+    BoxLayout:
+        size_hint_x: None
+        width: dp(70)
+        orientation: 'vertical'
+        Label:
+            text: f'[b]₱{root.price:,.2f}[/b]'
+            markup: True
+            font_size: sp(14)
+            color: 0.43, 0.33, 0.85, 1
+            text_size: self.size
+            halign: 'right'
+            valign: 'middle'
 <DynamicActivity>:
 	canvas.before:
 		Color:
@@ -5,116 +229,6 @@
 		RoundedRectangle:
 			size: self.size
 			pos: self.pos
-
-<DynamicProduct>:
-	size_hint: 1, 0.2
-	canvas.before:
-		Color:
-			rgba: 0.15, 0.17, 0.23, 0.5
-		RoundedRectangle:
-			size: self.size
-			pos: self.pos
-			radius: [20]
-	BoxLayout:
-		size: self.parent.size
-		pos: self.parent.pos
-		orientation: 'horizontal'
-		spacing: dp(10)
-		Label:
-			size_hint_x: 0.01
-		Label:
-			text: f'[b]{root.initial}[/b]'
-			size_hint: 0.3, 0.5
-			pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-			color: 0.4, 0.31, 0.85, 1
-			font_size: dp(20)
-			markup: True
-			canvas.before:
-				Color:
-					rgba: 0.20, 0.11, 0.44, 0.3
-				RoundedRectangle:
-					size: self.size
-					pos: self.pos
-					radius: [20]
-		BoxLayout:
-			orientation: 'vertical'
-			Label:
-			Label:
-				text: f'[b]{root.title}[/b]'
-				markup: True
-				font_size: dp(13)
-				text_size: self.size
-				halign: 'left'
-			Label:
-				text: f'{root.fullname} • {root.subject}'
-				text_size: self.size
-				font_size: dp(13)
-				color: 1,1,1,0.5
-				halign: 'left'
-			BoxLayout:
-				orientation: 'horizontal'
-				BoxLayout:
-					size_hint_x: 0.7
-					orientation: 'horizontal'
-					Image:
-						source: 'assets/star.png'
-						size_hint_x: 0.5
-					Label:
-						text: f'[b]{root.rating}[/b]'
-						markup: True
-						font_size: dp(13)
-						text_size: self.size
-						halign: 'left'
-						valign: 'center'
-				Label:
-					text: f"-{root.review} reviews-"
-					color: 1,1,1,0.5
-					font_size: dp(10)
-					text_size: self.size
-					halign: 'left'
-					valign: 'center'
-				Label:
-					text: root.condition
-					font_size: dp(13)
-					canvas.before:
-						Color:
-							rgba: (1,1,1,0.1)  
-						RoundedRectangle:
-							size: self.size[0] + dp(2), self.size[1] + dp(2)
-							pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
-							radius: [20]
-						Color:
-							rgba: (0.11, 0.12, 0.18, 1) 
-						RoundedRectangle:
-							size: self.size
-							pos: self.pos
-							radius: [20]
-			Label:
-				text: f'[b]₱{root.price}[/b]'
-				markup: True
-				font_size: dp(15)
-				text_size: self.size
-				color: 0.4, 0.31, 0.85, 1
-				halign: 'left'
-			Label:
-		BoxLayout:
-			size_hint_x: 0.2
-			orientation: 'vertical'
-			Label:
-				size_hint_y: 0.3
-			Image:
-				size_hint: 0.7, 0.7
-				source: 'assets/heart_normal.png'
-			Label:
-			Image:
-				size_hint: 0.7, 0.7
-				source: 'assets/green_shield.png'
-			Label:
-				size_hint_y: 0.3
-		Label:
-			size_hint_x: 0.01
-			
-			
 
 <DynamicService>:
 	size_hint: 1, 0.2
@@ -124,3 +238,4 @@
 		RoundedRectangle:
 			size: self.size
 			pos: self.pos					
+
