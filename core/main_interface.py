@@ -16,7 +16,7 @@ from kivy.metrics import dp
 import requests
 from core import request_http as request
 
-Builder.load_file('design/mini_interface.kv')
+Builder.load_file('design/modal_interface.kv')
 Builder.load_file('design/main_system.kv')
 Builder.load_file('design/start_system.kv')
 Builder.load_file('design/dynamic_box.kv') 
@@ -24,6 +24,15 @@ Builder.load_file('design/dynamic_box.kv')
 #-----------------------------------------------------------#
 # Dynamic_Box
 #-----------------------------------------------------------#
+class NotificationModal(ModalView):
+    def show(self, title, message, is_error=False):
+        self.ids.notif_title.text = f'[b]{title}[/b]'
+        if is_error:
+            self.ids.notif_title.color = (0.88, 0.25, 0.25, 1) # Red for errors
+        else:
+            self.ids.notif_title.color = (0.16, 0.67, 0.38, 1) # Green for success
+        self.ids.notif_message.text = message
+        self.open()
 class ReviewModal(ModalView):
     seller_name = StringProperty("")
     current_rating = NumericProperty(5) # Default to 5 stars
@@ -276,7 +285,7 @@ class Login(Widget):
             # --------------------------------------------------
             
             # Use standard App execution to switch screens
-            from kivy.app import App
+            
             App.get_running_app().root.logged = True
             App.get_running_app().root.current = "main"
 
@@ -447,129 +456,95 @@ class MainInterface(Screen):
 
 #Children
 class Dashboard(Widget):
-    data = ListProperty([])
-    MAX_BARS = 15  # number of visible bars
+    MAX_BARS = 15
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        self.grouped = {}        # slot -> accumulated value
-        self.current_slot = 0    # active bar index
-        self.max_v = 10          # scaling reference
-        self.interval = 5        # seconds per bar
-
+        self.data = []
+        self.max_v = 50
+        
+        # Bind to screen resize so the graph always scales perfectly
         self.bind(size=self.on_resize, pos=self.on_resize)
-
         Clock.schedule_once(self.load_stats, 1)
 
     def load_stats(self, dt=0):
-        # 1. Grab the active user
         user = Data.user or {}
         full_name = user.get('full_name')
         if not full_name: 
             return
 
-        # 2. Fetch the data from our new API endpoint
         stats = request.get_user_stats(full_name)
         if stats:
-            # 3. Update the Labels
             earnings = stats.get('total_earnings', 0)
             listings = stats.get('active_listings', 0)
+            sold = stats.get('items_sold', 0)
             
+            # Inject Labels
             self.ids.earnings_label.text = f"[b]₱{earnings:,.2f}[/b]"
             self.ids.active_listings_label.text = f"[b]{listings}[/b]"
+            if hasattr(self.ids, 'items_sold_label'):
+                self.ids.items_sold_label.text = f"[b]{sold}[/b]"
 
-            # 4. Update the Bar Graph
+            # Set Graph Data
             graph_data = stats.get('graph_data', [])
-            
-            # Pad the list with zeroes if the user has fewer than 15 sales
             while len(graph_data) < self.MAX_BARS:
                 graph_data.insert(0, 0)
                 
             self.data = graph_data
             
-            # Recalculate graph heights based on the highest sale
             current_max = max(self.data + [10])
             BUFFER = 1.5
             self.max_v = max(current_max * BUFFER, 50)
             
             self.draw_graph()
 
-    def add(self, dt):
-        self.ids.dynamic_product.add_widget(DynamicProduct(size_hint=(1,0), height=200))
-        
-    def add_value(self, value=None):
-        if value is None:
-            value = 1
-        self.grouped[self.current_slot] = (
-            self.grouped.get(self.current_slot, 0) + value
-        )
-        self.recalculate()
-
-    def next_slot(self, dt):
-        self.current_slot += 1
-        if len(self.grouped) > self.MAX_BARS:
-            oldest = min(self.grouped.keys())
-            del self.grouped[oldest]
-        self.recalculate()
-
-    def recalculate(self):
-        slots = [
-            self.current_slot - (self.MAX_BARS - 1 - i)
-            for i in range(self.MAX_BARS)
-        ]
-        self.data = [self.grouped.get(s, 0) for s in slots]
-        current_max = max(self.data + [10])
-        BUFFER = 1.5
-        target_scale = max(current_max * BUFFER, 50)
-        self.max_v = self.max_v * 0.9 + target_scale * 0.1
-        self.draw_graph()
-        Clock.schedule_once(self.auto_scroll, 0)
-
     def draw_graph(self):
         chart = self.ids.chart
-        chart.canvas.clear()
-        chart.pos = (0, 0)
+        
+        # Clear previous renders without deleting the KV background color
+        chart.canvas.after.clear()
 
         if not self.data:
             return
 
         max_v = self.max_v
-        bar_w = self.width / (self.MAX_BARS)
+        bar_w = self.width / self.MAX_BARS
         spacing = bar_w * 0.3
 
-        with chart.canvas:
-            start_x = 0
+        with chart.canvas.after:
             for i, v in enumerate(self.data):
-                if i == len(self.data) - 1:
-                    Color(0.2, 0.7, 0.9, 1)  # current
+                
+                # Dynamic Color Logic
+                if i == len(self.data) - 1 and v > 0:
+                    Color(0.16, 0.67, 0.38, 1)  # Newest sale is Green!
+                elif i == len(self.data) - 1:
+                    Color(0.2, 0.7, 0.9, 1) 
                 elif i == 0:
-                    Color(0.6, 0.6, 0.6, 1)  # no previous
+                    Color(0.6, 0.6, 0.6, 1)  
                 else:
                     prev = self.data[i - 1]
                     if v > prev:
-                        Color(0.3, 0.9, 0.3, 1)  # increase
+                        Color(0.3, 0.9, 0.3, 1)  
                     elif v < prev:
-                        Color(0.9, 0.3, 0.3, 1)  # decrease
+                        Color(0.9, 0.3, 0.3, 1)  
                     else:
-                        Color(0.6, 0.6, 0.6, 1)  # same
+                        Color(0.6, 0.6, 0.6, 1)  
 
-                min_h = 5  
+                min_h = dp(5)  
                 if v == 0:
                     h = min_h
                 else:
-                    graph_height = self.height * 0.7
+                    graph_height = chart.height * 0.8
                     h = max((v / max_v) * graph_height, min_h)
 
-                x = start_x + i * (bar_w + spacing)
-                y = 0
+                # Anchor bars securely to the chart widget
+                x = chart.x + (i * (bar_w + spacing))
+                y = chart.y 
+                
                 Rectangle(pos=(x, y), size=(bar_w, h))
 
+        # Adjust width for smooth scrolling
         chart.width = len(self.data) * (bar_w + spacing)
-        chart.x = 0
-
-    def auto_scroll(self, dt):
-        self.ids.scroll.scroll_x = 1
 
     def on_resize(self, *args):
         self.draw_graph()
@@ -635,56 +610,75 @@ class Product(Widget):
 
 class Sell(Widget):
     def add_product(self):
-        title = self.ids.title_input.text_val
-        description = self.ids.desc_input.text_val
-        price = self.ids.price_input.text_val
+        title = self.ids.title_input.ids.internal_input.text.strip()
+        description = self.ids.desc_input.ids.internal_input.text.strip()
+        price_text = self.ids.price_input.ids.internal_input.text.strip()
 
-        # 1. Determine the Listing Type based on the toggle buttons
-        listing_type = "Textbook"  # Default fallback
+        # 1. DYNAMIC VALIDATION: Empty Fields
+        missing_fields = []
+        if not title: 
+            missing_fields.append("Title")
+        if not price_text: 
+            missing_fields.append("Price")
+            
+        if missing_fields:
+            # Magically builds "Title", "Price", or "Title and Price"
+            fields_str = " and ".join(missing_fields)
+            NotificationModal().show("Missing Information", f"Please enter a {fields_str} to list your item.", is_error=True)
+            return
+
+        # 2. Strict Validation: Valid Numbers Only
+        try:
+            price = float(price_text)
+            if price <= 0:
+                raise ValueError
+        except ValueError:
+            NotificationModal().show("Invalid Price", "Please enter a valid amount greater than 0.", is_error=True)
+            return
+
+        # 3. Determine the Listing Type based on the toggle buttons
+        listing_type = "Textbook"
         if self.ids.type_service.state == 'down':
             listing_type = "Service"
         elif self.ids.type_notes.state == 'down':
             listing_type = "Notes"
 
-        # 2. Determine the Condition
+        # 4. Determine the Condition
         condition = "New"
         for btn in self.ids.condition_group.children:
             if btn.state == "down":
                 condition = btn.text.replace('[b]', '').replace('[/b]', '')
                 break
 
-        if not title or not price:
-            print("Missing required fields")
-            return
-
-        # 3. Grab the active user
+        # 5. Grab the active user
         user = Data.user or {}
         full_name = user.get('full_name', 'Guest User')
         initial = "".join([x[0].upper() for x in full_name.split() if x])
 
-        # 4. Construct payload with the dynamic listing_type
+        # 6. Construct payload (Now injecting the REAL description!)
         payload = {
             "initial": initial,
             "full_name": full_name,
             "title": title,
-            "subject": listing_type,  # <-- Injects 'Textbook', 'Notes', or 'Service'
+            "subject": listing_type, 
             "rate": 0,            
             "price": price,
-            "review": 0, 
+            "review": description, # <-- THE FIX: Back to saving the actual text!
             "condition_status": condition,
             "escrow": True,
             "satisfied": False
         }
 
+        # 7. Call API & Trigger Visual Modal
         res = request.add_product(payload)
 
         if res:
-            print(f"✅ {listing_type} successfully published")
+            NotificationModal().show("Success!", f"Your {listing_type} is now live on the marketplace.", is_error=False)
             self.ids.title_input.ids.internal_input.text = ""
             self.ids.desc_input.ids.internal_input.text = ""
             self.ids.price_input.ids.internal_input.text = ""
         else:
-            print("❌ Failed to publish")
+            NotificationModal().show("Upload Failed", "Something went wrong. Please check your connection and try again.", is_error=True)
 
 class Service(Widget):
     current_category = StringProperty('All')

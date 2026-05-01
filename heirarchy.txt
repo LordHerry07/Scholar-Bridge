@@ -1,0 +1,84 @@
+heirarchy:
+"
+Scholar-Bridge
+├── assets
+│   ├── attach.png
+│   ├── bank.png
+│   ├── bar_graph.png
+│   ├── calendar.png
+│   ├── camera.png
+│   ├── chat.png
+│   ├── check_circle.png
+│   ├── dashboard_down.png
+│   ├── dashboard_normal.png
+│   ├── down.png
+│   ├── edit.png
+│   ├── email.png
+│   ├── eye.png
+│   ├── green_shield.png
+│   ├── green_up.png
+│   ├── heart_down.png
+│   ├── heart_normal.png
+│   ├── help.png
+│   ├── language.png
+│   ├── location.png
+│   ├── lock.png
+│   ├── logo.png
+│   ├── logout.png
+│   ├── mail.png
+│   ├── notes_down.png
+│   ├── notes_normal.png
+│   ├── notifaction.png
+│   ├── person_down.png
+│   ├── person_normal.png
+│   ├── phone.png
+│   ├── product_down.png
+│   ├── product_normal.png
+│   ├── profile.png
+│   ├── red_down.png
+│   ├── school.png
+│   ├── sell.png
+│   ├── send.png
+│   ├── service_down.png
+│   ├── service_normal.png
+│   ├── settings.png
+│   ├── shield.png
+│   ├── star.png
+│   ├── textbook_normal.png
+│   ├── trend_down.png
+│   ├── trend_up.png
+│   ├── university.png
+│   ├── up.png
+│   ├── visa.png
+│   ├── visibility_off.png
+│   ├── visibility.png
+│   ├── wallet.png
+│   └── white_shield.png
+├── bin
+├── buildozer.spec
+├── cache
+├── core
+│   ├── main_interface.py
+│   ├── __pycache__
+│   │   ├── interface.cpython-313.pyc
+│   │   ├── maininterface2.cpython-313.pyc
+│   │   ├── main_interface.cpython-312.pyc
+│   │   ├── main_interface.cpython-313.pyc
+│   │   ├── maininterface.cpython-313.pyc
+│   │   ├── miniinterface.cpython-313.pyc
+│   │   ├── request.cpython-313.pyc
+│   │   ├── request_http.cpython-312.pyc
+│   │   ├── request_http.cpython-313.pyc
+│   │   ├── startinterface2.cpython-313.pyc
+│   │   └── startinterface.cpython-313.pyc
+│   └── request_http.py
+├── design
+│   ├── dynamic_box.kv
+│   ├── main_system.kv
+│   ├── mini_interface.kv
+│   └── start_system.kv
+├── heirarchy.txt
+├── icon.png
+├── main.py
+└── README.md
+"
