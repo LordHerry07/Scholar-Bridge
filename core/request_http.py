@@ -1,13 +1,34 @@
 import requests
 from requests.exceptions import RequestException
 from kivy.clock import Clock
+import os
 
-BASE_URL = "http://127.0.0.1:5000"
+CONFIG_FILE = 'server_config.txt'
 TIMEOUT = 5  # Seconds before giving up on the server
 
 # ---------------------------------------
 # Network Armor
 # ---------------------------------------
+def load_base_url():
+    """Loads the saved server IP, defaulting to localhost if none exists."""
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, 'r') as f:
+            return f.read().strip()
+    return "http://127.0.0.1:5000"
+
+BASE_URL = load_base_url()
+
+def set_base_url(new_url):
+    """Updates the global API bridge and saves it locally."""
+    global BASE_URL
+    # Ensure it always has the http:// prefix
+    if not new_url.startswith("http"):
+        new_url = "http://" + new_url
+        
+    BASE_URL = new_url
+    with open(CONFIG_FILE, 'w') as f:
+        f.write(BASE_URL)
+
 def show_network_error():
     """Safely triggers the UI Notification Modal from outside the main thread."""
     from core.main_interface import NotificationModal

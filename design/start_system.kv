@@ -6,6 +6,17 @@
 		Rectangle:
 			size: root.size
 			pos: root.pos
+	IconButton:
+        icon_source: 'assets/settings.png'
+        size_hint: None, None
+        size: dp(45), dp(45)
+        pos_hint: {'top': 0.98, 'right': 0.96}
+        on_release: root.open_server_settings()
+        
+    BoxLayout:
+        size_hint: 0.9, 0.9
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+        orientation: 'vertical'
 	BoxLayout:
 		size_hint: 0.9, 0.9
 		pos_hint: {'center_x': 0.5, 'center_y': 0.5}

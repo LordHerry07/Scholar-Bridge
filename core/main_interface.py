@@ -22,8 +22,27 @@ Builder.load_file('design/start_system.kv')
 Builder.load_file('design/dynamic_box.kv') 
 
 #-----------------------------------------------------------#
-# Dynamic_Box
+# Modal_Interface
 #-----------------------------------------------------------#
+class ServerSelectorModal(ModalView):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Pre-fill the input box with the current saved IP
+        Clock.schedule_once(self.populate_input, 0.1)
+
+    def populate_input(self, dt):
+        # Strip the http:// for a cleaner user experience
+        clean_ip = request.BASE_URL.replace("http://", "").replace("https://", "")
+        self.ids.server_ip_input.text = clean_ip
+
+    def save_server(self):
+        ip_text = self.ids.server_ip_input.text.strip()
+        if ip_text:
+            request.set_base_url(ip_text)
+            print(f"🚨 SERVER REROUTED TO: {request.BASE_URL}")
+            NotificationModal().show("Server Updated", f"App is now pointing to:\n{request.BASE_URL}", is_error=False)
+        self.dismiss()
+
 class NotificationModal(ModalView):
     def show(self, title, message, is_error=False):
         self.ids.notif_title.text = f'[b]{title}[/b]'
@@ -48,6 +67,9 @@ class ReviewModal(ModalView):
             self.dismiss()
         else:
             print("Failed to save review.")
+#-----------------------------------------------------------#
+# Dynamic_Box
+#-----------------------------------------------------------#
 class TransactionTile(BoxLayout):
     def set_data(self, txn_type, amount, date, description):
         # We manually push the text into the IDs we created
@@ -263,6 +285,9 @@ class Data:
 class StartInterface(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    def open_server_settings(self):
+        ServerSelectorModal().open()
 
 #Children
 class Login(Widget):

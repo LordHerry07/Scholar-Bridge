@@ -598,21 +598,20 @@
 #-------------------------------------------------------------#
 # 0 (SEARCH BAR)
 #-------------------------------------------------------------#
+        Label:
+            size_hint_y: 0.01
         BoxLayout:
             size_hint: 0.95, None
             height: dp(50)
             pos_hint: {'center_x': 0.5}
             padding: [0, dp(5), 0, dp(5)]
 
-            TextInput:
-                id: search_bar
-                hint_text: 'Search for textbooks, notes...'
-                background_color: 0, 0, 0, 0
-                foreground_color: 1, 1, 1, 1
-                hint_text_color: 0.5, 0.5, 0.5, 1
-                multiline: False
-                padding: [dp(15), dp(10)]
-                on_text: root.filter_products()  # <-- MAGIC: Triggers instantly as you type!
+            BoxLayout:
+                size_hint_y: None
+                height: self.parent.height # Fills the parent container
+                padding: [dp(15), 0]
+                
+                # The Background
                 canvas.before:
                     Color:
                         rgba: 0.15, 0.16, 0.22, 1
@@ -620,21 +619,40 @@
                         pos: self.pos
                         size: self.size
                         radius: [dp(15)]
+                        
+                # The Naked Text Input
+                TextInput:
+                    id: search_bar
+                    hint_text: 'Search for textbooks, notes...'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    pos_hint: {'center_y': 0.5} # Perfectly centered!
+                    
+                    background_normal: ''
+                    background_active: ''
+                    background_color: 0, 0, 0, 0
+                    foreground_color: 1, 1, 1, 1
+                    hint_text_color: 0.5, 0.5, 0.5, 1
+                    multiline: False
+                    padding: [0, 0] # Strip all internal padding
+                    on_text: root.filter_products()
         BoxLayout:
-            size_hint: 0.95, 0.1
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint_y: None        # Stop shrinking to 10%!
+            height: dp(60)           # Lock the exact height
+            pos_hint: {'center_x': 0.5} 
             spacing: dp(10)
             orientation: 'horizontal'
+            padding: [0, dp(10), 0, dp(10)] # Add breathing room around buttons
 #1------------------------------------------------------------#
             ScrollView:
                 size_hint_y: None
                 height: dp(40)
+                pos_hint: {'center_y': 0.5}
                 do_scroll: True, False
                 bar_width: 0
-              
                 scroll_timeout: 250 
                 scroll_distance: dp(20)
-              
+             
                 BoxLayout:
                     orientation: 'horizontal'
                     size_hint_x: None
@@ -732,11 +750,15 @@
             id: scroll
             do_scroll: False, True
             BoxLayout:
-                size_hint_y: len(self.children) * 0.2
                 id: dynamic_product
                 orientation: 'vertical'
-                spacing: dp(10)
-#Dynamic Prodoct List          
+                
+                # THE MAGIC FIX: Stop squishing based on len(children)!
+                size_hint_y: None
+                height: self.minimum_height
+                
+                spacing: dp(15)
+                padding: [0, dp(10), 0, dp(100)]  
         Label:
             size_hint_y: 0.01
 
@@ -782,6 +804,7 @@
     title: ''
     hint: ''
     text_val: internal_input.text
+    multilined: False
 
     Label:
         text: root.title
@@ -792,15 +815,9 @@
         text_size: self.size
         halign: 'left'
         valign: 'middle'
-    TextInput:
-        id: internal_input
-        hint_text: root.hint
-        hint_text_color: 1, 1, 1, 0.4
-        foreground_color: 1, 1, 1, 1
-        background_color: 0, 0, 0, 0
-        cursor_color: 0.42, 0.35, 0.88, 1
-        multiline: False
-        padding: [dp(15), dp(15)]
+    BoxLayout:
+        pos_hint: {'center_y': 0.5}
+        padding: [dp(15), 0]
         canvas.before:
             Color:
                 rgba: 0.11, 0.13, 0.18, 1
@@ -813,6 +830,18 @@
             Line:
                 rounded_rectangle: [self.x, self.y, self.width, self.height, dp(8)]
                 width: dp(1)
+        TextInput:
+            id: internal_input
+            hint_text: root.hint
+            hint_text_color: 1, 1, 1, 0.4
+            background_normal: ''
+            background_active: ''
+            foreground_color: 1, 1, 1, 1
+            background_color: 0, 0, 0, 0
+            cursor_color: 0.42, 0.35, 0.88, 1
+            multiline: root.multilined
+            padding: [dp(15), (self.height - self.line_height) / 2]
+        
 <PrimaryButton@ButtonBehavior+FloatLayout>:
     text: ''
     size_hint_y: None
@@ -940,7 +969,10 @@
                 id: desc_input
                 title: 'Description'
                 hint: 'Describe condition, edition, ISBN...'
-                height: dp(120) 
+                height: dp(120)
+                multilined: True
+                
+
          
             FormInput:
                 id: price_input
@@ -1072,21 +1104,19 @@
 #-------------------------------------------------------------#
 # 0 (SEARCH BAR)
 #-------------------------------------------------------------#
+        Label:
+            size_hint_y: 0.01
         BoxLayout:
             size_hint: 0.95, None
             height: dp(50)
             pos_hint: {'center_x': 0.5}
             padding: [0, dp(5), 0, dp(5)]
 
-            TextInput:
-                id: search_bar
-                hint_text: 'Search for tutors, writers, guides...'
-                background_color: 0, 0, 0, 0
-                foreground_color: 1, 1, 1, 1
-                hint_text_color: 0.5, 0.5, 0.5, 1
-                multiline: False
-                padding: [dp(15), dp(10)]
-                on_text: root.filter_services()  # <-- Triggers as you type!
+            BoxLayout:
+                size_hint_y: None
+                height: self.parent.height
+                padding: [dp(15), 0]
+                
                 canvas.before:
                     Color:
                         rgba: 0.15, 0.16, 0.22, 1
@@ -1094,21 +1124,39 @@
                         pos: self.pos
                         size: self.size
                         radius: [dp(15)]
+                        
+                TextInput:
+                    id: search_bar
+                    hint_text: 'Search for tutors, writers, guides...'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    pos_hint: {'center_y': 0.5}
+                    
+                    background_normal: ''
+                    background_active: ''
+                    background_color: 0, 0, 0, 0
+                    foreground_color: 1, 1, 1, 1
+                    hint_text_color: 0.5, 0.5, 0.5, 1
+                    multiline: False
+                    padding: [0, 0]
+                    on_text: root.filter_services()
         BoxLayout:
-            size_hint: 0.95, 0.1
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint_y: None        # Stop shrinking to 10%!
+            height: dp(60)           # Lock the exact height
+            pos_hint: {'center_x': 0.5} 
             spacing: dp(10)
             orientation: 'horizontal'
+            padding: [0, dp(10), 0, dp(10)] # Add breathing room around buttons
 #1------------------------------------------------------------#
             ScrollView:
                 size_hint_y: None
                 height: dp(40)
+                pos_hint: {'center_y': 0.5} # Perfectly centers the buttons
                 do_scroll: True, False
                 bar_width: 0
-              
                 scroll_timeout: 250 
                 scroll_distance: dp(20)
-              
+             
                 BoxLayout:
                     orientation: 'horizontal'
                     size_hint_x: None
@@ -1211,10 +1259,15 @@
             id: scroll
             do_scroll: False, True
             BoxLayout:
-                size_hint_y: len(self.children) * 0.2
                 id: dynamic_service
                 orientation: 'vertical'
-                spacing: dp(10)
+                
+                # THE MAGIC FIX: Stop squishing based on len(children)!
+                size_hint_y: None
+                height: self.minimum_height
+                
+                spacing: dp(15)
+                padding: [0, dp(10), 0, dp(100)]
 #Dynamic Service List          
         Label:
             size_hint_y: 0.01
