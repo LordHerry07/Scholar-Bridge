@@ -2046,6 +2046,7 @@
                 size_hint_y: None
                 height: self.minimum_height
                 spacing: dp(10)
+                
                 Label:
                     text: '[b]Recent Transactions[/b]'
                     markup: True
@@ -2057,16 +2058,15 @@
                     halign: 'left'
                     valign: 'middle'
 
-                ScrollView:
-                    do_scroll: False, True
-                    bar_width: 0
-                    BoxLayout:
-                        id: history_list  # <-- The Python logic looks for this!
-                        orientation: 'vertical'
-                        size_hint_y: None
-                        height: self.minimum_height
-                        spacing: dp(10)
-
+                # Removed the inner ScrollView! We just use a plain container.
+                BoxLayout:
+                    id: history_list  
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    # We leave height blank here because your Python code 
+                    # explicitly calculates it (len * 75dp)!
+                    spacing: dp(10)
+                    padding: [0, 0, 0, dp(15)]
 # ------------------- 4. SETTINGS SCREEN ------------------- #
 <UserSettings>:
     orientation: 'vertical'

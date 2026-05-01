@@ -12,7 +12,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 import json
 import os
-
+from kivy.metrics import dp
 import requests
 from core import request_http as request
 
@@ -370,7 +370,21 @@ class Wallet(BoxLayout):
         history = request.get_wallet_history(my_email)
         container = self.ids.history_list
         container.clear_widgets()
-        
+
+        print(f"🚨 DEBUG: Found {len(history)} transactions! Building tiles...")
+        container.height = len(history) * dp(75)
+        for item in history:
+            sign = "+" if item['type'] == 'Deposit' else "-"
+            formatted_amount = f"{sign} ₱{float(item['amount']):,.2f}"
+            
+            tile = TransactionTile()
+            tile.ids.desc_label.text = f'[b]{item["description"]}[/b]'
+            tile.ids.date_label.text = item['date']
+            
+            color = "#2ECC71" if item['type'] == "Deposit" else "#E74C3C"
+            tile.ids.amount_label.text = f'[color={color}]{formatted_amount}[/color]'
+            
+            container.add_widget(tile)
         
         
     def process_transaction(self, action):
