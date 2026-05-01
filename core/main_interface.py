@@ -16,9 +16,6 @@ from kivy.metrics import dp
 import requests
 from core import request_http as request
 
-
-# Assuming you combine the KV into one file for testing, 
-# or keep your original Builder.load_file routing if you prefer them separated.
 Builder.load_file('design/mini_interface.kv')
 Builder.load_file('design/main_system.kv')
 Builder.load_file('design/start_system.kv')
@@ -71,7 +68,7 @@ class PublicProfileModal(ModalView):
         self.ids.profile_name.text = f'[b]{fullname}[/b]'
         self.ids.profile_stats.text = f'⭐ {rating} Rating • {len(products)} Active Listings'
         
-        # Populate the active listings using your existing DynamicProduct card!
+        # Populate the active listings using existing DynamicProduct card
         container = self.ids.active_listings
         container.clear_widgets()
         
@@ -86,7 +83,7 @@ class PublicProfileModal(ModalView):
                 product_type=data.get('subject', 'Product'),
                 description=str(data.get('review', 'No description'))
             )
-            # Make sure the nested cards can also open their own modals!
+            # Make sure the nested cards can also open their own modals
             card.bind(on_release=lambda instance, c=card: self.open_nested_product(c))
             container.add_widget(card)
 
@@ -140,7 +137,6 @@ class ProductDetailsModal(ModalView):
         main_interface.ids.back_btn.opacity = 1
         main_interface.ids.back_btn.disabled = False
         
-        # --- NEW: Tell the ChatBox who we are chatting with and load history ---
         chatbox_widget = status_screen.ids.screenmanager.get_screen('chatbox').children[0]
         chatbox_widget.set_target_user(self.fullname)
         
@@ -181,7 +177,7 @@ class DynamicProduct(ButtonBehavior, BoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Ensure description is safely pulled from kwargs if you mapped review -> description previously
+
         self.description = kwargs.get('description', 'This seller has not provided a description for this listing.')
     
     def on_release(self, *args):
@@ -272,7 +268,6 @@ class Login(Widget):
             data = response.json()
             Data.user = data.get('user', {})
             
-            # --- NEW: Save the session to a local JSON file ---
             try:
                 with open('local_state.json', 'w', encoding='utf-8') as f:
                     json.dump(Data.user, f)
@@ -332,9 +327,15 @@ class Profile(BoxLayout):
 class ChatBox(BoxLayout):
     target_user = StringProperty("")
     
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Check the database for new messages every 2 seconds!
+        Clock.schedule_interval(self.load_messages, 2.0)
+
     def set_target_user(self, full_name):
         self.target_user = full_name
         self.ids.chat_header_name.text = f'[b]{full_name}[/b]'
+        self.ids.chat_history.clear_widgets()
         self.load_messages()
         
     def load_messages(self, dt=0):
@@ -345,6 +346,8 @@ class ChatBox(BoxLayout):
         
         # Clear old dummy messages
         chat_container = self.ids.chat_history
+        if len(chat_container.children) == len(history):
+            return
         chat_container.clear_widgets()
         
         for msg in history:
@@ -355,6 +358,8 @@ class ChatBox(BoxLayout):
                 time=msg['timestamp'],
                 is_sender=is_me
             ))
+        if hasattr(self.ids, 'chat_scroll'):
+            Clock.schedule_once(lambda dt: setattr(self.ids.chat_scroll, 'scroll_y', 0), 0.1)
             
     def send_new_message(self):
         text_input = self.ids.chat_input
@@ -743,6 +748,7 @@ class Status(Widget):
     initial = StringProperty("N.A")
     full_name = StringProperty("N.A")
     email = StringProperty("N.A")
+    rating = StringProperty("0")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -757,6 +763,13 @@ class Status(Widget):
         self.full_name = name
         self.email = user.get('email', 'Not Logged In')
         self.initial = "".join([x[0].upper() for x in name.split() if x])
+    def load_user_stats(self, dt=0):
+        name = Data.user.get('full_name')
+        if name:
+            profile = request.get_user_profile(name)
+            if profile:
+                # Update the string property to instantly refresh the UI
+                self.rating = str(profile.get('rating', '0'))
 
 class Interface(ScreenManager):
     logged = False
