@@ -566,8 +566,30 @@
         orientation: 'vertical'
         spacing: dp(5)
 #-------------------------------------------------------------#
-# 0
+# 0 (SEARCH BAR)
 #-------------------------------------------------------------#
+        BoxLayout:
+            size_hint: 0.95, None
+            height: dp(50)
+            pos_hint: {'center_x': 0.5}
+            padding: [0, dp(5), 0, dp(5)]
+
+            TextInput:
+                id: search_bar
+                hint_text: 'Search for textbooks, notes...'
+                background_color: 0, 0, 0, 0
+                foreground_color: 1, 1, 1, 1
+                hint_text_color: 0.5, 0.5, 0.5, 1
+                multiline: False
+                padding: [dp(15), dp(10)]
+                on_text: root.filter_products()  # <-- MAGIC: Triggers instantly as you type!
+                canvas.before:
+                    Color:
+                        rgba: 0.15, 0.16, 0.22, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(15)]
         BoxLayout:
             size_hint: 0.95, 0.1
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
@@ -1018,8 +1040,30 @@
         orientation: 'vertical'
         spacing: dp(5)
 #-------------------------------------------------------------#
-# 0
+# 0 (SEARCH BAR)
 #-------------------------------------------------------------#
+        BoxLayout:
+            size_hint: 0.95, None
+            height: dp(50)
+            pos_hint: {'center_x': 0.5}
+            padding: [0, dp(5), 0, dp(5)]
+
+            TextInput:
+                id: search_bar
+                hint_text: 'Search for tutors, writers, guides...'
+                background_color: 0, 0, 0, 0
+                foreground_color: 1, 1, 1, 1
+                hint_text_color: 0.5, 0.5, 0.5, 1
+                multiline: False
+                padding: [dp(15), dp(10)]
+                on_text: root.filter_services()  # <-- Triggers as you type!
+                canvas.before:
+                    Color:
+                        rgba: 0.15, 0.16, 0.22, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(15)]
         BoxLayout:
             size_hint: 0.95, 0.1
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
@@ -1052,6 +1096,7 @@
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        on_release: root.set_category('All')
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -1069,6 +1114,7 @@
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        on_release: root.set_category('Tutoring')
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -1086,6 +1132,7 @@
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        on_release: root.set_category('Writing')
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -1103,6 +1150,7 @@
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        on_release: root.set_category('Career')
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -1120,6 +1168,7 @@
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        on_release: root.set_category('Test Prep')
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)

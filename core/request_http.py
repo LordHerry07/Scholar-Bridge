@@ -188,3 +188,17 @@ def get_wallet_history(email):
     if response.status_code == 200:
         return response.json()
     return []
+
+# ---------------------------------------
+# Reviews
+# ---------------------------------------
+def submit_review(reviewer_email, seller_name, rating, comment):
+    url = f"{BASE_URL}/review"
+    payload = {
+        "reviewer_email": reviewer_email,
+        "seller_name": seller_name,
+        "rating": rating,
+        "comment": comment
+    }
+    response = requests.post(url, json=payload)
+    return response.status_code == 201

@@ -27,6 +27,21 @@ Builder.load_file('design/dynamic_box.kv')
 #-----------------------------------------------------------#
 # Dynamic_Box
 #-----------------------------------------------------------#
+class ReviewModal(ModalView):
+    seller_name = StringProperty("")
+    current_rating = NumericProperty(5) # Default to 5 stars
+    
+    def submit(self):
+        my_email = Data.user.get('email')
+        comment = self.ids.review_comment.text.strip()
+        
+        # Call the API
+        success = request.submit_review(my_email, self.seller_name, self.current_rating, comment)
+        if success:
+            print("Review saved!")
+            self.dismiss()
+        else:
+            print("Failed to save review.")
 class TransactionTile(BoxLayout):
     def set_data(self, txn_type, amount, date, description):
         # We manually push the text into the IDs we created
@@ -106,6 +121,9 @@ class ProductDetailsModal(ModalView):
             # Refresh the product list so the bought item disappears
             app = App.get_running_app()
             app.root.get_screen('main').ids.screenmanager.get_screen('product').children[0].get_products()
+
+            review_modal = ReviewModal(seller_name=self.fullname)
+            review_modal.open()
         else:
             print("Transaction failed (insufficient funds or item already sold).")
 
@@ -552,32 +570,63 @@ class Dashboard(Widget):
         self.draw_graph()
 
 class Product(Widget):
+    current_category = StringProperty('All')
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.all_products = [] # Cache to hold data so we don't spam the API
         Clock.schedule_once(self.get_products, 0.5)
-    
+
+    def set_category(self, cat):
+        self.current_category = cat
+        self.filter_products() # Re-filter instantly when a button is clicked
+
     def get_products(self, dt=0):
         response = request.get_products(satisfied=0)
         if not response: 
             return
 
+        # Save the master list to memory
+        self.all_products = response 
+        
+        # Trigger the initial render
+        self.filter_products() 
+
+    def filter_products(self, *args):
+        # 1. Grab the search text
+        search_text = self.ids.search_bar.text.lower()
+        
         container = self.ids.dynamic_product
         container.clear_widgets() 
         
-        for data in response:
-            # ONLY render if it's NOT a Service
-            if data.get('subject') != 'Service':
-                container.add_widget(DynamicProduct(
-                    # This line is critical to fix the 400 error
-                    product_id=data.get('id'), 
-                    fullname=data.get('full_name'), 
-                    initial=data.get('initial'), 
-                    title=data.get('title'), 
-                    price=float(data.get('price', 0)),
-                    condition=data.get('condition_status'),
-                    product_type=data.get('subject'),
-                    description=str(data.get('review')) # Assuming review stores description
-                ))
+        for data in self.all_products:
+            item_subject = data.get('subject', '')
+            
+            # 2. Skip Services (They belong on the Service screen)
+            if item_subject == 'Service':
+                continue
+                
+            # 3. Apply Category Filter
+            if self.current_category != 'All' and item_subject != self.current_category:
+                continue
+                
+            # 4. Apply Search Bar Filter (Checks both Title and Description)
+            title = data.get('title', '').lower()
+            desc = str(data.get('review', '')).lower()
+            if search_text and (search_text not in title and search_text not in desc):
+                continue
+                
+            # 5. If it passes all filters, draw the widget!
+            container.add_widget(DynamicProduct(
+                product_id=data.get('id'), 
+                fullname=data.get('full_name'), 
+                initial=data.get('initial'), 
+                title=data.get('title'), 
+                price=float(data.get('price', 0)),
+                condition=data.get('condition_status'),
+                product_type=item_subject,
+                description=str(data.get('review'))
+            ))
 
 class Sell(Widget):
     def add_product(self):
@@ -633,33 +682,62 @@ class Sell(Widget):
             print("❌ Failed to publish")
 
 class Service(Widget):
+    current_category = StringProperty('All')
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Fetch services when the widget initializes
+        self.all_services = [] # Cache to hold data
         Clock.schedule_once(self.get_services, 0.5)
+
+    def set_category(self, cat):
+        self.current_category = cat
+        self.filter_services() # Re-filter instantly when a button is clicked
 
     def get_services(self, dt=0):
         response = request.get_products(satisfied=0)
         if not response: 
             return
 
+        # Save the master list to memory
+        self.all_services = response 
+        self.filter_services() 
+
+    def filter_services(self, *args):
+        search_text = self.ids.search_bar.text.lower()
         container = self.ids.dynamic_service
         container.clear_widgets() 
         
-        for data in response:
-            # ONLY render if it IS a Service
-            if data.get('subject') == 'Service':
-                container.add_widget(DynamicProduct( # Reusing your DynamicProduct UI component
-                    product_id=data.get('id'),
-                    fullname=data.get('full_name', 'Unknown'), 
-                    initial=data.get('initial', 'U'), 
-                    title=data.get('title', 'No Title'), 
-                    rating=float(data.get('rate', 0)), 
-                    condition=data.get('condition_status', 'N/A'), 
-                    price=float(data.get('price', 0)), 
-                    review=int(data.get('review', 0)), 
-                    product_type=data.get('subject', 'Service')
-                ))
+        for data in self.all_services:
+            item_subject = data.get('subject', '')
+            
+            # 1. ONLY process items explicitly marked as 'Service' in the DB
+            if item_subject != 'Service':
+                continue
+                
+            title = data.get('title', '').lower()
+            desc = str(data.get('review', '')).lower()
+            
+            # 2. Smart Category Filter (Checks if sub-category word is in title/desc)
+            cat = self.current_category.lower()
+            if cat != 'all' and cat not in title and cat not in desc:
+                continue
+                
+            # 3. Search Bar Filter
+            if search_text and (search_text not in title and search_text not in desc):
+                continue
+                
+            # 4. If it passes all filters, draw the widget!
+            container.add_widget(DynamicProduct(
+                product_id=data.get('id'),
+                fullname=data.get('full_name', 'Unknown'), 
+                initial=data.get('initial', 'U'), 
+                title=data.get('title', 'No Title'), 
+                rating=float(data.get('rate', 0)), 
+                condition=data.get('condition_status', 'N/A'), 
+                price=float(data.get('price', 0)), 
+                product_type=item_subject,
+                description=str(data.get('review', 'No description'))
+            ))
 
 class Status(Widget):
     initial = StringProperty("N.A")
