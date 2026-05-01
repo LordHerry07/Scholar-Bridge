@@ -125,6 +125,13 @@ def get_inbox(username):
         return response.json()
     return []
 
+def get_unread_count(username):
+    url = f"{BASE_URL}/inbox/unread/{username}"
+    response = safe_request(requests.get, url)
+    if response and response.status_code == 200:
+        return response.json().get('unread_count', 0)
+    return 0
+
 # ---------------------------------------
 # Escrow / Purchasing
 # ---------------------------------------

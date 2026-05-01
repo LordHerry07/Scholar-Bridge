@@ -349,7 +349,8 @@ class ChatBox(BoxLayout):
         
     def load_messages(self, dt=0):
         if not self.target_user: return
-        
+        if self.parent and self.parent.manager and self.parent.manager.current != 'chatbox':
+            return
         my_name = Data.user.get('full_name', '')
         history = request.get_messages(my_name, self.target_user)
         
@@ -451,8 +452,20 @@ class LogOut(FloatLayout):
 
 #Parent
 class MainInterface(Screen):
+    # This property will hold our live notification count
+    #unread_count = NumericProperty(0)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # Check for notifications every 3 seconds
+        Clock.schedule_interval(self.poll_notifications, 3.0)
+        
+    def poll_notifications(self, dt):
+        name = Data.user.get('full_name')
+        if name:
+            app = App.get_running_app()
+            if app:
+                app.unread_count = request.get_unread_count(name)
 
 #Children
 class Dashboard(Widget):

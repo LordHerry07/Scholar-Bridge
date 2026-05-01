@@ -4,7 +4,7 @@ from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.widget import Widget
-from kivy.properties import BooleanProperty, StringProperty, ListProperty
+from kivy.properties import BooleanProperty, StringProperty, ListProperty, NumericProperty
 from kivy.clock import Clock
 import random
 from datetime import datetime, timedelta
@@ -21,6 +21,7 @@ from kivy.utils import platform
 Window.size = 360, 702
 
 class ScholarBridge(App):
+	unread_count = NumericProperty(0)
 	def build(self):
 		return Interface()
 
