@@ -1,3 +1,157 @@
+<NewPasswordModal>:
+    size_hint: 0.85, 0.45
+    auto_dismiss: False
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(15)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+
+        Label:
+            text: '[b]Set New Password[/b]'
+            markup: True
+            font_size: sp(18)
+            size_hint_y: None
+            height: dp(30)
+
+        FormInput:
+            id: new_pwd
+            title: "New Password"
+            hint: "Enter new password"
+            # password: True  <-- Ensure your FormInput supports this or set it manually
+
+        FormInput:
+            id: confirm_pwd
+            title: "Confirm Password"
+            hint: "Re-type password"
+
+        PrimaryButton:
+            text: "Reset Password"
+            on_release: root.change_password(new_pwd.ids.internal_input.text, confirm_pwd.ids.internal_input.text)
+<SimulatedNotification>:
+    size_hint: 0.9, None
+    height: dp(70)
+    pos_hint: {'center_x': 0.5, 'top': 0.98}
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.16, 0.22, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(15)]
+        Color:
+            rgba: 0.43, 0.33, 0.85, 1
+        Line:
+            width: dp(1.5)
+            rounded_rectangle: [self.x, self.y, self.width, self.height, dp(15)]
+
+    BoxLayout:
+        padding: dp(15)
+        spacing: dp(15)
+        
+        Image:
+            source: 'assets/mail.png'
+            size_hint_x: None
+            width: dp(30)
+            color: 0.43, 0.33, 0.85, 1
+
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: "[b]New Message: ScholarBridge[/b]"
+                markup: True
+                font_size: sp(14)
+                halign: 'left'
+                text_size: self.size
+            Label:
+                text: root.message_text
+                font_size: sp(12)
+                color: 0.8, 0.8, 0.8, 1
+                halign: 'left'
+                text_size: self.size
+# --------------------------------------------------------#
+# NEW: 6-Digit OTP Reset Modal
+# --------------------------------------------------------#
+<ResetPasswordModal@ModalView>:
+    size_hint: 0.85, 0.45
+    background_color: 0, 0, 0, 0.7
+    auto_dismiss: False
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(15)
+        canvas.before:
+            Color:
+                rgba: 0.08, 0.09, 0.14, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+
+        Label:
+            text: "[b]RESET PASSWORD[/b]"
+            markup: True
+            font_size: sp(18)
+            size_hint_y: None
+            height: dp(30)
+
+        Label:
+            text: "Enter the 6-digit code sent to your email"
+            font_size: sp(13)
+            color: 0.6, 0.6, 0.6, 1
+            size_hint_y: None
+            height: dp(20)
+
+        # OTP Input Field
+        TextInput:
+            id: otp_input
+            hint_text: "000000"
+            input_filter: "int"
+            halign: "center"
+            font_size: sp(24)
+            multiline: False
+            background_color: 0.11, 0.12, 0.18, 1
+            foreground_color: 1, 1, 1, 1
+            size_hint_y: None
+            height: dp(50)
+            cursor_color: 1,1,1,1
+
+        BoxLayout:
+            spacing: dp(10)
+            size_hint_y: None
+            height: dp(50)
+            
+            Button:
+                text: "Cancel"
+                background_color: 0,0,0,0
+                on_release: root.dismiss()
+                canvas.before:
+                    Color:
+                        rgba: 1,1,1,0.1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(10)]
+
+            Button:
+                text: "[b]Verify[/b]"
+                markup: True
+                background_color: 0,0,0,0
+                on_release: root.verify_otp(otp_input.text)
+                canvas.before:
+                    Color:
+                        rgba: 0.4, 0.31, 0.85, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(10)]
 #-----------------------------------------------------------#
 # GLOBAL OFFLINE BANNER
 #-----------------------------------------------------------#

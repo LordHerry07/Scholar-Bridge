@@ -226,13 +226,14 @@
 					markup: True
 					halign: 'left'
 					valign: 'center'
-				Label:
-					text: '[b][color=#373174]Forgot?[/b][/color]'
-					font_size: dp(14)
-					text_size: self.size	
-					markup: True
-					halign: 'right'
-					valign: 'center'
+				Button:
+                    text: '[b][color=#6251B4]Forgot?[/b][/color]'
+                    font_size: dp(14)
+                    markup: True
+                    background_color: 0,0,0,0
+                    halign: 'right'
+                    valign: 'center'
+                    on_release: root.open_reset_modal(login_mail.text)
 			FloatLayout:
 				size_hint_y: 0.3
 				GridLayout:

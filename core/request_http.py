@@ -2,6 +2,7 @@ import requests
 from requests.exceptions import RequestException
 from kivy.clock import Clock
 import os
+from flask import jsonify
 
 CONFIG_FILE = 'server_config.txt'
 TIMEOUT = 5  # Seconds before giving up on the server
@@ -254,6 +255,49 @@ def update_profile(email, old_name, new_name, new_password, role, age, birthday,
         error_msg = response.json().get("error", "Update failed.")
     except:
         error_msg = "Unknown error occurred."
+        
+    return {"success": False, "error": error_msg}
+
+def request_password_reset(email):
+    url = f"{BASE_URL}/request_reset"
+    payload = {"email": email} # We only send the email to the server
+    response = safe_request(requests.post, url, json=payload)
+    
+    if response is None:
+        return {"success": False, "error": "Server connection failed"}
+
+    if response.status_code == 200:
+        # 1. Parse the JSON 'envelope' from the server
+        data = response.json()
+        # 2. Return the success status AND the OTP we found inside
+        return {
+            "success": True, 
+            "debug_otp": data.get("debug_otp") # <--- CATCH THE CODE
+        }
+
+    try:
+        error_msg = response.json().get("error", "Error requesting OTP")
+    except:
+        error_msg = f"Server Error ({response.status_code})"
+        
+    return {"success": False, "error": error_msg}
+
+def verify_reset_otp(email, otp):
+    url = f"{BASE_URL}/verify_reset"
+    payload = {"email": email, "otp": otp}
+    response = safe_request(requests.post, url, json=payload)
+    
+    if response is None:
+        return {"success": False, "error": "Server is offline"}
+
+    if response.status_code == 200:
+        return {"success": True}
+
+    # SAFE PARSING: Don't crash if the server sends HTML instead of JSON
+    try:
+        error_msg = response.json().get("error", "Invalid or expired code")
+    except Exception:
+        error_msg = f"Server Error ({response.status_code})"
         
     return {"success": False, "error": error_msg}
 

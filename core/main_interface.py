@@ -19,6 +19,8 @@ from core import request_http as request
 import threading
 from kivy.core.window import Window
 from kivy.clock import mainthread
+from kivy.uix.relativelayout import RelativeLayout
+from kivy.core.window import Window
 
 Builder.load_file('design/modal_interface.kv')
 Builder.load_file('design/main_system.kv')
@@ -71,11 +73,10 @@ class OfflineBanner(BoxLayout):
         # 3. Wait 3 seconds, then trigger the hide animation
         Clock.schedule_once(self.hide, 3)
 
-    def hide(self, dt):
-        # 4. Slide back up off-screen
-        anim = Animation(y=Window.height, duration=0.3, t='in_quad')
-        # 5. Destroy the widget once it's hidden to save memory
-        anim.bind(on_complete=lambda *x: self.parent.remove_widget(self) if self.parent else None)
+    def hide(self, *args):
+        anim = Animation(opacity=0, duration=0.4)
+        # Use Window.remove_widget to clean up properly
+        anim.bind(on_complete=lambda *x: Window.remove_widget(self) if self.parent else None)
         anim.start(self)
 
 # Global helper function to spawn the banner from anywhere
@@ -88,6 +89,86 @@ def show_offline_warning(*args):
 #-----------------------------------------------------------#
 # Modal_Interface
 #-----------------------------------------------------------#
+class SimulatedNotification(RelativeLayout):
+    message_text = StringProperty("")
+
+    def show(self):
+        self.opacity = 0
+        # Simple fade in animation
+        anim = Animation(opacity=1, duration=0.4)
+        anim.start(self)
+        # Auto-hide after 5 seconds
+        Clock.schedule_once(self.hide, 5)
+
+    def hide(self, *args):
+        anim = Animation(opacity=0, duration=0.4)
+        # Cleanup: remove from Window safely
+        anim.bind(on_complete=lambda *x: Window.remove_widget(self) if self.parent else None)
+        anim.start(self)
+
+# Add this helper to your main StartInterface or App class
+
+class ResetPasswordModal(ModalView):
+    user_email = StringProperty('')
+    def verify_otp(self, raw_code):
+        code = str(raw_code).strip()
+        if len(code) != 6:
+            # FIX: Use your existing NotificationModal instead of self.show_error
+            NotificationModal().show("Input Error", "Please enter the 6-digit code.", is_error=True)
+            return
+
+        # Use the property we stored
+        result = request.verify_reset_otp(self.user_email, code)
+        
+        if result.get("success"):
+            self.dismiss()
+            # This is the hand-off to the next modal
+            NewPasswordModal(user_email=self.user_email).open()
+            # Success notification
+            NotificationModal().show("Success", "Identity Verified! You can now reset your password.", is_error=False)
+            print("Access Granted! Identity Verified.")
+        else:
+            # Handle server-side errors (like incorrect/expired codes)
+            error_msg = result.get('error', 'Invalid code')
+            NotificationModal().show("Verification Failed", error_msg, is_error=True)
+
+        # Use the property we stored
+        result = request.verify_reset_otp(self.user_email, code)
+        
+        if result.get("success"):
+            self.dismiss()
+            # Logic for success (e.g., opening the password change modal)
+            print("Access Granted! Identity Verified.")
+        else:
+            print(f"Verification Failed: {result.get('error')}")
+            # Trigger your notification popup here
+
+def finalize_password_reset(email, new_password):
+    url = f"{BASE_URL}/reset_password"
+    payload = {"email": email, "password": new_password}
+    response = safe_request(requests.post, url, json=payload)
+    
+    if response and response.status_code == 200:
+        return {"success": True}
+    
+    return {"success": False, "error": "Could not update password"}
+
+class NewPasswordModal(ModalView):
+    user_email = StringProperty('')
+
+    def change_password(self, pwd, confirm):
+        if not pwd or pwd != confirm:
+            NotificationModal().show("Error", "Passwords do not match!", is_error=True)
+            return
+
+        result = request.finalize_password_reset(self.user_email, pwd)
+        
+        if result.get("success"):
+            self.dismiss()
+            NotificationModal().show("Success", "Password changed! You can now log in.", is_error=False)
+        else:
+            NotificationModal().show("Error", "Server update failed.", is_error=True)
+
 class ServerSelectorModal(ModalView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -466,10 +547,58 @@ class StartInterface(Screen):
     def open_server_settings(self):
         ServerSelectorModal().open()
 
+    def trigger_otp_notification(self, otp_code):
+        # We create the notification widget
+        notif = SimulatedNotification()
+        notif.message_text = f"ScholarBridge: Your code is {otp_code}"
+        
+        # FIX: We add it to the Window directly. 
+        # This bypasses the ScreenManager's "Screens only" rule.
+        Window.add_widget(notif) 
+        
+        # Since Window doesn't use relative coordinates like layouts,
+        # we ensure it stays at the top of the screen.
+        notif.y = Window.height - notif.height - dp(10)
+        
+        notif.show()
+
 #Children
 class Login(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    def open_reset_modal(self, email):
+        # The result now contains the 'debug_otp' from the server
+        result = request.request_password_reset(email)
+        
+        if result.get("success"):
+            # 1. Catch the code that the bridge just extracted
+            otp_to_show = result.get("debug_otp", "ERROR")
+            
+            # 2. Trigger the slide-down notification with that code
+            self.trigger_otp_notification(otp_to_show)
+            
+            # 3. Open the entry modal
+            ResetPasswordModal(user_email=email).open()
+        else:
+            # Handle user not found or server errors
+            error = result.get("error", "Unknown error")
+            print(f"Error: {error}")
+
+    def trigger_otp_notification(self, otp_code):
+        # 1. Create the notification instance
+        notif = SimulatedNotification()
+        notif.message_text = f"ScholarBridge: Your code is {otp_code}"
+        
+        # 2. Add it to the Window directly (bypasses ScreenManager restrictions)
+        Window.add_widget(notif) 
+        
+        # 3. Position it manually at the top of the Window
+        # We subtract the notification's height and a small margin from the Window height
+        notif.y = Window.height - notif.height - dp(10)
+        
+        # 4. Start the entry animation
+        notif.show()
 
     def login_user(self, email, password):
         global IS_OFFLINE_MODE
@@ -477,7 +606,6 @@ class Login(Widget):
         # --- THE BYPASS ---
         if IS_OFFLINE_MODE:
             print("📴 Offline Mode Active: Faking login and bypassing server!")
-            from kivy.app import App
             App.get_running_app().root.logged = True
             App.get_running_app().root.current = "main"
             return # Stop here!
