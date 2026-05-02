@@ -14,12 +14,15 @@ import json
 import os
 from kivy.metrics import dp
 import requests
+from kivy.animation import Animation
 from core import request_http as request
+import threading
 
 Builder.load_file('design/modal_interface.kv')
 Builder.load_file('design/main_system.kv')
 Builder.load_file('design/start_system.kv')
 Builder.load_file('design/dynamic_box.kv') 
+Builder.load_file('design/animations.kv') 
 
 #-----------------------------------------------------------#
 # Modal_Interface
@@ -600,15 +603,26 @@ class Product(Widget):
         self.filter_products() # Re-filter instantly when a button is clicked
 
     def get_products(self, dt=0):
-        response = request.get_products(satisfied=0)
-        if not response: 
-            return
+        # 1. Trigger: Show skeletons instantly
+        container = self.ids.dynamic_product
+        container.clear_widgets()
+        for _ in range(5):
+            container.add_widget(ProductSkeleton())
+            
+        # 2. Spawn a background thread so the UI never freezes!
+        threading.Thread(target=self._thread_fetch_products, daemon=True).start()
 
-        # Save the master list to memory
-        self.all_products = response 
+    def _thread_fetch_products(self):
+        # 3. Background Worker: This runs invisibly without touching the UI
+        response = request.get_products(satisfied=0)
         
-        # Trigger the initial render
-        self.filter_products() 
+        # 4. Safely push the result back to the Main UI Thread to draw the real cards
+        Clock.schedule_once(lambda dt: self._on_products_fetched(response), 0)
+
+    def _on_products_fetched(self, response):
+        if response:
+            self.all_products = response 
+        self.filter_products()
 
     def filter_products(self, *args):
         # 1. Grab the search text
@@ -731,13 +745,25 @@ class Service(Widget):
         self.filter_services() # Re-filter instantly when a button is clicked
 
     def get_services(self, dt=0):
-        response = request.get_products(satisfied=0)
-        if not response: 
-            return
+        container = self.ids.dynamic_service
+        container.clear_widgets()
+        for _ in range(5):
+            container.add_widget(ProductSkeleton())
+            
+        # Spawn the background thread
+        threading.Thread(target=self._thread_fetch_services, daemon=True).start()
 
-        # Save the master list to memory
-        self.all_services = response 
-        self.filter_services() 
+    def _thread_fetch_services(self):
+        # Invisible API call
+        response = request.get_products(satisfied=0)
+        
+        # Pass back to main thread
+        Clock.schedule_once(lambda dt: self._on_services_fetched(response), 0)
+
+    def _on_services_fetched(self, response):
+        if response:
+            self.all_services = response 
+        self.filter_services()
 
     def filter_services(self, *args):
         search_text = self.ids.search_bar.text.lower()
@@ -803,6 +829,25 @@ class Status(Widget):
                 # Update the string property to instantly refresh the UI
                 self.rating = str(profile.get('rating', '0'))
 
+# -----------------------------------------------------------
+# Animation Components
+# -----------------------------------------------------------
+class ProductSkeleton(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Start the pulsing animation the moment the skeleton is born
+        Clock.schedule_once(self.animate_pulse, 0)
+        
+    def animate_pulse(self, dt):
+        # Fades to 40% opacity, then back to 100%, and repeats infinitely
+        anim = Animation(opacity=0.4, duration=0.6) + Animation(opacity=1.0, duration=0.6)
+        anim.repeat = True
+        anim.start(self)
+
+
+# -----------------------------------------------------------
+# Root
+# -----------------------------------------------------------
 class Interface(ScreenManager):
     logged = False
     def __init__(self, **kwargs):
@@ -827,3 +872,4 @@ class Interface(ScreenManager):
             self.current = "main"
         else:
             self.current = "start"
+

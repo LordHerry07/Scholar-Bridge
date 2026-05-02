@@ -1,0 +1,68 @@
+# -----------------------------------------------------------
+# SKELETON LOADING CARD
+# -----------------------------------------------------------
+<ProductSkeleton>:
+    size_hint_y: None
+    height: dp(85)
+    padding: dp(15)
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.16, 1  # Dark card background
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+            
+    # Fake Avatar Circle
+    FloatLayout:
+        size_hint_x: None
+        width: dp(50)
+        canvas.before:
+            Color:
+                rgba: 0.15, 0.16, 0.22, 1  # Slightly lighter grey/purple
+            Ellipse:
+                pos: [self.center_x - dp(25), self.center_y - dp(25)]
+                size: dp(50), dp(50)
+                
+    # Fake Text Lines
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(10)
+        padding: [0, dp(10), 0, dp(10)]
+        Widget:
+            size_hint_y: None
+            height: dp(14)
+            canvas.before:
+                Color:
+                    rgba: 0.15, 0.16, 0.22, 1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(7)]
+        Widget:
+            size_hint_y: None
+            height: dp(10)
+            size_hint_x: 0.6  # Make the second line shorter to look like a subtitle
+            canvas.before:
+                Color:
+                    rgba: 0.15, 0.16, 0.22, 1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(5)]
+                    
+    # Fake Price Badge
+    Widget:
+        size_hint_x: None
+        width: dp(60)
+        size_hint_y: None
+        height: dp(18)
+        pos_hint: {'center_y': 0.5}
+        canvas.before:
+            Color:
+                rgba: 0.15, 0.16, 0.22, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(9)]
