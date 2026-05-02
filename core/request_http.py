@@ -99,8 +99,33 @@ def get_user_stats(full_name):
     response = safe_request(requests.get, url)
     if response and response.status_code == 200:
         return response.json()
-    return None
+        
+    # FALLBACK DATA: Returned if offline or API isn't built yet
+    print(f"⚠️ Using fallback stats for {full_name}")
+    return {
+        "total_earnings": 3450.00,
+        "active_listings": 8,
+        "items_sold": 24,
+        "rating": 4.9,                 # <-- The new rating key for the 4th panel!
+        "graph_data": [5, 10, 8, 25, 40, 30, 50, 45, 60] 
+    }
 
+def get_recent_activity(email):
+    url = f"{BASE_URL}/recent_activity/{email}"
+    response = safe_request(requests.get, url)
+    if response and response.status_code == 200:
+        return response.json()
+        
+    # FALLBACK DATA: Exact list of dictionaries your Dashboard expects
+    print(f"⚠️ Using fallback recent activity for {email}")
+    return [
+        {
+            "type": "Sold", 
+            "title": "Organic Chemistry 8th Ed.", 
+            "amount": "45.00", 
+            "time": "2h ago"
+        }
+    ]
 def get_products(satisfied=None):
     params = {}
     if satisfied is not None:
@@ -193,7 +218,44 @@ def get_user_profile(fullname):
     response = safe_request(requests.get, url)
     if response and response.status_code == 200:
         return response.json()
-    return None
+        
+    # FALLBACK DATA: Keeps the Menu and Dashboard perfectly synced when offline
+    print(f"⚠️ Using fallback profile for {fullname}")
+    return {
+        "full_name": fullname,
+        "rating": 4.2,
+        "products": []
+    }
+
+def update_profile(email, old_name, new_name, new_password, role, age, birthday, location):
+    url = f"{BASE_URL}/update_profile"
+    
+    # Pack all 8 variables into the JSON payload
+    payload = {
+        "email": email,
+        "old_name": old_name,
+        "full_name": new_name,
+        "password": new_password,
+        "role": role,
+        "age": age,
+        "birthday": birthday,
+        "location": location
+    }
+    
+    response = safe_request(requests.put, url, json=payload)
+    
+    if response is None:
+        return {"success": False, "error": "Could not connect to server."}
+        
+    if response.status_code == 200:
+        return {"success": True, "message": "Updated successfully!"}
+        
+    try:
+        error_msg = response.json().get("error", "Update failed.")
+    except:
+        error_msg = "Unknown error occurred."
+        
+    return {"success": False, "error": error_msg}
 
 def submit_review(reviewer_email, seller_name, rating, comment):
     url = f"{BASE_URL}/review"

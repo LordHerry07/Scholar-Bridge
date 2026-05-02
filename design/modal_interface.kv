@@ -105,7 +105,9 @@
                         size: self.size
                         pos: self.pos
                         radius: [dp(10)]
-                on_release: root.set_online_mode(server_ip_input.text)
+                on_release:
+                    root.save_server()
+                    root.set_online_mode(server_ip_input.text)
 
 <NotificationModal>:
     size_hint: 0.8, None

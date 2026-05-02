@@ -18,6 +18,7 @@ from kivy.animation import Animation
 from core import request_http as request
 import threading
 from kivy.core.window import Window
+from kivy.clock import mainthread
 
 Builder.load_file('design/modal_interface.kv')
 Builder.load_file('design/main_system.kv')
@@ -110,7 +111,6 @@ class ServerSelectorModal(ModalView):
         self.dismiss() # Close the modal
         
         # --- THE INSTANT JUMP ---
-        from kivy.app import App
         app = App.get_running_app()
         
         # Fake the login state so the app knows we are allowed in
@@ -165,33 +165,30 @@ class ActivityTile(BoxLayout):
     amount = StringProperty("")
     time_ago = StringProperty("")
     
-    # Dynamic colors that will change automatically
     icon_bg_color = ColorProperty([0, 0, 0, 0]) 
     text_color = ColorProperty([1, 1, 1, 1])
-
     icon_source = StringProperty("")
     
-    def on_activity_type(self, instance, value):
-        if value.lower() == 'sold':
+    # Bypass auto-binding and manually set everything securely
+    def setup_tile(self, act_type, title, amt, time_str):
+        self.activity_type = act_type
+        self.item_title = title
+        self.time_ago = time_str
+        
+        if act_type.lower() == 'sold':
             self.icon_bg_color = [0.18, 0.77, 0.41, 0.15] 
-            self.text_color = [0.18, 0.77, 0.41, 1]       
-            
-            # Put the correct path to your folder here! 
-            # (e.g., 'assets/green_up.png' or just 'green_up.png')
+            self.text_color = [0.18, 0.77, 0.41, 1]      
             self.icon_source = "assets/trend_up.png"                         
-            
-            if not self.amount.startswith('+'):
-                self.amount = f"+{self.amount}"
+            self.amount = f"+{amt}"
                 
-        elif value.lower() == 'purchased':
+        elif act_type.lower() == 'purchased':
             self.icon_bg_color = [0.85, 0.26, 0.33, 0.15] 
-            self.text_color = [0.85, 0.26, 0.33, 1]       
-            
-            # Put the correct path to your folder here!
-            self.icon_source = "assets/trend_down.png"                          
-            
-            if not self.amount.startswith('-'):
-                self.amount = f"-{self.amount}"
+            self.text_color = [0.85, 0.26, 0.33, 1]      
+            self.icon_source = "assets/trend_down.png"                         
+            self.amount = f"-{amt}"
+        else:
+            self.amount = amt
+
 class TransactionTile(BoxLayout):
     def set_data(self, txn_type, amount, date, description):
         # We manually push the text into the IDs we created
@@ -262,20 +259,61 @@ class ProductDetailsModal(ModalView):
             print("Not logged in!")
             return
         
-        # Call the API to process the transaction
-        success = request.buy_product(self.product_id, my_email)
+        # 1. Call the API
+        result = request.buy_product(self.product_id, my_email)
         
-        if success:
-            print(f"Successfully purchased {self.title}!")
+        # Safely check success
+        is_success = result.get("success") if isinstance(result, dict) else bool(result)
+        
+        if is_success:
+            # 1. Destroy the modal instantly
             self.dismiss()
-            # Refresh the product list so the bought item disappears
+            
+            # --- 2. THE DEEP SCAN RADAR REFRESH ---
             app = App.get_running_app()
-            app.root.get_screen('main').ids.screenmanager.get_screen('product').children[0].get_products()
+            
+            if app.root and app.root.has_screen('main'):
+                main_screen = app.root.get_screen('main')
+                
+                try:
+                    # Dive explicitly into the ScreenManager to scan EVERY tab
+                    sm = main_screen.ids.screenmanager
+                    for screen in sm.screens: 
+                        for widget in screen.walk():
+                            # Use the raw string name to bypass any Python class confusion
+                            widget_name = type(widget).__name__
+                            
+                            if widget_name == 'Product':
+                                widget.get_products()
+                            elif widget_name == 'Service':
+                                widget.get_services()
+                            elif widget_name == 'Dashboard':
+                                widget.load_stats()
+                            elif widget_name == 'Wallet':
+                                widget.load_balance()
+                except Exception as e:
+                    print(f"Radar Refresh Error: {e}")
+                        
+            # 3. Show Success Popup
+            try:
+                
+                notif = NotificationModal()
+                notif.ids.notif_title.text = "[color=#2ecc71]Transaction Successful[/color]"
+                notif.ids.notif_message.text = "Funds have been safely moved to Escrow."
+                notif.open()
+            except Exception as e:
+                print(f"Could not open success notification: {e}")
 
-            review_modal = ReviewModal(seller_name=self.fullname)
-            review_modal.open()
         else:
-            print("Transaction failed (insufficient funds or item already sold).")
+            # 4. Show Error Popup
+            try:
+                notif = NotificationModal()
+                notif.ids.notif_title.text = "[color=#e74c3c]Transaction Failed[/color]"
+                error_msg = result.get("error", "An unknown error occurred.") if isinstance(result, dict) else "Transaction failed."
+                notif.ids.notif_message.text = error_msg
+                notif.open()
+            except Exception as e:
+                print(f"Could not open error notification: {e}")
 
     def go_to_chat(self):
         self.dismiss()
@@ -509,9 +547,191 @@ class ChatBubble(BoxLayout):
 #-----------------------------------------------------------#
 # Mini_Interface
 #-----------------------------------------------------------#
+# =========================================================== #
+#                   1B. EDIT PROFILE MODAL                    #
+# =========================================================== #
+class EditProfileModal(ModalView):
+    def __init__(self, profile_screen_ref, **kwargs):
+        super().__init__(**kwargs)
+        self.profile_screen_ref = profile_screen_ref
+        from kivy.clock import Clock
+        Clock.schedule_once(self.load_modal_info, 0.1)
+
+    def load_modal_info(self, dt=0):
+        user = Data.user or {}
+        full_name = user.get('full_name', 'Guest User')
+        
+        if hasattr(self.ids, 'modal_display_name_label'):
+            self.ids.modal_display_name_label.text = f"[b]{full_name}[/b]"
+            self.ids.modal_initial_label.text = f"[b]{''.join([x[0].upper() for x in full_name.split() if x])}[/b]"
+
+        # Populate all text boxes with current data
+        if hasattr(self.ids, 'name_input'):
+            self.ids.name_input.ids.internal_input.text = full_name
+            self.ids.role_input.ids.internal_input.text = user.get('role', '')
+            self.ids.age_input.ids.internal_input.text = str(user.get('age', ''))
+            self.ids.birthday_input.ids.internal_input.text = user.get('birthday', '')
+            self.ids.location_input.ids.internal_input.text = user.get('location', '')
+            
+            self.ids.password_input.ids.internal_input.password = True
+            self.ids.confirm_password_input.ids.internal_input.password = True
+
+    def auto_locate(self):
+        # 1. Update UI to show we are searching
+        if hasattr(self.ids, 'location_input'):
+            self.ids.location_input.ids.internal_input.text = "Locating..."
+            self.ids.location_input.ids.internal_input.foreground_color = (0.43, 0.33, 0.85, 1) # Purple text
+        
+        # 2. Fire the background thread so Kivy doesn't freeze!
+        threading.Thread(target=self._fetch_osm_location, daemon=True).start()
+
+    def _fetch_osm_location(self):
+        try:
+            # STEP A: Try ip-api.com (Higher success rate on Linux/Desktops)
+            # This returns JSON with 'lat', 'lon', 'city', and 'regionName'
+            response = requests.get('http://ip-api.com/json/', timeout=5)
+            ip_data = response.json()
+
+            if ip_data.get('status') == 'success':
+                lat = ip_data.get('lat')
+                lon = ip_data.get('lon')
+                
+                # We can actually get the city directly from this API!
+                city = ip_data.get('city', '')
+                region = ip_data.get('regionName', '')
+                
+                # Try to refine it with OpenStreetMap for better accuracy
+                try:
+                    headers = {'User-Agent': 'ScholarBridgeApp/1.0'}
+                    osm_url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=14"
+                    osm_res = requests.get(osm_url, headers=headers, timeout=5).json()
+                    
+                    addr = osm_res.get('address', {})
+                    # OSM is more specific (can find neighborhood or town)
+                    refined_city = addr.get('city') or addr.get('town') or addr.get('village') or city
+                    refined_region = addr.get('state') or region
+                    
+                    final_location = f"{refined_city}, {refined_region}".strip(", ")
+                except:
+                    # Fallback to the basic IP data if OSM fails
+                    final_location = f"{city}, {region}".strip(", ")
+
+                if final_location and "None" not in final_location:
+                    self._update_location_ui(final_location, False)
+                else:
+                    self._update_location_ui("Location not found", True)
+            else:
+                self._update_location_ui("GPS Detection Failed", True)
+
+        except Exception as e:
+            print(f"Location Error: {e}")
+            self._update_location_ui("Network Error", True)
+
+    @mainthread
+    def _update_location_ui(self, result_text, is_error):
+        # 3. Safely update the Kivy UI back on the main thread
+        if hasattr(self.ids, 'location_input'):
+            self.ids.location_input.ids.internal_input.text = result_text
+            # Revert color back to white if successful, or red if failed
+            color = (0.88, 0.25, 0.25, 1) if is_error else (1, 1, 1, 1)
+            self.ids.location_input.ids.internal_input.foreground_color = color
+
+    def save_profile(self):
+        user = Data.user or {}
+        email = user.get('email')
+        old_name = user.get('full_name')
+
+        if hasattr(self.ids, 'name_input'):
+            # Grab all the fresh inputs
+            new_name = self.ids.name_input.ids.internal_input.text.strip()
+            new_role = self.ids.role_input.ids.internal_input.text.strip()
+            new_age = self.ids.age_input.ids.internal_input.text.strip()
+            new_birthday = self.ids.birthday_input.ids.internal_input.text.strip()
+            new_location = self.ids.location_input.ids.internal_input.text.strip()
+            
+            new_password = self.ids.password_input.ids.internal_input.text.strip()
+            confirm_password = self.ids.confirm_password_input.ids.internal_input.text.strip()
+            
+            if not new_name:
+                NotificationModal().show("Action Blocked", "Your full name cannot be empty.", is_error=True)
+                return
+                
+            if new_password != confirm_password:
+                NotificationModal().show("Action Blocked", "Passwords do not match.", is_error=True)
+                return
+
+            # Call API with the expanded variables
+            result = request.update_profile(
+                email, old_name, new_name, new_password, 
+                new_role, new_age, new_birthday, new_location
+            )
+            
+            is_success = result.get("success") if isinstance(result, dict) else bool(result)
+
+            if is_success:
+                # Save to Local Session
+                Data.user['full_name'] = new_name
+                Data.user['role'] = new_role
+                Data.user['age'] = new_age
+                Data.user['birthday'] = new_birthday
+                Data.user['location'] = new_location
+                
+                import json
+                try:
+                    with open('local_state.json', 'w', encoding='utf-8') as f:
+                        json.dump(Data.user, f)
+                except: pass
+
+                # Close Modal & Refresh Screen
+                self.dismiss()
+                self.profile_screen_ref.load_info()
+                
+                # Wake up Status Bar
+                from kivy.app import App
+                app = App.get_running_app()
+                if app.root and app.root.has_screen('main'):
+                    try:
+                        sm = app.root.get_screen('main').ids.screenmanager
+                        for screen in sm.screens: 
+                            for widget in screen.walk():
+                                if type(widget).__name__ == 'Status':
+                                    widget.check_info(0) 
+                    except: pass
+
+                NotificationModal().show("Profile Updated", "Your changes have been saved.", is_error=False)
+            else:
+                error_msg = result.get("error", "An unknown error occurred.") if isinstance(result, dict) else "Update failed."
+                NotificationModal().show("Update Failed", error_msg, is_error=True)
+
+
+# =========================================================== #
+#                  1A. READ-ONLY PROFILE                      #
+# =========================================================== #
 class Profile(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        from kivy.clock import Clock
+        Clock.schedule_once(self.load_info, 0.5)
+
+    def load_info(self, dt=0):
+        user = Data.user or {}
+        full_name = user.get('full_name', 'Guest User')
+        
+        if hasattr(self.ids, 'display_name_label'):
+            self.ids.display_name_label.text = f"[b]{full_name}[/b]"
+            self.ids.display_email_label.text = user.get('email', '')
+            self.ids.initial_label.text = f"[b]{''.join([x[0].upper() for x in full_name.split() if x])}[/b]"
+
+        # Inject Data into Read-Only Tiles
+        if hasattr(self.ids, 'tile_email'):
+            self.ids.tile_email.ids.subtitle_lbl.text = user.get('email', 'Not set')
+            self.ids.tile_role.ids.subtitle_lbl.text = user.get('role', 'Not set')
+            self.ids.tile_age.ids.subtitle_lbl.text = str(user.get('age', 'Not set'))
+            self.ids.tile_birthday.ids.subtitle_lbl.text = user.get('birthday', 'Not set')
+            self.ids.tile_location.ids.subtitle_lbl.text = user.get('location', 'Not set')
+
+    def open_edit_modal(self):
+        EditProfileModal(profile_screen_ref=self).open()
 class ChatBox(BoxLayout):
 
     target_user = StringProperty("")
@@ -661,43 +881,77 @@ class Dashboard(Widget):
         self.bind(size=self.on_resize, pos=self.on_resize)
         Clock.schedule_once(self.load_stats, 1)
         Clock.schedule_once(self.load_recent_activity, 0.5)
-    def load_recent_activity(self, dt):
-        # Assuming you have an id: recent_activity_list in your KV file
+    def load_recent_activity(self, dt=0):
+        user = Data.user or {}
+        
+        # THE FIX: Grab the email instead of full_name!
+        email = user.get('email')
+        
+        if not email: 
+            Clock.schedule_once(self.load_recent_activity, 1)
+            return
+
         container = self.ids.recent_activity_list
         container.clear_widgets()
         
-        # Dummy Data mimicking your screenshot
-        activities = [
-            {"type": "Sold", "title": "Organic Chemistry 8th Ed.", "amount": "₱45.00", "time": "2h ago"},
-            {"type": "Purchased", "title": "Python Tutoring Session", "amount": "₱25.00", "time": "5h ago"},
-            {"type": "Sold", "title": "Calculus Notes Chap 1-3", "amount": "₱15.00", "time": "1d ago"},
-        ]
-        
+        try:
+            # Pass the email to the API
+            activities = request.get_recent_activity(email)
+        except Exception as e:
+            print(f"Dashboard Activity Error: {e}")
+            activities = []
+
+        if not activities:
+            from kivy.uix.label import Label
+            from kivy.metrics import dp
+            empty_label = Label(
+                text="No recent transactions yet.",
+                color=(1, 1, 1, 0.4),
+                size_hint_y=None,
+                height=dp(50)
+            )
+            container.add_widget(empty_label)
+            return
+
         for act in activities:
-            tile = ActivityTile(
-                activity_type=act["type"],
-                item_title=act["title"],
-                amount=act["amount"],
-                time_ago=act["time"]
+            tile = ActivityTile()
+            tile.setup_tile(
+                act_type=act.get("type", "Unknown"),
+                title=act.get("title", "Item"),
+                amt=str(act.get("amount", "0.00")),
+                time_str=act.get("time", "Just now")
             )
             container.add_widget(tile)
+
     def load_stats(self, dt=0):
         user = Data.user or {}
         full_name = user.get('full_name')
+        
+        # THE FIX: Wait for the user to log in before trying to draw the graph
         if not full_name: 
+            Clock.schedule_once(self.load_stats, 1)
             return
 
         stats = request.get_user_stats(full_name)
+        
+        # Single Source of Truth for the 4th Panel Rating
+        profile_data = request.get_user_profile(full_name)
+        real_rating = profile_data.get('rating', 0.0) if profile_data else 0.0
+        
         if stats:
             earnings = stats.get('total_earnings', 0)
             listings = stats.get('active_listings', 0)
             sold = stats.get('items_sold', 0)
             
             # Inject Labels
-            self.ids.earnings_label.text = f"[b]₱{earnings:,.2f}[/b]"
-            self.ids.active_listings_label.text = f"[b]{listings}[/b]"
+            if hasattr(self.ids, 'earnings_label'):
+                self.ids.earnings_label.text = f"[b]₱{earnings:,.2f}[/b]"
+            if hasattr(self.ids, 'active_listings_label'):
+                self.ids.active_listings_label.text = f"[b]{listings}[/b]"
             if hasattr(self.ids, 'items_sold_label'):
                 self.ids.items_sold_label.text = f"[b]{sold}[/b]"
+            if hasattr(self.ids, 'rating_label'):
+                self.ids.rating_label.text = f"[b]{float(real_rating):.1f}[/b]"
 
             # Set Graph Data
             graph_data = stats.get('graph_data', [])
@@ -711,6 +965,7 @@ class Dashboard(Widget):
             self.max_v = max(current_max * BUFFER, 50)
             
             self.draw_graph()
+            self.load_recent_activity()
 
     def draw_graph(self):
         chart = self.ids.chart
@@ -810,7 +1065,7 @@ class Product(Widget):
 
     def _on_products_fetched(self, response):
         if response:
-            self.all_products = response 
+            self.all_products = response
         self.filter_products()
 
     def filter_products(self, *args):
@@ -1034,6 +1289,41 @@ class Status(Widget):
                 # Update the string property to instantly refresh the UI
                 self.rating = str(profile.get('rating', '0'))
 
+class ProfileInterface(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+class SettingsInterface(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def clear_local_cache(self):
+        """Deletes the offline JSON file to free up space."""
+        cache_file = "scholarbridge_offline_data.json"
+        if os.path.exists(cache_file):
+            try:
+                os.remove(cache_file)
+                print("🗑️ Offline cache successfully cleared!")
+                # Optional: Show a Kivy popup confirming it was cleared
+            except Exception as e:
+                print(f"Failed to clear cache: {e}")
+        else:
+            print("Cache is already empty.")
+
+    def logout_user(self):
+        """Clears local session state and returns to login."""
+        # 1. Delete local login token/state
+        if os.path.exists('local_state.json'):
+            try:
+                os.remove('local_state.json')
+            except: pass
+            
+        # 2. Tell the app we are logged out
+        app = App.get_running_app()
+        app.root.logged = False
+        
+        # 3. Jump back to the StartInterface
+        app.root.current = "start"
 # -----------------------------------------------------------
 # Animation Components
 # -----------------------------------------------------------

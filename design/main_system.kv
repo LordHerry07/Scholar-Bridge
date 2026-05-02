@@ -336,13 +336,10 @@
                         orientation: 'horizontal'
                         Label:
                             size_hint_x: 0.1
-                        Label:
+                        Image:
+                            source: 'assets/peso.png'
                             size_hint_x: 0.3
-                            text: '₱'
-                            text_size: self.size
-                            color: 0.4, 0.31, 0.85, 1
-                            halign: 'center'
-                            valign: 'center'
+                          
                             canvas.before:
                                 Color:
                                     rgba: 0.15, 0.17, 0.23, 0.5
@@ -353,7 +350,7 @@
                             size_hint_x: 0.1
                         Label:
                             size_hint_x: 0.3
-                            text: '+12%'
+                            text: '+2'
                             font_size: dp(12)
                             text_size: self.size
                             color: 0.16, 0.59, 0.33, 1
@@ -498,6 +495,7 @@
 #4------------------------------------------------------------#
                 BoxLayout:
                     orientation: 'vertical'
+                    spacing: dp(5)
                     canvas.before:
                         Color:
                             rgba: 0.11, 0.12, 0.18, 1
@@ -505,6 +503,52 @@
                             size: self.size
                             pos: self.pos
                             radius: [10]
+                    Label:
+                        size_hint_y: 0.1
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Label:
+                            size_hint_x: 0.1
+                        Image:
+                            source: 'assets/star-hallow.png'  # Make sure this icon exists!
+                            size_hint_x: 0.3
+                            canvas.before:
+                                Color:
+                                    rgba: 0.15, 0.17, 0.23, 0.5
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                        Label:
+                            size_hint_x: 0.1
+                        Label:
+                            size_hint_x: 0.3
+                            text: 'Top 5%' # A nice little gamification touch
+                            font_size: dp(12)
+                            text_size: self.size
+                            color: 1, 0.8, 0.2, 1  # Gold color
+                            halign: 'center'
+                            valign: 'center'
+                            canvas.before:
+                                Color:
+                                    rgba: 0.15, 0.17, 0.23, 0.5
+                                RoundedRectangle:
+                                    size: self.size
+                                    pos: self.pos
+                        Label:
+                            size_hint_x: 0.1
+                    Label:
+                        id: rating_label
+                        text: '[b]5.0[/b]'
+                        font_size: dp(16)
+                        text_size: self.size
+                        markup: True
+                        halign: 'center'
+                    Label:
+                        text: 'Seller Rating'
+                        font_size: dp(10)
+                        text_size: self.size
+                        halign: 'center'
+                        valign: 'top'
          
 #5----------------------------------------------------------#
             BoxLayout:
@@ -1724,6 +1768,8 @@
                                 text: 'My Profile'
                                 on_release: 
                                     screenmanager.current = 'profile'
+                                    # THIS LINE FORCES THE INSTANT DATA LOAD:
+                                    screenmanager.get_screen('profile').children[0].load_info()
                                     root.parent.parent.parent.parent.ids.label1.text = '[b]MY PROFILE[/b]'
                                     root.parent.parent.parent.parent.ids.label2.text = 'view your details'
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
@@ -1928,8 +1974,78 @@
             height: self.minimum_height
             spacing: dp(10)        
 
-# ------------------- 1. PROFILE SCREEN ------------------- #
+# -----------------------------------------------------------#
+# Custom Dynamic Class for Read-Only Profile Tiles
+# -----------------------------------------------------------#
+<ProfileDataTile@BoxLayout>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: dp(80) # Made slightly taller for better text vertical spacing
+    padding: [dp(15), 0]
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.16, 1  # Dark Card Background
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(15)]
+    
+    icon_source: ''
+    title: ''
+    subtitle: ''
+
+    # Left Icon with squared-off purple background
+    FloatLayout:
+        size_hint: None, None
+        size: dp(50), dp(50)
+        pos_hint: {'center_y': 0.5}
+        canvas.before:
+            Color:
+                rgba: 0.12, 0.13, 0.20, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(10)]
+        Image:
+            id: tile_icon
+            source: root.icon_source
+            size_hint: 0.6, 0.6
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+    # Text content (prominent title, dimmer gray subtitle)
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(5)
+        pos_hint: {'center_y': 0.5}
+        Label:
+            text: root.title
+            id: title_lbl
+            font_size: sp(16)
+            bold: True
+            color: 1, 1, 1, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: root.subtitle
+            id: subtitle_lbl
+            font_size: sp(13)
+            color: 0.7, 0.7, 0.7, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+            shorten: True
+            shorten_from: 'right'
+
+
+# =========================================================== #
+#                      THE PROFILE FLOW                      #
+# =========================================================== #
+
+# ------------------- 1A. READ-ONLY PROFILE ------------------- #
 <Profile>:
+    # This screen now looks exactly like user's screenshot image_1.png
     size: root.size
     pos: root.pos
     orientation: 'vertical'
@@ -1939,8 +2055,6 @@
     ScrollView:
         do_scroll: False, True
         bar_width: 0
-        
-        # Priority Mobile Constraint: Limit touch dispatching to prevent lock-ups
         scroll_timeout: 250
         scroll_distance: dp(20)
 
@@ -1948,13 +2062,13 @@
             orientation: 'vertical'
             size_hint_y: None
             height: self.minimum_height
-            spacing: dp(20)
+            spacing: dp(15)
 
-            # Avatar Header
+            # --- DYNAMIC AVATAR HEADER (matches image_1.png) ---
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
-                height: dp(150)
+                height: dp(160)
                 spacing: dp(5)
                 FloatLayout:
                     size_hint: None, None
@@ -1967,56 +2081,244 @@
                             pos: self.pos
                             size: self.size
                     Label:
-                        text: '[b]JD[/b]'
+                        id: initial_label
+                        text: '[b]-[/b]'
                         markup: True
                         font_size: sp(32)
                         color: 0.43, 0.33, 0.85, 1
                         pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                 Label:
-                    text: '[b]Jane Doe[/b]'
+                    id: display_name_label
+                    text: '[b]Loading...[/b]'
                     markup: True
-                    font_size: sp(20)
+                    font_size: sp(22) # Made name larger
                     size_hint_y: None
-                    height: dp(25)
+                    height: dp(30)
                 Label:
-                    text: '@janedoe'
+                    id: display_email_label # Gray text below the name
+                    text: '...'
                     font_size: sp(14)
                     color: 0.6, 0.6, 0.6, 1
                     size_hint_y: None
                     height: dp(20)
-         
-            # Info Cards
+
+            # --- READ-ONLY INFO TILES (Uses redesigned ProfileDataTile) ---
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
                 height: self.minimum_height
                 spacing: dp(10)
-                
-                # Assuming <ListTile> is successfully defined elsewhere in your .kv
-                ListTile:
-                    icon_source: 'assets/email.png'
+
+                ProfileDataTile:
+                    id: tile_email
+                    icon_source: 'assets/email.png' # Using envelope icon from image_1.png
                     title: 'Email'
-                    subtitle: 'jane.doe@university.edu'
-                    show_arrow: False
-                ListTile:
-                    icon_source: 'assets/phone.png'
-                    title: 'Phone'
-                    subtitle: '+1 (555) 123-4567'
-                    show_arrow: False
-                ListTile:
-                    icon_source: 'assets/school.png'
-                    title: 'University'
-                    subtitle: 'State University'
-                    show_arrow: False
-                ListTile:
-                    icon_source: 'assets/location.png'
+                    subtitle: 'loading...'
+                
+                ProfileDataTile:
+                    id: tile_role
+                    icon_source: 'assets/school.png' # Existing graduation cap icon
+                    title: 'Role'
+                    subtitle: 'loading...'
+                
+                ProfileDataTile:
+                    id: tile_age
+                    icon_source: 'assets/person_normal.png' # Existing person icon
+                    title: 'Age'
+                    subtitle: 'loading...'
+                
+                ProfileDataTile:
+                    id: tile_birthday
+                    icon_source: 'assets/star.png' # Existing star icon
+                    title: 'Birthday'
+                    subtitle: 'loading...'
+
+                ProfileDataTile:
+                    id: tile_location
+                    icon_source: 'assets/location.png' # Using map pin icon from image_1.png
                     title: 'Location'
-                    subtitle: 'Campus Dorm B, Room 204'
-                    show_arrow: False
-         
-            # FIX: Call the valid dynamic class instead of the abstract ButtonBehavior
+                    subtitle: 'loading...'
+
+            # This space ensures the button stays below the cards
+            Label:
+                size_hint_y: None
+                height: dp(15)
+
+            # THIS CENTRAL BUTTON OPENS THE EDIT MODAL (matches image_1.png)
             EditProfileButton:
-                on_release: print("Edit profile triggered")
+                text: 'Edit Profile'
+                on_release: root.open_edit_modal()
+
+
+# ------------------- 1B. EDIT PROFILE POPUP ------------------- #
+<EditProfileModal@ModalView>:
+    # Master Background for the overlay
+    background_color: 0, 0, 0, 0.6
+    size_hint: 0.92, 0.88  # Made slightly taller
+    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    auto_dismiss: False 
+
+    # Master Layout
+    BoxLayout:
+        id: modal_layout
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(10)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+
+        # --- 1. PINNED AVATAR HEADER ---
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(130) # Shrunk slightly to prioritize form space
+            spacing: dp(5)
+            FloatLayout:
+                size_hint: None, None
+                size: dp(70), dp(70) 
+                pos_hint: {'center_x': 0.5}
+                canvas.before:
+                    Color:
+                        rgba: 0.12, 0.13, 0.20, 1
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+                Label:
+                    id: modal_initial_label
+                    text: '[b]-[/b]'
+                    markup: True
+                    font_size: sp(26)
+                    color: 0.43, 0.33, 0.85, 1
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            Label:
+                id: modal_display_name_label
+                text: '[b]Loading...[/b]'
+                markup: True
+                font_size: sp(18)
+                size_hint_y: None
+                height: dp(25)
+        
+        # --- 2. SCROLLABLE FORM FIELDS ---
+        ScrollView:
+            do_scroll: False, True
+            bar_width: 0
+            scroll_timeout: 250
+            scroll_distance: dp(20)
+
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(15)
+                padding: [0, dp(10), 0, dp(20)] # Extra padding at the bottom so it doesn't get cut off
+                
+                FormInput:
+                    id: name_input
+                    title: 'Full Name'
+                    hint: 'Change your display name'
+
+                FormInput:
+                    id: role_input
+                    title: 'Role'
+                    hint: 'Student or Teacher'
+                
+                FormInput:
+                    id: age_input
+                    title: 'Age'
+                    hint: 'e.g. 21'
+
+                FormInput:
+                    id: birthday_input
+                    title: 'Birthday'
+                    hint: 'YYYY-MM-DD or Month Day'
+
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(80)
+                    spacing: dp(10)
+                    
+                    FormInput:
+                        id: location_input
+                        title: 'Location'
+                        hint: 'Campus Dorm B, Room 204'
+                        size_hint_x: 0.8  # Takes up 80% of the width
+                        
+                    # Locate Me Button
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint_x: 0.2  # Takes up 20% of the width
+                        Label:
+                            size_hint_y: None
+                            height: dp(28)
+                        Button:
+                            text: ''
+                            background_color: 0,0,0,0
+                            on_release: root.auto_locate()
+                            canvas.before:
+                                Color:
+                                    rgba: 0.15, 0.16, 0.22, 1
+                                RoundedRectangle:
+                                    pos: self.pos
+                                    size: self.size
+                                    radius: [dp(8)]
+                                Color:
+                                    rgba: 0.43, 0.33, 0.85, 1
+                                Line:
+                                    rounded_rectangle: [self.x, self.y, self.width, self.height, dp(8)]
+                                    width: dp(1)
+                            Image:
+                                size: self.parent.size
+                                source: 'assets/location.png'
+                                size_hint: None, None
+                                size: dp(24), dp(24)
+                                center_x: self.parent.center_x
+                                center_y: self.parent.center_y
+                
+                FormInput:
+                    id: password_input
+                    title: 'New Password'
+                    hint: 'Leave blank to keep current'
+
+                FormInput:
+                    id: confirm_password_input
+                    title: 'Confirm Password'
+                    hint: 'Re-type new password'
+
+        # --- 3. PINNED ACTION BUTTONS ---
+        BoxLayout:
+            size_hint_y: None
+            height: dp(120)
+            orientation: 'vertical'
+            spacing: dp(10)
+
+            PrimaryButton:
+                text: '[b]Save Changes[/b]'
+                on_release: root.save_profile()
+
+            Button:
+                text: '[b]Cancel[/b]'
+                markup: True
+                size_hint_y: None
+                height: dp(55)
+                background_color: 0,0,0,0
+                canvas.before:
+                    Color:
+                        rgba: 0.15, 0.16, 0.22, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(27)]
+                    Color:
+                        rgba: 0.3, 0.3, 0.3, 1
+                    Line:
+                        rounded_rectangle: [self.x, self.y, self.width, self.height, dp(27)]
+                        width: dp(1)
+                on_release: root.dismiss()
 
 # ------------------- 2. CHATBOX SCREEN ------------------- #
 <ChatBox>:
