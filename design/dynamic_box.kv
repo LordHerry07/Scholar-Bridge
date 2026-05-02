@@ -1,6 +1,79 @@
 # -----------------------------------------------------------
 # Polished Listing Card (Used for both Product and Service)
 # -----------------------------------------------------------
+<ActivityTile>:
+    size_hint_y: None
+    height: dp(70)
+    padding: dp(12)
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.16, 1  # Dark card background
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+            
+    # --- 1. Left Icon Box ---
+    AnchorLayout:
+        size_hint_x: None
+        width: dp(45)
+        canvas.before:
+            Color:
+                rgba: root.icon_bg_color
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(10)]
+        Image:
+            source: root.icon_source
+            size_hint: 0.5, 0.5 # Scales the image down so it fits nicely inside the rounded box
+            allow_stretch: True
+            keep_ratio: True
+                
+    # --- 2. Middle Text (Title & Description) ---
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(2)
+        Label:
+            text: f"[b]{root.activity_type}[/b]"
+            markup: True
+            font_size: sp(15)
+            color: 1, 1, 1, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: root.item_title
+            font_size: sp(13)
+            color: 0.5, 0.5, 0.5, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+            shorten: True
+            shorten_from: 'right'
+            
+    # --- 3. Right Text (Amount & Time) ---
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_x: None
+        width: dp(80)
+        spacing: dp(2)
+        Label:
+            text: f"[b]{root.amount}[/b]"
+            markup: True
+            font_size: sp(15)
+            color: root.text_color
+            text_size: self.size
+            halign: 'right'
+            valign: 'bottom'
+        Label:
+            text: root.time_ago
+            font_size: sp(12)
+            color: 0.5, 0.5, 0.5, 1
+            text_size: self.size
+            halign: 'right'
+            valign: 'top'
 <DynamicProduct>:
     size_hint_y: None
     height: dp(110)

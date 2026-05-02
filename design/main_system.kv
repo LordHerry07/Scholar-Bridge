@@ -2,12 +2,12 @@
 #:import os os
 <Interface>:
 	id: interface
-    MainInterface:
-		name: "main"
-		id: main
 	StartInterface:
 		name: "start"
 		id: start
+	MainInterface:
+		name: "main"
+		id: main
 
 <MainInterface>:
     canvas.before:
@@ -571,17 +571,22 @@
                 markup: True
                 text_size: self.size
                 valign: 'center'
-                halign: 'center'
-            BoxLayout:
-                size_hint_y: 2
-                id: dynamic_activity
-                orientation: 'vertical'
-                spacing: dp(10)
-                DynamicActivity:
-                DynamicActivity:
-                DynamicActivity:
-                DynamicActivity:
-                DynamicActivity:
+                halign: 'left'
+            ScrollView:
+                do_scroll: False, True
+                size_hint_y: 1 # Let it take up the remaining screen space
+                
+                BoxLayout:
+                    id: recent_activity_list
+                    orientation: 'vertical'
+                    
+                    # --- THE MAGIC TRICK ---
+                    size_hint_y: None
+                    height: self.minimum_height
+                    # -----------------------
+                    
+                    spacing: dp(10)
+                    padding: [0, dp(5), 0, dp(100)]
                   
             Label:
                 size_hint_y: 0.05
@@ -1431,6 +1436,7 @@
     height: dp(55)
     spacing: dp(15)
     padding: [dp(10), dp(5), dp(10), dp(5)]
+    opacity: 0.5 if self.state == 'down' else 1.0
    
     # Custom properties to easily pass data
     icon_source: ''

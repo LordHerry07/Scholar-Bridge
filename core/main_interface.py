@@ -17,6 +17,7 @@ import requests
 from kivy.animation import Animation
 from core import request_http as request
 import threading
+from kivy.core.window import Window
 
 Builder.load_file('design/modal_interface.kv')
 Builder.load_file('design/main_system.kv')
@@ -24,6 +25,65 @@ Builder.load_file('design/start_system.kv')
 Builder.load_file('design/dynamic_box.kv') 
 Builder.load_file('design/animations.kv') 
 
+IS_OFFLINE_MODE = False
+CACHE_FILE = "scholarbridge_offline_data.json"
+
+def save_to_cache(key, data):
+    """Saves API data to the local offline file."""
+    # 1. Read the existing file so we don't overwrite other tabs
+    cache = {}
+    if os.path.exists(CACHE_FILE):
+        try:
+            with open(CACHE_FILE, 'r') as f:
+                cache = json.load(f)
+        except: pass 
+        
+    # 2. Update the specific key (like 'products' or 'dashboard')
+    cache[key] = data
+    
+    # 3. Save it back to the phone
+    with open(CACHE_FILE, 'w') as f:
+        json.dump(cache, f)
+
+def load_from_cache(key):
+    """Loads backup data if the server is unreachable."""
+    if os.path.exists(CACHE_FILE):
+        try:
+            with open(CACHE_FILE, 'r') as f:
+                cache = json.load(f)
+                return cache.get(key, []) # Return the data, or an empty list
+        except: pass
+    return []
+
+class OfflineBanner(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # 1. Start completely off-screen at the very top
+        self.size_hint = (1, None)
+        self.y = Window.height 
+        
+    def show(self):
+        # 2. Slide down into view smoothly
+        anim = Animation(y=Window.height - self.height, duration=0.3, t='out_quad')
+        anim.start(self)
+        
+        # 3. Wait 3 seconds, then trigger the hide animation
+        Clock.schedule_once(self.hide, 3)
+
+    def hide(self, dt):
+        # 4. Slide back up off-screen
+        anim = Animation(y=Window.height, duration=0.3, t='in_quad')
+        # 5. Destroy the widget once it's hidden to save memory
+        anim.bind(on_complete=lambda *x: self.parent.remove_widget(self) if self.parent else None)
+        anim.start(self)
+
+# Global helper function to spawn the banner from anywhere
+def show_offline_warning(*args):
+    from kivy.metrics import dp
+    banner = OfflineBanner()
+    banner.height = dp(35) # Height of the banner
+    Window.add_widget(banner) # Attach globally to the absolute top layer
+    banner.show()
 #-----------------------------------------------------------#
 # Modal_Interface
 #-----------------------------------------------------------#
@@ -32,6 +92,32 @@ class ServerSelectorModal(ModalView):
         super().__init__(**kwargs)
         # Pre-fill the input box with the current saved IP
         Clock.schedule_once(self.populate_input, 0.1)
+
+    def set_online_mode(self, ip_address):
+        """Called when the user enters an IP and clicks Connect"""
+        global IS_OFFLINE_MODE
+        IS_OFFLINE_MODE = False
+        
+        # ... your existing logic to update the request URL with the new IP ...
+        print(f"🌍 Switching to ONLINE mode at {ip_address}")
+        self.dismiss() # Close the modal
+
+    def set_offline_mode(self):
+        global IS_OFFLINE_MODE
+        IS_OFFLINE_MODE = True
+        print("📴 Switching to OFFLINE mode. Network bypassed.")
+        
+        self.dismiss() # Close the modal
+        
+        # --- THE INSTANT JUMP ---
+        from kivy.app import App
+        app = App.get_running_app()
+        
+        # Fake the login state so the app knows we are allowed in
+        app.root.logged = True 
+        
+        # Teleport directly to your main interface!
+        app.root.current = "main"
 
     def populate_input(self, dt):
         # Strip the http:// for a cleaner user experience
@@ -73,6 +159,39 @@ class ReviewModal(ModalView):
 #-----------------------------------------------------------#
 # Dynamic_Box
 #-----------------------------------------------------------#
+class ActivityTile(BoxLayout):
+    activity_type = StringProperty("")
+    item_title = StringProperty("")
+    amount = StringProperty("")
+    time_ago = StringProperty("")
+    
+    # Dynamic colors that will change automatically
+    icon_bg_color = ColorProperty([0, 0, 0, 0]) 
+    text_color = ColorProperty([1, 1, 1, 1])
+
+    icon_source = StringProperty("")
+    
+    def on_activity_type(self, instance, value):
+        if value.lower() == 'sold':
+            self.icon_bg_color = [0.18, 0.77, 0.41, 0.15] 
+            self.text_color = [0.18, 0.77, 0.41, 1]       
+            
+            # Put the correct path to your folder here! 
+            # (e.g., 'assets/green_up.png' or just 'green_up.png')
+            self.icon_source = "assets/trend_up.png"                         
+            
+            if not self.amount.startswith('+'):
+                self.amount = f"+{self.amount}"
+                
+        elif value.lower() == 'purchased':
+            self.icon_bg_color = [0.85, 0.26, 0.33, 0.15] 
+            self.text_color = [0.85, 0.26, 0.33, 1]       
+            
+            # Put the correct path to your folder here!
+            self.icon_source = "assets/trend_down.png"                          
+            
+            if not self.amount.startswith('-'):
+                self.amount = f"-{self.amount}"
 class TransactionTile(BoxLayout):
     def set_data(self, txn_type, amount, date, description):
         # We manually push the text into the IDs we created
@@ -213,8 +332,15 @@ class DynamicProduct(ButtonBehavior, BoxLayout):
         super().__init__(**kwargs)
 
         self.description = kwargs.get('description', 'This seller has not provided a description for this listing.')
-    
+
+    def on_press(self):
+        # Instantly dim the card when touched
+        anim = Animation(opacity=0.5, duration=0.05)
+        anim.start(self)
+
     def on_release(self, *args):
+        anim = Animation(opacity=1.0, duration=0.15)
+        anim.start(self)
         # Open the pop-up panel when the card is clicked
         print(f"DEBUG: Tapped Product ID: {self.product_id}")
         modal = ProductDetailsModal(
@@ -239,6 +365,16 @@ class InboxTile(ButtonBehavior, BoxLayout):
     partner_name = StringProperty("")
     last_message = StringProperty("")
     time = StringProperty("")
+
+    def on_press(self):
+        anim = Animation(opacity=0.5, duration=0.05)
+        anim.start(self)
+        
+    def on_release(self, *args):
+        # Ease back to normal, then open the chat
+        anim = Animation(opacity=1.0, duration=0.15)
+        anim.start(self)
+        self.open_chat()
 
     def open_chat(self):
         app = App.get_running_app()
@@ -298,24 +434,39 @@ class Login(Widget):
         super().__init__(**kwargs)
 
     def login_user(self, email, password):
-        if email == '' or password == '':
-            return
-        response = request.log_user(email, password)
-        if response.status_code == 200:
-            data = response.json()
-            Data.user = data.get('user', {})
-            
-            try:
-                with open('local_state.json', 'w', encoding='utf-8') as f:
-                    json.dump(Data.user, f)
-            except Exception as e:
-                print("Failed to save session:", e)
-            # --------------------------------------------------
-            
-            # Use standard App execution to switch screens
-            
+        global IS_OFFLINE_MODE
+        
+        # --- THE BYPASS ---
+        if IS_OFFLINE_MODE:
+            print("📴 Offline Mode Active: Faking login and bypassing server!")
+            from kivy.app import App
             App.get_running_app().root.logged = True
             App.get_running_app().root.current = "main"
+            return # Stop here!
+            
+        # --- NORMAL ONLINE LOGIN ---
+        if email == '' or password == '':
+            return
+            
+        try:
+            response = request.log_user(email, password)
+            if response.status_code == 200:
+                data = response.json()
+                Data.user = data.get('user', {})
+                
+                try:
+                    import json # Ensure json is imported at the top of your file!
+                    with open('local_state.json', 'w', encoding='utf-8') as f:
+                        json.dump(Data.user, f)
+                except Exception as e:
+                    print("Failed to save session:", e)
+                
+                # Use standard App execution to switch screens
+                from kivy.app import App
+                App.get_running_app().root.logged = True
+                App.get_running_app().root.current = "main"
+        except Exception as e:
+            print(f"🚨 Network Error during login: {e}")
 
 class Signup(Widget):
     def __init__(self, **kwargs):
@@ -359,9 +510,10 @@ class ChatBubble(BoxLayout):
 # Mini_Interface
 #-----------------------------------------------------------#
 class Profile(BoxLayout):
-    pass
-
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 class ChatBox(BoxLayout):
+
     target_user = StringProperty("")
     
     def __init__(self, **kwargs):
@@ -469,7 +621,8 @@ class Wallet(BoxLayout):
             print(f"Failed to {action} funds.")
 
 class UserSettings(BoxLayout):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 class LogOut(FloatLayout):
     pass
@@ -507,7 +660,27 @@ class Dashboard(Widget):
         # Bind to screen resize so the graph always scales perfectly
         self.bind(size=self.on_resize, pos=self.on_resize)
         Clock.schedule_once(self.load_stats, 1)
-
+        Clock.schedule_once(self.load_recent_activity, 0.5)
+    def load_recent_activity(self, dt):
+        # Assuming you have an id: recent_activity_list in your KV file
+        container = self.ids.recent_activity_list
+        container.clear_widgets()
+        
+        # Dummy Data mimicking your screenshot
+        activities = [
+            {"type": "Sold", "title": "Organic Chemistry 8th Ed.", "amount": "₱45.00", "time": "2h ago"},
+            {"type": "Purchased", "title": "Python Tutoring Session", "amount": "₱25.00", "time": "5h ago"},
+            {"type": "Sold", "title": "Calculus Notes Chap 1-3", "amount": "₱15.00", "time": "1d ago"},
+        ]
+        
+        for act in activities:
+            tile = ActivityTile(
+                activity_type=act["type"],
+                item_title=act["title"],
+                amount=act["amount"],
+                time_ago=act["time"]
+            )
+            container.add_widget(tile)
     def load_stats(self, dt=0):
         user = Data.user or {}
         full_name = user.get('full_name')
@@ -613,10 +786,26 @@ class Product(Widget):
         threading.Thread(target=self._thread_fetch_products, daemon=True).start()
 
     def _thread_fetch_products(self):
-        # 3. Background Worker: This runs invisibly without touching the UI
-        response = request.get_products(satisfied=0)
+        global IS_OFFLINE_MODE
         
-        # 4. Safely push the result back to the Main UI Thread to draw the real cards
+        # --- THE BYPASS: Intentional Offline Mode ---
+        if IS_OFFLINE_MODE:
+            response = load_from_cache('marketplace_products')
+            Clock.schedule_once(lambda dt: self._on_products_fetched(response), 0)
+            return # Stop here! Don't even try to hit the network.
+            
+        # --- NORMAL ONLINE MODE ---
+        try:
+            response = request.get_products(satisfied=0)
+            if response:
+                save_to_cache('marketplace_products', response)
+                
+        except Exception as e:
+            # Unintentional Network Error (Only shows if they WANTED to be online)
+            print(f"🚨 Network Error: {e} | Falling back to Offline Mode...")
+            Clock.schedule_once(show_offline_warning, 0)
+            response = load_from_cache('marketplace_products')
+
         Clock.schedule_once(lambda dt: self._on_products_fetched(response), 0)
 
     def _on_products_fetched(self, response):
@@ -751,13 +940,29 @@ class Service(Widget):
             container.add_widget(ProductSkeleton())
             
         # Spawn the background thread
-        threading.Thread(target=self._thread_fetch_services, daemon=True).start()
+        threading.Thread(target=self._thread_fetch_products, daemon=True).start()
 
-    def _thread_fetch_services(self):
-        # Invisible API call
-        response = request.get_products(satisfied=0)
+    def _thread_fetch_products(self):
+        global IS_OFFLINE_MODE
         
-        # Pass back to main thread
+        # --- THE BYPASS: Intentional Offline Mode ---
+        if IS_OFFLINE_MODE:
+            response = load_from_cache('marketplace_products')
+            Clock.schedule_once(lambda dt: self._on_services_fetched(response), 0)
+            return # Stop here! Don't even try to hit the network.
+            
+        # --- NORMAL ONLINE MODE ---
+        try:
+            response = request.get_products(satisfied=0)
+            if response:
+                save_to_cache('marketplace_products', response)
+                
+        except Exception as e:
+            # Unintentional Network Error (Only shows if they WANTED to be online)
+            print(f"🚨 Network Error: {e} | Falling back to Offline Mode...")
+            Clock.schedule_once(show_offline_warning, 0)
+            response = load_from_cache('marketplace_products')
+
         Clock.schedule_once(lambda dt: self._on_services_fetched(response), 0)
 
     def _on_services_fetched(self, response):
