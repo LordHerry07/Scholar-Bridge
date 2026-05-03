@@ -461,75 +461,171 @@
             halign: 'right'
             valign: 'top'
 <DynamicProduct>:
+    # 1. Main Card Settings
     size_hint_y: None
-    height: dp(110)
+    height: dp(120)
     padding: dp(15)
     spacing: dp(15)
-    # Background click animation
+    
+    # Dim slightly on press (handled by Python Animation)
     canvas.before:
         Color:
-            rgba: (0.15, 0.16, 0.22, 1) if self.state == 'normal' else (0.20, 0.21, 0.28, 1)
+            rgba: 0.11, 0.12, 0.16, 1  # Dark background
         RoundedRectangle:
             pos: self.pos
             size: self.size
-            radius: [dp(15)]
-            
-    # Avatar Box
+            radius: [dp(12)]
+
+    # ---------------------------------------------------
+    # LEFT PANEL: Rounded Square Avatar
+    # ---------------------------------------------------
     FloatLayout:
-        size_hint_x: None
-        width: dp(50)
+        size_hint: None, None
+        size: dp(85), dp(85)
+        pos_hint: {'center_y': 0.5}
         canvas.before:
             Color:
-                rgba: 0.43, 0.33, 0.85, 1
-            Ellipse:
-                pos: [self.center_x - dp(25), self.center_y - dp(25)]
-                size: dp(50), dp(50)
+                # Deep purple/gray background for the square
+                rgba: 0.15, 0.13, 0.22, 1  
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(12)]
         Label:
-			pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            text: f'[b]{root.initial}[/b]'
-            markup: True
-            font_size: sp(16)
-            
-    # Details Box
+            text: root.initial
+            font_size: sp(22)
+            bold: True
+            # Bright purple text for initials
+            color: 0.6, 0.25, 0.95, 1  
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+    # ---------------------------------------------------
+    # RIGHT PANEL: Data Rows
+    # ---------------------------------------------------
     BoxLayout:
         orientation: 'vertical'
-        spacing: dp(2)
+        spacing: dp(4)
+
+        # ROW 1: Title & Heart Icon
+        BoxLayout:
+            size_hint_y: None
+            height: dp(22)
+            Label:
+                text: f'[b]{root.title}[/b]'
+                markup: True
+                font_size: sp(16)
+                color: 1, 1, 1, 1
+                text_size: self.size
+                halign: 'left'
+                valign: 'middle'
+                shorten: True
+                shorten_from: 'right'
+            
+            # Optional: Heart Icon (Ensure you have a heart.png asset)
+            Image:
+                source: 'assets/heart_outline.png' 
+                size_hint_x: None
+                width: dp(20)
+                color: 0.5, 0.5, 0.5, 1
+
+        # ROW 2: Author & Category
         Label:
-            text: f'[b]{root.title}[/b]'
-            markup: True
-            font_size: sp(15)
-            text_size: self.size
-            halign: 'left'
-            valign: 'bottom'
-            color: 1, 1, 1, 1
-        Label:
-            text: f'{root.product_type} • {root.condition}'
+            text: f'{root.fullname} · {root.subject}'
             font_size: sp(12)
             color: 0.6, 0.6, 0.6, 1
+            size_hint_y: None
+            height: dp(16)
             text_size: self.size
             halign: 'left'
             valign: 'middle'
-        Label:
-            text: f'By {root.fullname}'
-            font_size: sp(11)
-            color: 0.4, 0.4, 0.4, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'top'
+            shorten: True
+
+        # ROW 3: Ratings, Reviews & Condition Pill
+        BoxLayout:
+            size_hint_y: None
+            height: dp(20)
+            spacing: dp(6)
+            orientation: 'horizontal'
             
-    # Price Box
-    BoxLayout:
-        size_hint_x: None
-        width: dp(70)
-        orientation: 'vertical'
-        Label:
-            text: f'[b]₱{root.price:,.2f}[/b]'
-            markup: True
-            font_size: sp(14)
-            color: 0.43, 0.33, 0.85, 1
-            text_size: self.size
-            halign: 'right'
-            valign: 'middle'
+            # Star Icon
+            Image:
+                source: 'assets/star.png'
+                size_hint: None, None
+                size: dp(12), dp(12)
+                pos_hint: {'center_y': 0.5}
+                color: 0.6, 0.25, 0.95, 1  # Matches purple theme
+
+            # Rating Number
+            Label:
+                text: f'[b]{root.rating}[/b]'
+                markup: True
+                font_size: sp(12)
+                color: 1, 1, 1, 1
+                size_hint_x: None
+                width: self.texture_size[0]
+
+            # Review Count
+            Label:
+                text: f'({root.review} reviews)'
+                font_size: sp(12)
+                color: 0.5, 0.5, 0.5, 1
+                size_hint_x: None
+                width: self.texture_size[0]
+
+            # Condition Pill (Outline)
+            BoxLayout:
+                size_hint: None, None
+                size: self.minimum_width, dp(18)
+                pos_hint: {'center_y': 0.5}
+                padding: [dp(8), 0]
+                canvas.before:
+                    Color:
+                        rgba: 0.5, 0.5, 0.5, 0.4  # Faint gray outline
+                    Line:
+                        rounded_rectangle: [self.x, self.y, self.width, self.height, dp(9)]
+                        width: dp(1)
+                Label:
+                    text: root.condition
+                    font_size: sp(10)
+                    color: 1, 1, 1, 1
+                    bold: True
+                    size_hint_x: None
+                    width: self.texture_size[0]
+            
+            # Spacer pushes everything to the left
+            Widget: 
+
+        # ROW 4: Price & Escrow Badge
+        BoxLayout:
+            size_hint_y: None
+            height: dp(24)
+            Label:
+                # Formats price with commas (e.g. ₱1,200)
+                text: f'[b]₱{root.price:,.0f}[/b]' 
+                markup: True
+                font_size: sp(18)
+                color: 0.6, 0.25, 0.95, 1  # Purple Price
+                text_size: self.size
+                halign: 'left'
+                valign: 'bottom'
+            
+            # Escrow Badge anchored to the right
+            BoxLayout:
+                size_hint_x: None
+                width: self.minimum_width
+                spacing: dp(4)
+                Image:
+                    source: 'assets/green_shield.png' 
+                    size_hint: None, None
+                    size: dp(14), dp(14)
+                    pos_hint: {'center_y': 0.4}
+                Label:
+                    text: 'Escrow'
+                    font_size: sp(12)
+                    color: 0.15, 0.76, 0.51, 1  # Bright Green
+                    size_hint_x: None
+                    width: self.texture_size[0]
+                    pos_hint: {'center_y': 0.4}
 <DynamicActivity>:
 	canvas.before:
 		Color:
@@ -539,13 +635,153 @@
 			pos: self.pos
 
 <DynamicService>:
-	size_hint: 1, 0.2
-	canvas.before:
-		Color:
-			rgba: 0.15, 0.17, 0.23, 0.5
-		RoundedRectangle:
-			size: self.size
-			pos: self.pos					
+    size_hint_y: None
+    height: dp(130)
+    padding: dp(15)
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.16, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+
+    # LEFT PANEL: Circular Avatar with Shield
+    FloatLayout:
+        size_hint: None, None
+        size: dp(65), dp(65)
+        pos_hint: {'center_y': 0.6}
+        canvas.before:
+            Color:
+                rgba: 0.18, 0.17, 0.25, 1
+            Ellipse:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: root.initial
+            font_size: sp(18)
+            bold: True
+            color: 1, 1, 1, 1
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+        
+        # Escrow/Verified Shield
+        Image:
+            source: 'assets/green_shield.png' # Ensure this exists
+            size_hint: None, None
+            size: dp(16), dp(16)
+            pos_hint: {'right': 1.0, 'y': 0}
+
+    # RIGHT PANEL: Data Rows
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(4)
+
+        # ROW 1: Title
+        Label:
+            text: f'[b]{root.title}[/b]'
+            markup: True
+            font_size: sp(16)
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: dp(20)
+            text_size: self.size
+            halign: 'left'
+            valign: 'middle'
+            shorten: True
+
+        # ROW 2: Author & Subject
+        Label:
+            text: f'{root.fullname} · {root.subject}'
+            font_size: sp(12)
+            color: 0.6, 0.6, 0.6, 1
+            size_hint_y: None
+            height: dp(16)
+            text_size: self.size
+            halign: 'left'
+            valign: 'middle'
+            shorten: True
+
+        # ROW 3: Stats (Rating + Reviews + Schedule)
+        BoxLayout:
+            size_hint_y: None
+            height: dp(20)
+            spacing: dp(6)
+            Image:
+                source: 'assets/star.png'
+                size_hint: None, None
+                size: dp(12), dp(12)
+                pos_hint: {'center_y': 0.5}
+                color: 0.6, 0.25, 0.95, 1 
+            Label:
+                text: f'[b]{root.rating}[/b]'
+                markup: True
+                font_size: sp(12)
+                color: 1, 1, 1, 1
+                size_hint_x: None
+                width: self.texture_size[0]
+            Label:
+                text: f'({root.review_count})'
+                font_size: sp(12)
+                color: 0.5, 0.5, 0.5, 1
+                size_hint_x: None
+                width: self.texture_size[0]
+            
+            # Divider
+            Label:
+                text: '|'
+                font_size: sp(12)
+                color: 0.3, 0.3, 0.3, 1
+                size_hint_x: None
+                width: dp(10)
+
+            # Schedule Icon & Text
+            Image:
+                source: 'assets/clock.png' # Fallback to a clock or calendar icon
+                size_hint: None, None
+                size: dp(12), dp(12)
+                pos_hint: {'center_y': 0.5}
+                color: 0.5, 0.5, 0.5, 1
+            Label:
+                text: root.schedule
+                font_size: sp(12)
+                color: 0.5, 0.5, 0.5, 1
+                size_hint_x: None
+                width: self.texture_size[0]
+            Widget:
+
+        # ROW 4: Price & Book Button
+        FloatLayout:
+            size_hint_y: None
+            height: dp(35)
+            
+            # Price
+            Label:
+                text: f'[b]₱{root.price:,.0f}[/b][size=12sp]/{root.rate_type}[/size]' 
+                markup: True
+                font_size: sp(18)
+                color: 0.6, 0.25, 0.95, 1
+                pos_hint: {'x': 0, 'center_y': 0.3}
+                size_hint: None, None
+                size: self.texture_size
+
+            # Book Button
+            Button:
+                text: '[b]Book[/b]'
+                markup: True
+                font_size: sp(13)
+                size_hint: None, None
+                size: dp(70), dp(30)
+                pos_hint: {'right': 1, 'center_y': 0.3}
+                background_color: 0,0,0,0
+                on_release: root.open_booking()
+                canvas.before:
+                    Color:
+                        rgba: 0.5, 0.1, 0.9, 1 # Deep Purple
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(8)]					
 
 <TransactionTile>:
     size_hint_y: None

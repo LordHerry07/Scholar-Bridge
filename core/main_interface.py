@@ -1,5 +1,5 @@
 from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 from kivy.uix.widget import Widget
 from kivy.properties import BooleanProperty, StringProperty, ListProperty, NumericProperty, ColorProperty
 from kivy.clock import Clock
@@ -21,6 +21,10 @@ from kivy.core.window import Window
 from kivy.clock import mainthread
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.core.window import Window
+from kivy.uix.label import Label
+from kivy.uix.togglebutton import ToggleButton
+import calendar
+from kivy.factory import Factory
 
 Builder.load_file('design/modal_interface.kv')
 Builder.load_file('design/main_system.kv')
@@ -157,11 +161,15 @@ class NewPasswordModal(ModalView):
     user_email = StringProperty('')
 
     def change_password(self, pwd, confirm):
-        if not pwd or pwd != confirm:
+        # Strip invisible trailing spaces
+        clean_pwd = str(pwd).strip()
+        clean_confirm = str(confirm).strip()
+
+        if not clean_pwd or clean_pwd != clean_confirm:
             NotificationModal().show("Error", "Passwords do not match!", is_error=True)
             return
 
-        result = request.finalize_password_reset(self.user_email, pwd)
+        result = request.finalize_password_reset(self.user_email, clean_pwd)
         
         if result.get("success"):
             self.dismiss()
@@ -224,7 +232,7 @@ class NotificationModal(ModalView):
         self.open()
 class ReviewModal(ModalView):
     seller_name = StringProperty("")
-    current_rating = NumericProperty(5) # Default to 5 stars
+    current_rating = NumericProperty(0) # Default to 0 stars
     
     def submit(self):
         my_email = Data.user.get('email')
@@ -256,17 +264,40 @@ class ActivityTile(BoxLayout):
         self.item_title = title
         self.time_ago = time_str
         
+        # --- 1. SOLD (Green) ---
         if act_type.lower() == 'sold':
             self.icon_bg_color = [0.18, 0.77, 0.41, 0.15] 
             self.text_color = [0.18, 0.77, 0.41, 1]      
-            self.icon_source = "assets/trend_up.png"                         
+            self.icon_source = "assets/trend_up.png"                        
             self.amount = f"+{amt}"
-                
+               
+        # --- 2. PURCHASED (Red) ---
         elif act_type.lower() == 'purchased':
             self.icon_bg_color = [0.85, 0.26, 0.33, 0.15] 
             self.text_color = [0.85, 0.26, 0.33, 1]      
-            self.icon_source = "assets/trend_down.png"                         
+            self.icon_source = "assets/trend_down.png"                        
             self.amount = f"-{amt}"
+            
+        # --- 3. SUBSCRIBED (Purple) ---
+        elif act_type.lower() == 'subscribed':
+            self.icon_bg_color = [0.42, 0.35, 0.88, 0.15] 
+            self.text_color = [0.6, 0.4, 0.95, 1]      
+            self.icon_source = "assets/subscribed.png"                        
+            self.amount = f"-{amt}"
+            
+        # --- 4. UNSUBSCRIBED (Gray) ---
+        elif act_type.lower() == 'unsubscribed':
+            self.icon_bg_color = [0.5, 0.5, 0.5, 0.15] 
+            self.text_color = [0.6, 0.6, 0.6, 1]      
+            self.icon_source = "assets/unsubscribed.png" # Great reuse of the logout icon                        
+            self.amount = "Ended"
+            
+        elif act_type.lower() == 'listed':
+            self.icon_bg_color = [0.2, 0.6, 0.9, 0.15] 
+            self.text_color = [0.2, 0.6, 0.9, 1]      
+            self.icon_source = "assets/sell.png" # Nice reuse of your sell icon                        
+            self.amount = "New"
+            
         else:
             self.amount = amt
 
@@ -293,7 +324,7 @@ class PublicProfileModal(ModalView):
         if not profile_data: return
         
         products = profile_data.get('products', [])
-        rating = profile_data.get('rating', 5.0)
+        rating = profile_data.get('rating', 0)
         
         # Update UI text
         self.ids.profile_name.text = f'[b]{fullname}[/b]'
@@ -312,7 +343,9 @@ class PublicProfileModal(ModalView):
                 price=float(data.get('price', 0)),
                 condition=data.get('condition_status', 'Good'),
                 product_type=data.get('subject', 'Product'),
-                description=str(data.get('review', 'No description'))
+                description=str(data.get('review', 'No description')),
+                # --- NEW LINE: Use the seller rating! ---
+                rating=round(float(data.get('seller_rating', rating)), 1)
             )
             # Make sure the nested cards can also open their own modals
             card.bind(on_release=lambda instance, c=card: self.open_nested_product(c))
@@ -430,6 +463,104 @@ class ProductDetailsModal(ModalView):
         main_interface.ids.back_btn.opacity = 1
         main_interface.ids.back_btn.disabled = False
 
+class BookingCalendarModal(ModalView):
+    selected_date = NumericProperty(0)
+    service_title = StringProperty("Service")
+    service_id = NumericProperty(0) # <--- The Receiver
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        Clock.schedule_once(self.build_calendar, 0.1)
+        
+    def build_calendar(self, dt):
+        if not hasattr(self.ids, 'calendar_grid'): return
+        grid = self.ids.calendar_grid
+        grid.clear_widgets()
+        
+        now = datetime.now()
+        first_day = now.replace(day=1)
+        offset = (first_day.weekday() + 1) % 7
+        
+        days = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+        for day in days:
+            grid.add_widget(Label(text=f'[b]{day}[/b]', markup=True, color=(0.5, 0.5, 0.5, 1)))
+            
+        for _ in range(offset): 
+            grid.add_widget(Label(text=''))
+            
+        days_in_month = calendar.monthrange(now.year, now.month)[1]
+        for i in range(1, days_in_month + 1):
+            btn = ToggleButton(
+                text=str(i),
+                group='dates',
+                background_normal='',
+                background_down='',
+                background_color=(0.15, 0.16, 0.22, 1)
+            )
+            btn.bind(state=self.on_date_select)
+            grid.add_widget(btn)
+            
+    def on_date_select(self, instance, value):
+        if value == 'down':
+            instance.background_color = (0.42, 0.35, 0.88, 1) 
+            self.selected_date = int(instance.text)
+        else:
+            instance.background_color = (0.15, 0.16, 0.22, 1)
+
+    def confirm_booking(self):
+        if self.selected_date == 0:
+            NotificationModal().show("Action Blocked", "Please select a date.", is_error=True)
+            return
+            
+        now = datetime.now()
+        selected_dt = now.replace(day=self.selected_date)
+        weekday_str = selected_dt.strftime("%A") 
+        
+        n = self.selected_date
+        suffix = "th" if 11 <= n <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+        day_str = f"{n}{suffix} {weekday_str}"
+        
+        my_email = Data.user.get('email')
+        
+        print(f"🚀 FIRING TO API: Subscribing to Service #{self.service_id}")
+        
+        success = request.subscribe_service(self.service_id, my_email, day_str)
+        
+        if success:
+            NotificationModal().show("Subscription Active", f"Your subscription starts on {day_str}.", is_error=False)
+            self.dismiss()
+            
+            # Deep Scan Refresh
+            app = App.get_running_app()
+            if app.root and app.root.has_screen('main'):
+                try:
+                    sm = app.root.get_screen('main').ids.screenmanager
+                    for screen in sm.screens: 
+                        for widget in screen.walk():
+                            if type(widget).__name__ == 'Service':
+                                widget.get_services() 
+                except: pass
+        else:
+            NotificationModal().show("Error", "Could not complete booking.", is_error=True)
+
+class ServiceDetailsModal(ModalView):
+    service_id = NumericProperty(0)
+    title = StringProperty("")
+    description = StringProperty("")
+    price = NumericProperty(0)
+    fullname = StringProperty("")
+    rate_type = StringProperty("")
+
+    def subscribe_service(self):
+        self.dismiss()
+        modal = BookingCalendarModal()
+        modal.service_title = self.title
+        modal.service_id = self.service_id 
+        modal.open()
+
+#-----------------------------------------------------------#
+# Dynamic_Box
+#-----------------------------------------------------------#
 class DynamicActivity(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -449,19 +580,15 @@ class DynamicProduct(ButtonBehavior, BoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
         self.description = kwargs.get('description', 'This seller has not provided a description for this listing.')
 
     def on_press(self):
-        # Instantly dim the card when touched
         anim = Animation(opacity=0.5, duration=0.05)
         anim.start(self)
 
     def on_release(self, *args):
         anim = Animation(opacity=1.0, duration=0.15)
         anim.start(self)
-        # Open the pop-up panel when the card is clicked
-        print(f"DEBUG: Tapped Product ID: {self.product_id}")
         modal = ProductDetailsModal(
             title=self.title,
             description=self.description,
@@ -473,12 +600,48 @@ class DynamicProduct(ButtonBehavior, BoxLayout):
         modal.product_id = self.product_id
         modal.open()
 
-class DynamicService(Widget):
+class DynamicService(ButtonBehavior, BoxLayout):
+    service_id = NumericProperty(0)
+    initial = StringProperty('N.A')
+    fullname = StringProperty('N.A')
+    subject = StringProperty('N.A')
+    rating = StringProperty('0.0')
+    review_count = NumericProperty(0)
+    title = StringProperty('N.A')
+    price = NumericProperty(0)
+    rate_type = StringProperty('hr') 
+    schedule = StringProperty('Mon-Fri')
+    description = StringProperty('No description provided.')
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    def on_press(self):
+        anim = Animation(opacity=0.5, duration=0.05)
+        anim.start(self)
+
+    def on_release(self, *args):
+        anim = Animation(opacity=1.0, duration=0.15)
+        anim.start(self)
+        
+        modal = ServiceDetailsModal(
+            service_id=self.service_id,
+            title=self.title,
+            description=self.description,
+            price=self.price,
+            fullname=self.fullname,
+            rate_type=self.rate_type
+        )
+        modal.open()
+
+    def open_booking(self):
+        modal = BookingCalendarModal()
+        modal.service_title = self.title 
+        modal.service_id = self.service_id 
+        modal.open()
+
 # -----------------------------------------------------------
-# Inbox Components
+# Inbox Components (Hub)
 # -----------------------------------------------------------
 class InboxTile(ButtonBehavior, BoxLayout):
     partner_name = StringProperty("")
@@ -490,7 +653,6 @@ class InboxTile(ButtonBehavior, BoxLayout):
         anim.start(self)
         
     def on_release(self, *args):
-        # Ease back to normal, then open the chat
         anim = Animation(opacity=1.0, duration=0.15)
         anim.start(self)
         self.open_chat()
@@ -499,37 +661,73 @@ class InboxTile(ButtonBehavior, BoxLayout):
         app = App.get_running_app()
         main_interface = app.root.get_screen('main')
         status_screen = main_interface.ids.screenmanager.get_screen('info').children[0]
-        
-        # Navigate from the Inbox to the ChatBox
         status_screen.ids.screenmanager.current = 'chatbox'
         
-        # Update headers
         main_interface.ids.label1.text = '[b]CHATBOX[/b]'
         main_interface.ids.label2.text = f'Chatting with {self.partner_name}'
         
-        # Inject the partner name and load the messages
         chatbox_widget = status_screen.ids.screenmanager.get_screen('chatbox').children[0]
         chatbox_widget.set_target_user(self.partner_name)
 
 class InboxScreen(BoxLayout):
+    current_tab = StringProperty('chats')
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def load_inbox(self, dt=0):
-        my_name = Data.user.get('full_name')
-        if not my_name: 
-            return
+    def switch_tab(self, tab_name):
+        self.current_tab = tab_name
+        self.load_hub_data()
 
-        inbox_data = request.get_inbox(my_name)
-        container = self.ids.inbox_list
+    def load_hub_data(self, dt=0):
+        my_name = Data.user.get('full_name')
+        my_email = Data.user.get('email')
+        if not my_name or not my_email: return
+
+        container = self.ids.hub_list
         container.clear_widgets()
 
-        for convo in inbox_data:
-            container.add_widget(InboxTile(
-                partner_name=convo['partner_name'],
-                last_message=convo['last_message'],
-                time=convo['timestamp']
-            ))
+        if self.current_tab == 'chats':
+            inbox_data = request.get_inbox(my_name)
+            for convo in inbox_data:
+                container.add_widget(InboxTile(
+                    partner_name=convo['partner_name'],
+                    last_message=convo['last_message'],
+                    time=convo['timestamp']
+                ))
+                
+        elif self.current_tab == 'products':
+            hub_data = request.get_my_hub(my_email)
+            for prod in hub_data.get('products', []):
+                tile = Factory.OwnedItemTile()
+                tile.title = prod['title']
+                tile.subtitle = f"Purchased from {prod['full_name']}"
+                tile.icon_bg = (0.16, 0.67, 0.38, 1) # Green
+                container.add_widget(tile)
+                
+        elif self.current_tab == 'subs':
+            hub_data = request.get_my_hub(my_email)
+            for sub in hub_data.get('subscriptions', []):
+                tile = Factory.SubscriptionItemTile()
+                tile.title = sub['title']
+                tile.schedule = sub.get('booked_schedule', 'Pending')
+                tile.service_id = sub['id']
+                container.add_widget(tile)
+
+    def unsubscribe(self, service_id):
+        success = request.unsubscribe_service(service_id)
+        if success:
+            NotificationModal().show("Unsubscribed", "You have ended this subscription.", is_error=False)
+            self.load_hub_data() 
+            
+            app = App.get_running_app()
+            try:
+                sm = app.root.get_screen('main').ids.screenmanager
+                for screen in sm.screens: 
+                    for widget in screen.walk():
+                        if type(widget).__name__ == 'Service':
+                            widget.get_services() 
+            except: pass
 
 #-----------------------------------------------------------#
 # Starting_Interface
@@ -995,6 +1193,72 @@ class MainInterface(Screen):
             app = App.get_running_app()
             if app:
                 app.unread_count = request.get_unread_count(name)
+    def toggle_footer(self, show=True):
+        if not hasattr(self.ids, 'footer_nav'): return
+        
+        if show:
+            self.ids.footer_nav.opacity = 1
+            self.ids.footer_nav.disabled = False
+            self.ids.footer_nav.size_hint_y = 0.1
+        else:
+            self.ids.footer_nav.opacity = 0
+            self.ids.footer_nav.disabled = True
+            self.ids.footer_nav.size_hint_y = None
+            self.ids.footer_nav.height = 0
+
+    def switch_tab(self, tab_name):
+        sm = self.ids.screenmanager
+        current_tab = sm.current
+
+        # 1. Define the logical left-to-right order of the footer tabs
+        tab_order = ['dashboard', 'product', 'sell', 'service', 'info']
+
+        # 2. Modify the EXISTING transition direction (The Kivy Fix!)
+        if current_tab in tab_order and tab_name in tab_order:
+            current_idx = tab_order.index(current_tab)
+            target_idx = tab_order.index(tab_name)
+
+            if target_idx > current_idx:
+                sm.transition.direction = 'left'
+            elif target_idx < current_idx:
+                sm.transition.direction = 'right'
+
+        # 3. Switch the Screen
+        sm.current = tab_name
+
+        # 4. Centralized UI Updates
+        label1 = self.ids.label1
+        label2 = self.ids.label2
+        back_btn = self.ids.back_btn
+
+        back_btn.opacity = 0
+        back_btn.disabled = True
+
+        if tab_name == 'dashboard':
+            label1.text = '[b]DASHBOARD[/b]'
+            label2.text = 'your activity overview'
+            sm.get_screen('dashboard').children[0].load_stats()
+            
+        elif tab_name == 'product':
+            label1.text = '[b]PRODUCT[/b]'
+            label2.text = 'textbooks, notes & materials'
+            sm.get_screen('product').children[0].get_products(0)
+            
+        elif tab_name == 'sell':
+            label1.text = '[b]CREATE LISTING[/b]'
+            label2.text = 'publish your products & services'
+            
+        elif tab_name == 'service':
+            label1.text = '[b]SERVICE[/b]'
+            label2.text = 'tutoring, review & freelance help'
+            sm.get_screen('service').children[0].get_services(0)
+            
+        elif tab_name == 'info':
+            label1.text = '[b]MENU[/b]'
+            label2.text = 'manage your account'
+            info_screen = sm.get_screen('info').children[0]
+            info_screen.load_user_stats()
+            info_screen.ids.screenmanager.current = 'menu'
 
 #Children
 class Dashboard(Widget):
@@ -1030,8 +1294,6 @@ class Dashboard(Widget):
             activities = []
 
         if not activities:
-            from kivy.uix.label import Label
-            from kivy.metrics import dp
             empty_label = Label(
                 text="No recent transactions yet.",
                 color=(1, 1, 1, 0.4),
@@ -1055,31 +1317,50 @@ class Dashboard(Widget):
         user = Data.user or {}
         full_name = user.get('full_name')
         
-        # THE FIX: Wait for the user to log in before trying to draw the graph
         if not full_name: 
             Clock.schedule_once(self.load_stats, 1)
             return
 
         stats = request.get_user_stats(full_name)
         
-        # Single Source of Truth for the 4th Panel Rating
         profile_data = request.get_user_profile(full_name)
         real_rating = profile_data.get('rating', 0.0) if profile_data else 0.0
         
         if stats:
-            earnings = stats.get('total_earnings', 0)
-            listings = stats.get('active_listings', 0)
-            sold = stats.get('items_sold', 0)
-            
-            # Inject Labels
+            # 1. Update the Main Large Labels
             if hasattr(self.ids, 'earnings_label'):
-                self.ids.earnings_label.text = f"[b]₱{earnings:,.2f}[/b]"
+                self.ids.earnings_label.text = f"[b]₱{stats.get('total_earnings', 0):,.2f}[/b]"
             if hasattr(self.ids, 'active_listings_label'):
-                self.ids.active_listings_label.text = f"[b]{listings}[/b]"
+                self.ids.active_listings_label.text = f"[b]{stats.get('active_listings', 0)}[/b]"
             if hasattr(self.ids, 'items_sold_label'):
-                self.ids.items_sold_label.text = f"[b]{sold}[/b]"
+                self.ids.items_sold_label.text = f"[b]{stats.get('items_sold', 0)}[/b]"
             if hasattr(self.ids, 'rating_label'):
                 self.ids.rating_label.text = f"[b]{float(real_rating):.1f}[/b]"
+
+            # 2. Update the Tiny Trend Badges dynamically!
+            e_pct = stats.get('earnings_pct', 0)
+            e_color = "2ECC71" if e_pct >= 0 else "E74C3C" # Green if up, Red if down
+            e_sign = "+" if e_pct > 0 else ""
+
+            s_pct = stats.get('sold_pct', 0)
+            s_color = "2ECC71" if s_pct >= 0 else "E74C3C"
+            s_sign = "+" if s_pct > 0 else ""
+
+            l_pct = stats.get('listings_pct', 0)
+            l_color = "2ECC71" if l_pct >= 0 else "E74C3C"
+            l_sign = "+" if l_pct > 0 else ""
+
+            if hasattr(self.ids, 'earnings_trend'):
+                self.ids.earnings_trend.text = f"[color=#{e_color}]{e_sign}{e_pct}%[/color]"
+                
+            if hasattr(self.ids, 'listings_trend'):
+                self.ids.listings_trend.text = f"[color=#{l_color}]{l_sign}{l_pct}%[/color]"
+                
+            if hasattr(self.ids, 'sold_trend'):
+                self.ids.sold_trend.text = f"[color=#{s_color}]{s_sign}{s_pct}%[/color]"
+                
+            if hasattr(self.ids, 'rating_trend'):
+                self.ids.rating_trend.text = f"[b]{stats.get('top_percentage', 'Top 1%')}[/b]"
 
             # Set Graph Data
             graph_data = stats.get('graph_data', [])
@@ -1087,10 +1368,8 @@ class Dashboard(Widget):
                 graph_data.insert(0, 0)
                 
             self.data = graph_data
-            
             current_max = max(self.data + [10])
-            BUFFER = 1.5
-            self.max_v = max(current_max * BUFFER, 50)
+            self.max_v = max(current_max * 1.5, 50)
             
             self.draw_graph()
             self.load_recent_activity()
@@ -1204,14 +1483,16 @@ class Product(Widget):
         container.clear_widgets() 
         
         for data in self.all_products:
-            item_subject = data.get('subject', '')
+            # We now check product_type for filtering! (Fallback to subject for older DB rows)
+            item_type = data.get('product_type', data.get('subject', ''))
+            item_subject = data.get('subject', 'General')
             
-            # 2. Skip Services (They belong on the Service screen)
-            if item_subject == 'Service':
+            # Skip Services (They belong on the Service screen)
+            if item_type == 'Service':
                 continue
                 
-            # 3. Apply Category Filter
-            if self.current_category != 'All' and item_subject != self.current_category:
+            # Apply Category Filter (Notes/Guides/Materials)
+            if self.current_category != 'All' and item_type != self.current_category:
                 continue
                 
             # 4. Apply Search Bar Filter (Checks both Title and Description)
@@ -1228,123 +1509,167 @@ class Product(Widget):
                 title=data.get('title'), 
                 price=float(data.get('price', 0)),
                 condition=data.get('condition_status'),
-                product_type=item_subject,
-                description=str(data.get('review'))
+                product_type=item_type,
+                subject=item_subject,
+                description=str(data.get('review')),
+                rating=round(float(data.get('seller_rating', 0)), 1)
             ))
 
 class Sell(Widget):
-    def add_product(self):
-        title = self.ids.title_input.ids.internal_input.text.strip()
-        description = self.ids.desc_input.ids.internal_input.text.strip()
-        price_text = self.ids.price_input.ids.internal_input.text.strip()
+    # This Boolean controls the entire UI state automatically!
+    is_service_mode = BooleanProperty(False)
 
-        # 1. DYNAMIC VALIDATION: Empty Fields
+    def add_product(self):
+        # 1. Safely extract core fields
+        title = self.ids.title_input.ids.internal_input.text.strip() if 'title_input' in self.ids else ""
+        subject_name = self.ids.subject_input.ids.internal_input.text.strip() if 'subject_input' in self.ids else ""
+        description = self.ids.desc_input.ids.internal_input.text.strip() if 'desc_input' in self.ids else ""
+        price_text = self.ids.price_input.ids.internal_input.text.strip() if 'price_input' in self.ids else ""
+
+        # 2. DYNAMIC VALIDATION
         missing_fields = []
-        if not title: 
-            missing_fields.append("Title")
-        if not price_text: 
-            missing_fields.append("Price")
-            
+        if not title: missing_fields.append("Title")
+        if not subject_name: missing_fields.append("Subject")
+        if not price_text: missing_fields.append("Price")
+        
         if missing_fields:
-            # Magically builds "Title", "Price", or "Title and Price"
             fields_str = " and ".join(missing_fields)
             NotificationModal().show("Missing Information", f"Please enter a {fields_str} to list your item.", is_error=True)
             return
 
-        # 2. Strict Validation: Valid Numbers Only
+        # 3. Strict Price Validation
         try:
             price = float(price_text)
-            if price <= 0:
-                raise ValueError
+            if price <= 0: raise ValueError
         except ValueError:
             NotificationModal().show("Invalid Price", "Please enter a valid amount greater than 0.", is_error=True)
             return
 
-        # 3. Determine the Listing Type based on the toggle buttons
-        listing_type = "Textbook"
-        if self.ids.type_service.state == 'down':
-            listing_type = "Service"
-        elif self.ids.type_notes.state == 'down':
-            listing_type = "Notes"
-
-        # 4. Determine the Condition
-        condition = "New"
-        for btn in self.ids.condition_group.children:
-            if btn.state == "down":
-                condition = btn.text.replace('[b]', '').replace('[/b]', '')
-                break
-
-        # 5. Grab the active user
+        # 4. Grab User Data
         user = Data.user or {}
         full_name = user.get('full_name', 'Guest User')
         initial = "".join([x[0].upper() for x in full_name.split() if x])
 
-        # 6. Construct payload (Now injecting the REAL description!)
-        payload = {
-            "initial": initial,
-            "full_name": full_name,
-            "title": title,
-            "subject": listing_type, 
-            "rate": 0,            
-            "price": price,
-            "review": description, # <-- THE FIX: Back to saving the actual text!
-            "condition_status": condition,
-            "escrow": True,
-            "satisfied": False
-        }
+        # 5. DUAL-MODE ROUTING TO DATABASE
+        if not self.is_service_mode:
+            # ==========================================
+            # ROUTE A: PRODUCT UPLOAD
+            # ==========================================
+            listing_type = "Textbook"
+            if 'product_type_group' in self.ids:
+                for btn in self.ids.product_type_group.children:
+                    if btn.state == "down":
+                        listing_type = btn.text.replace('[b]', '').replace('[/b]', '')
+                        break
+            
+            condition = "New"
+            if 'condition_group' in self.ids:
+                for btn in self.ids.condition_group.children:
+                    if btn.state == "down":
+                        condition = btn.text.replace('[b]', '').replace('[/b]', '')
+                        break
 
-        # 7. Call API & Trigger Visual Modal
-        res = request.add_product(payload)
+            payload = {
+                "initial": initial,
+                "full_name": full_name,
+                "title": title,
+                "subject": subject_name,
+                "product_type": listing_type, 
+                "price": price,
+                "review": description, 
+                "condition_status": condition,
+                "rate": 0, 
+                "escrow": True, 
+                "satisfied": False
+            }
+            # SEND TO PRODUCT TABLE
+            res = request.add_product(payload)
+            success_type = listing_type
 
-        if res:
-            NotificationModal().show("Success!", f"Your {listing_type} is now live on the marketplace.", is_error=False)
-            self.ids.title_input.ids.internal_input.text = ""
-            self.ids.desc_input.ids.internal_input.text = ""
-            self.ids.price_input.ids.internal_input.text = ""
         else:
-            NotificationModal().show("Upload Failed", "Something went wrong. Please check your connection and try again.", is_error=True)
+            # ==========================================
+            # ROUTE B: SERVICE UPLOAD
+            # ==========================================
+            category = "Tutoring"
+            if 'service_type_group' in self.ids:
+                for btn in self.ids.service_type_group.children:
+                    if btn.state == "down":
+                        category = btn.text.replace('[b]', '').replace('[/b]', '')
+                        break
+            
+            rate_format = "hr"
+            if 'rate_group' in self.ids:
+                for btn in self.ids.rate_group.children:
+                    if btn.state == "down":
+                        # Extracts "hr", "week", or "month" 
+                        rate_format = btn.text.replace('[b]', '').replace('[/b]', '').replace('/', '').strip()
+                        break
+
+            payload = {
+                "initial": initial,
+                "full_name": full_name,
+                "title": title,
+                "subject": subject_name,
+                "category": category, 
+                "rate": price,
+                "rate_format": rate_format, 
+                "description": description, 
+                "schedule": "Flexible", 
+                "escrow": True
+            }
+            # SEND TO SERVICE TABLE (NEW ENDPOINT!)
+            res = request.add_service(payload) 
+            success_type = category
+
+        # 6. Check Response
+        if res:
+            NotificationModal().show("Success!", f"Your {success_type} is now live.", is_error=False)
+            if 'title_input' in self.ids: self.ids.title_input.ids.internal_input.text = ""
+            if 'subject_input' in self.ids: self.ids.subject_input.ids.internal_input.text = ""
+            if 'desc_input' in self.ids: self.ids.desc_input.ids.internal_input.text = ""
+            if 'price_input' in self.ids: self.ids.price_input.ids.internal_input.text = ""
+        else:
+            NotificationModal().show("Upload Failed", "Something went wrong.", is_error=True)
 
 class Service(Widget):
     current_category = StringProperty('All')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.all_services = [] # Cache to hold data
+        self.all_services = [] 
         Clock.schedule_once(self.get_services, 0.5)
 
     def set_category(self, cat):
         self.current_category = cat
-        self.filter_services() # Re-filter instantly when a button is clicked
+        self.filter_services() 
 
     def get_services(self, dt=0):
         container = self.ids.dynamic_service
         container.clear_widgets()
         for _ in range(5):
             container.add_widget(ProductSkeleton())
-            
-        # Spawn the background thread
-        threading.Thread(target=self._thread_fetch_products, daemon=True).start()
+        
+        # FIX: Point to the correct thread function
+        threading.Thread(target=self._thread_fetch_services, daemon=True).start()
 
-    def _thread_fetch_products(self):
+    def _thread_fetch_services(self):
         global IS_OFFLINE_MODE
         
-        # --- THE BYPASS: Intentional Offline Mode ---
         if IS_OFFLINE_MODE:
-            response = load_from_cache('marketplace_products')
+            response = load_from_cache('marketplace_services')
             Clock.schedule_once(lambda dt: self._on_services_fetched(response), 0)
-            return # Stop here! Don't even try to hit the network.
+            return 
             
-        # --- NORMAL ONLINE MODE ---
         try:
-            response = request.get_products(satisfied=0)
+            # FIX: Fetch from the new Services API!
+            response = request.get_services()
             if response:
-                save_to_cache('marketplace_products', response)
+                save_to_cache('marketplace_services', response)
                 
         except Exception as e:
-            # Unintentional Network Error (Only shows if they WANTED to be online)
             print(f"🚨 Network Error: {e} | Falling back to Offline Mode...")
             Clock.schedule_once(show_offline_warning, 0)
-            response = load_from_cache('marketplace_products')
+            response = load_from_cache('marketplace_services')
 
         Clock.schedule_once(lambda dt: self._on_services_fetched(response), 0)
 
@@ -1359,36 +1684,41 @@ class Service(Widget):
         container.clear_widgets() 
         
         for data in self.all_services:
-            item_subject = data.get('subject', '')
+            # 1. Safe extraction (prevent 'NoneType' crashes)
+            item_category = data.get('category') or ''
             
-            # 1. ONLY process items explicitly marked as 'Service' in the DB
-            if item_subject != 'Service':
+            # Apply Category Filter
+            if self.current_category != 'All' and item_category != self.current_category:
                 continue
                 
-            title = data.get('title', '').lower()
-            desc = str(data.get('review', '')).lower()
-            
-            # 2. Smart Category Filter (Checks if sub-category word is in title/desc)
-            cat = self.current_category.lower()
-            if cat != 'all' and cat not in title and cat not in desc:
-                continue
-                
-            # 3. Search Bar Filter
+            # Apply Search Filter
+            title = str(data.get('title') or '').lower()
+            desc = str(data.get('description') or '').lower()
             if search_text and (search_text not in title and search_text not in desc):
                 continue
                 
-            # 4. If it passes all filters, draw the widget!
-            container.add_widget(DynamicProduct(
-                product_id=data.get('id'),
-                fullname=data.get('full_name', 'Unknown'), 
-                initial=data.get('initial', 'U'), 
-                title=data.get('title', 'No Title'), 
-                rating=float(data.get('rate', 0)), 
-                condition=data.get('condition_status', 'N/A'), 
-                price=float(data.get('price', 0)), 
-                product_type=item_subject,
-                description=str(data.get('review', 'No description'))
-            ))
+            try:
+                # 2. Strict Type Formatting to guarantee Kivy doesn't break
+                s_id = int(data.get('id') or 0)
+                rate_val = float(data.get('rate') or 0.0)
+                seller_rating = float(data.get('seller_rating') or 5.0)
+                
+                # 3. Draw Widget
+                container.add_widget(DynamicService(
+                    service_id=s_id,
+                    fullname=data.get('full_name') or 'Unknown', 
+                    initial=data.get('initial') or 'U', 
+                    title=data.get('title') or 'No Title', 
+                    subject=data.get('subject') or 'General',
+                    rating=f"{seller_rating:.1f}", 
+                    price=rate_val, 
+                    rate_type=data.get('rate_format') or 'hr',
+                    description=str(data.get('description') or 'No description'),
+                    schedule=data.get('schedule') or 'Flexible'
+                ))
+            except Exception as e:
+                # If a specific card fails, Kivy will print it here instead of crashing the whole screen!
+                print(f"🚨 CRASH AVERTED: Skipping a corrupt service card because: {e}")
 
 class Status(Widget):
     initial = StringProperty("N.A")

@@ -1,3 +1,85 @@
+<ServiceDetailsModal@ModalView>:
+    size_hint: 0.9, 0.7
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(15)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+        
+        Label:
+            text: f"[b]{root.title}[/b]"
+            markup: True
+            font_size: sp(22)
+            size_hint_y: None
+            height: dp(30)
+            text_size: self.size
+            halign: 'left'
+        
+        Label:
+            text: f"By {root.fullname}"
+            color: 0.6, 0.6, 0.6, 1
+            size_hint_y: None
+            height: dp(20)
+            text_size: self.size
+            halign: 'left'
+
+        ScrollView:
+            Label:
+                text: root.description
+                text_size: self.width, None
+                size_hint_y: None
+                height: self.texture_size[1]
+                halign: 'left'
+                valign: 'top'
+        
+        FloatLayout:
+            size_hint_y: None
+            height: dp(50)
+            Label:
+                text: f"[b]₱{root.price:,.0f}[/b][size=14sp]/{root.rate_type}[/size]"
+                markup: True
+                font_size: sp(20)
+                color: 0.6, 0.25, 0.95, 1
+                pos_hint: {'x': 0, 'center_y': 0.5}
+
+<BookingCalendarModal@ModalView>:
+    size_hint: 0.85, 0.6
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(15)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+        Label:
+            text: '[b]Select a Schedule[/b]'
+            markup: True
+            font_size: sp(18)
+            size_hint_y: 0.15
+        
+        # The empty grid Python will automatically populate
+        GridLayout:
+            id: calendar_grid
+            cols: 7
+            spacing: dp(5)
+            size_hint_y: 0.7
+            
+        PrimaryButton:
+            text: "[b]Confirm Booking[/b]"
+            size_hint_y: None
+            height: dp(50)
+            on_release: root.confirm_booking()
+
 <NewPasswordModal>:
     size_hint: 0.85, 0.45
     auto_dismiss: False

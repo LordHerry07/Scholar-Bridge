@@ -16,14 +16,18 @@
         Rectangle:
             size: root.size
             pos: root.pos
+            
     BoxLayout:
         orientation: 'vertical'
+        
+        # -------------------------------------------------------------
+        # 1. THE GLOBAL HEADER
+        # -------------------------------------------------------------
         BoxLayout:
             size_hint_y: 0.1
             orientation: 'vertical'
             spacing: dp(10)
             
-            # --- UPDATED GLOBAL HEADER ---
             BoxLayout:
                 size_hint: 0.9, 0.1
                 pos_hint: {'center_x': 0.5, 'center_y': 0.5}
@@ -42,7 +46,7 @@
                         halign: 'left'
                     Label:
                         id: label2
-                        text: 'you activity overview'
+                        text: 'your activity overview'
                         color: 1,1,1,0.5
                         text_size: self.size
                         valign: 'top'
@@ -51,18 +55,35 @@
                 # Right Side: Global Back Button
                 NavBackButton:
                     id: back_btn
-                    opacity: 0     
+                    opacity: 0    
                     disabled: True 
                     pos_hint: {'center_y': 0.5}
                     on_release:
+                        # 1. Reset Screen to Menu
                         screenmanager.get_screen('info').children[0].ids.screenmanager.current = 'menu'
+                        
+                        # 2. Reset Header Text
                         label1.text = '[b]MENU[/b]'
                         label2.text = 'manage your account'
+                        
+                        # 3. Hide Back Button
                         self.opacity = 0
                         self.disabled = True
-#-------------------------------------------------------------#
-
-#-------------------------------------------------------------#
+                        root.toggle_footer(True)
+                        
+                        # 4. RESTORE FOOTER VISIBILITY
+                        footer_nav.opacity = 1
+                        footer_nav.size_hint_y = 0.1
+                        footer_nav.disabled = False
+                        
+                        # 5. FORCE TOGGLE BUTTON RESET 
+                        # Ensures the 'Status' icon is correctly highlighted when returning
+                        info.state = 'down'
+                        app.root.get_screen('main').toggle_footer(True)
+                        
+        # -------------------------------------------------------------
+        # 2. THE MAIN SCREEN MANAGER
+        # -------------------------------------------------------------
         ScreenManager:
             id: screenmanager
             size_hint: 0.9, 0.95
@@ -82,13 +103,16 @@
             Screen:
                 name: 'info'
                 Status:
-#-------------------------------------------------------------#
 
-#-------------------------------------------------------------#
+        # -------------------------------------------------------------
+        # 3. THE GLOBAL FOOTER NAVIGATION
+        # -------------------------------------------------------------
         BoxLayout:
+            id: footer_nav 
             size_hint: 0.98, 0.1
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             orientation: 'horizontal'
+            
             canvas.before:
                 Color:
                     rgba: 1,1,1,0.1
@@ -100,14 +124,16 @@
                 Rectangle:
                     size: self.size[0] + dp(48), self.size[1] 
                     pos: self.pos[0] - dp(24), self.pos[1]
-#-------------------------------------------------------------#
+
+            # --- Nav Item 1: Dashboard ---
             BoxLayout:
                 orientation: 'vertical'
                 pos_hint: {'center_x': 0.5, 'center_y': 0.35}
                 Image:
                     size_hint: 0.5, 0.5
                     pos_hint: {'center_x': 0.5, 'center_y': 0}
-                    source: 'assets/dashboard_down.png'
+                    # MAGIC BINDING: Auto-switches icon based on button state!
+                    source: 'assets/dashboard_down.png' if dashboard.state == 'down' else 'assets/dashboard_normal.png'
                     ToggleButton:
                         id: dashboard
                         size: self.parent.parent.size
@@ -116,32 +142,27 @@
                         background_color: 0,0,0,0
                         disabled: True if self.state == 'down' else False
                         state: 'down'
-                        on_state:
-                            self.parent.source = 'assets/dashboard_normal.png' if self.state == 'normal' else 'assets/dashboard_down.png'
-                            if self.state == 'down': screenmanager.current = 'dashboard'
-                            if self.state == 'down': screenmanager.get_screen('dashboard').children[0].load_stats()
-                            if self.state == 'down': label1.text = '[b]DASHBOARD[/b]'
-                            if self.state == 'down': label2.text = 'you activity overview'      
-                            if self.state == 'down': back_btn.opacity = 0
-                            if self.state == 'down': back_btn.disabled = True
+                        # THE FIX: Only fire when the user physically clicks!
+                        on_release: app.root.get_screen('main').switch_tab('dashboard')
                 Label:   
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                     size_hint_y: 0.5
                     text: "[b]DASHBOARD[/b]"
-                    color: (1,1,1,1) if dashboard.state == 'normal' else (0.20, 0.11, 0.44, 1)
+                    color: (1,1,1,1) if dashboard.state == 'down' else (0.20, 0.11, 0.44, 1)
                     font_size: dp(10)
                     text_size: self.size
                     markup: True
                     halign: 'center'
                     valign: 'top'
-#-------------------------------------------------------------#
+
+            # --- Nav Item 2: Product ---
             BoxLayout:
                 orientation: 'vertical'
                 pos_hint: {'center_x': 0.5, 'center_y': 0.35}
                 Image:
                     size_hint: 0.5, 0.5
                     pos_hint: {'center_x': 0.5, 'center_y': 0}
-                    source: 'assets/product_normal.png'
+                    source: 'assets/product_down.png' if product.state == 'down' else 'assets/product_normal.png'
                     ToggleButton:
                         id: product
                         size: self.parent.parent.size
@@ -149,25 +170,19 @@
                         group: "footer"
                         background_color: 0,0,0,0
                         disabled: True if self.state == 'down' else False
-                        on_state:
-                            self.parent.source = 'assets/product_normal.png' if self.state == 'normal' else 'assets/product_down.png'
-                            if self.state == 'down': screenmanager.current = 'product'
-                            if self.state == 'down': screenmanager.get_screen('product').children[0].get_products(0)
-                            if self.state == 'down': label1.text = '[b]PRODUCT[/b]'
-                            if self.state == 'down': label2.text = 'textbooks, notes & materials'
-                            if self.state == 'down': back_btn.opacity = 0
-                            if self.state == 'down': back_btn.disabled = True
+                        on_release: app.root.get_screen('main').switch_tab('product')
                 Label:
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                     size_hint_y: 0.5
                     text: "[b]PRODUCT[/b]"
                     font_size: dp(10)
-                    color: (1,1,1,1) if product.state == 'normal' else (0.20, 0.11, 0.44, 1)
+                    color: (1,1,1,1) if product.state == 'down' else (0.20, 0.11, 0.44, 1)
                     text_size: self.size
                     markup: True
                     halign: 'center'
                     valign: 'top'
-#-------------------------------------------------------------#
+
+            # --- Nav Item 3: Sell ---
             BoxLayout:
                 orientation: 'vertical'
                 pos_hint: {'center_x': 0.5, 'center_y': 0.6}
@@ -188,30 +203,26 @@
                         group: "footer"
                         background_color: 0,0,0,0
                         disabled: True if self.state == 'down' else False
-                        on_state:
-                            if self.state == 'down': screenmanager.current = 'sell'
-                            if self.state == 'down': label1.text = '[b]CREATE LISTING[/b]'
-                            if self.state == 'down': label2.text = 'publish your products & services'
-                            if self.state == 'down': back_btn.opacity = 0
-                            if self.state == 'down': back_btn.disabled = True
+                        on_release: app.root.get_screen('main').switch_tab('sell')
                 Label:
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                     size_hint_y: 0.5
                     text: "[b]SELL[/b]"
-                    color: (1,1,1,1) if sell.state == 'normal' else (0.20, 0.11, 0.44, 1)
+                    color: (1,1,1,1) if sell.state == 'down' else (0.20, 0.11, 0.44, 1)
                     font_size: dp(10)
                     text_size: self.size
                     markup: True
                     halign: 'center'
                     valign: 'bottom'
-#-------------------------------------------------------------#
+
+            # --- Nav Item 4: Service ---
             BoxLayout:
                 orientation: 'vertical'
                 pos_hint: {'center_x': 0.5, 'center_y': 0.35}
                 Image:
                     size_hint: 0.5, 0.5
                     pos_hint: {'center_x': 0.5, 'center_y': 0}
-                    source: 'assets/service_normal.png'
+                    source: 'assets/service_down.png' if service.state == 'down' else 'assets/service_normal.png'
                     ToggleButton:
                         id: service
                         size: self.parent.parent.size
@@ -219,40 +230,29 @@
                         group: "footer"
                         background_color: 0,0,0,0
                         disabled: True if self.state == 'down' else False
-                        on_state:
-                            self.parent.source = 'assets/service_normal.png' if self.state == 'normal' else 'assets/service_down.png'
-                            if self.state == 'down': screenmanager.current = 'service'
-                            if self.state == 'down': screenmanager.get_screen('service').children[0].get_services(0)
-                            if self.state == 'down': label1.text = '[b]SERVICE[/b]'
-                            if self.state == 'down': label2.text = 'tutoring, review & freelance help'
-                            if self.state == 'down': back_btn.opacity = 0
-                            if self.state == 'down': back_btn.disabled = True
+                        on_release: app.root.get_screen('main').switch_tab('service')
                 Label:
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                     size_hint_y: 0.5
                     text: "[b]SERVICE[/b]"
-                    color: (1,1,1,1) if service.state == 'normal' else (0.20, 0.11, 0.44, 1)
+                    color: (1,1,1,1) if service.state == 'down' else (0.20, 0.11, 0.44, 1)
                     font_size: dp(10)
                     text_size: self.size
                     markup: True
                     halign: 'center'
                     valign: 'top'
-#-------------------------------------------------------------#
+
+            # --- Nav Item 5: Status (Account) ---
             BoxLayout:
                 orientation: 'vertical'
                 pos_hint: {'center_x': 0.5, 'center_y': 0.35}
-                
                 FloatLayout:
                     size_hint_y: 0.5
-                    
-                    # LAYER 1: The Icon
                     Image:
                         id: status_icon_img
                         size_hint: 1, 1
                         pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                        source: 'assets/person_normal.png'
-                                
-                    # LAYER 2: The Clickable Button
+                        source: 'assets/person_down.png' if info.state == 'down' else 'assets/person_normal.png'
                     ToggleButton:
                         id: info
                         size_hint: 1, 1
@@ -260,17 +260,7 @@
                         group: "footer"
                         background_color: 0,0,0,0
                         disabled: True if self.state == 'down' else False
-                        on_state:
-                            status_icon_img.source = 'assets/person_normal.png' if self.state == 'normal' else 'assets/person_down.png'
-                            if self.state == 'down': screenmanager.current = 'info'
-                            if self.state == 'down': screenmanager.get_screen('info').children[0].load_user_stats()
-                            if self.state == 'down': screenmanager.get_screen('info').children[0].ids.screenmanager.current = 'menu'
-                            if self.state == 'down': label1.text = '[b]MENU[/b]'
-                            if self.state == 'down': label2.text = 'manage your account'
-                            if self.state == 'down': back_btn.opacity = 0
-                            if self.state == 'down': back_btn.disabled = True
-
-                    # LAYER 3: The Red Numeric Badge
+                        on_release: app.root.get_screen('main').switch_tab('info')
                     Label:
                         text: str(app.unread_count) if app.unread_count > 0 else ""
                         size_hint: None, None
@@ -287,12 +277,11 @@
                                 pos: self.pos
                                 size: self.size
                                 radius: [dp(7)]
-                            
                 Label:
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                     size_hint_y: 0.5
                     text: "[b]STATUS[/b]"
-                    color: (1,1,1,1) if info.state == 'normal' else (0.20, 0.11, 0.44, 1)
+                    color: (1,1,1,1) if info.state == 'down' else (0.20, 0.11, 0.44, 1)
                     font_size: dp(10)
                     text_size: self.size
                     markup: True
@@ -349,11 +338,12 @@
                         Label:
                             size_hint_x: 0.1
                         Label:
+                            id: earnings_trend
                             size_hint_x: 0.3
-                            text: '+2'
+                            text: '+0%' 
+                            markup: True
                             font_size: dp(12)
                             text_size: self.size
-                            color: 0.16, 0.59, 0.33, 1
                             halign: 'center'
                             valign: 'center'
                             canvas.before:
@@ -395,7 +385,7 @@
                         Label:
                             size_hint_x: 0.1
                         Image:
-                            source: 'assets/product_down.png'
+                            source: 'assets/active_listing.png'
                             size_hint_x: 0.3
                           
                             canvas.before:
@@ -407,11 +397,12 @@
                         Label:
                             size_hint_x: 0.1
                         Label:
+                            id: listings_trend
                             size_hint_x: 0.3
-                            text: '+2'
+                            text: '+0%' 
+                            markup: True
                             font_size: dp(12)
                             text_size: self.size
-                            color: 0.16, 0.59, 0.33, 1
                             halign: 'center'
                             valign: 'center'
                             canvas.before:
@@ -453,7 +444,7 @@
                         Label:
                             size_hint_x: 0.1
                         Image:
-                            source: 'assets/eye.png'
+                            source: 'assets/sold.png'
                             size_hint_x: 0.3
                             canvas.before:
                                 Color:
@@ -464,11 +455,12 @@
                         Label:
                             size_hint_x: 0.1
                         Label:
+                            id: sold_trend
                             size_hint_x: 0.3
-                            text: '+2'
+                            text: '+0%' 
+                            markup: True
                             font_size: dp(12)
                             text_size: self.size
-                            color: 0.16, 0.59, 0.33, 1
                             halign: 'center'
                             valign: 'center'
                             canvas.before:
@@ -521,8 +513,10 @@
                         Label:
                             size_hint_x: 0.1
                         Label:
+                            id: rating_trend
                             size_hint_x: 0.3
-                            text: 'Top 5%' # A nice little gamification touch
+                            text: 'Top 5%' 
+                            markup: True
                             font_size: dp(12)
                             text_size: self.size
                             color: 1, 0.8, 0.2, 1  # Gold color
@@ -574,17 +568,8 @@
                             text: '[b]EARNINGS[/b]'
                             markup: True
                             text_size: self.size
-                            halign: 'left'
+                            halign: 'center'
                             valign: 'center'
-                        Image:
-                            source: 'assets/bar_graph.png'
-                            size_hint: None, 1
-                            canvas.before:
-                                Color:
-                                    rgba: 0.15, 0.17, 0.23, 0.5
-                                RoundedRectangle:
-                                    size: self.size
-                                    pos: self.pos
                          
                 ScrollView:
                     size_hint: 0.9, 0.3
@@ -916,7 +901,7 @@
         pos: root.pos
         do_scroll: False, True
         bar_width: 0
-      
+        
         BoxLayout:
             orientation: 'vertical'
             size_hint_y: None
@@ -926,220 +911,352 @@
 
             EscrowBanner:
 
-            # TYPE SELECTION
+            # ---------------------------------------------------
+            # THE MASTER SWITCH (Product vs Service)
+            # ---------------------------------------------------
             BoxLayout:
-                orientation: 'vertical'
                 size_hint_y: None
-                height: dp(75)
-                spacing: dp(10)
-                Label:
-                    text: 'Type'
-                    bold: True
-                    font_size: sp(14)
-                    size_hint_y: None
-                    height: dp(20)
-                    text_size: self.size
-                    halign: 'left'
-             
-                BoxLayout:
-                    orientation: 'horizontal'
-                    spacing: dp(10)
-                 
-                    ToggleButton:
-                        id: type_textbook
-                        group: 'listing_type'
-                        text: 'Textbook'
-                        bold: True
-                        font_size: sp(14)
-                        background_color: 0, 0, 0, 0
-                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                        canvas.before:
-                            Color:
-                                rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1, 1, 1, 0.05)
-                            RoundedRectangle:
-                                size: self.size
-                                pos: self.pos
-                                radius: [dp(12)]
-                            Color:
-                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0, 0, 0, 0)
-                            Line:
-                                rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
-                                width: dp(1.2)
+                height: dp(50)
+                spacing: dp(15)
+                canvas.before:
+                    Color:
+                        rgba: 0.11, 0.12, 0.16, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(12)]
+                
+                ToggleButton:
+                    text: '[b]Product[/b]'
+                    markup: True
+                    group: 'main_sell_mode'
+                    state: 'down'
+                    allow_no_selection: False
+                    background_color: 0,0,0,0
+                    color: (1,1,1,1) if self.state == 'down' else (0.5,0.5,0.5,1)
+                    # Automatically sets boolean state in Python class
+                    on_state: root.is_service_mode = False if self.state == 'down' else True
+                    canvas.before:
+                        Color:
+                            rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0,0,0,0)
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [dp(12)]
 
-                    ToggleButton:
-                        id: type_service
-                        group: 'listing_type'
-                        text: 'Service'
-                        bold: True
-                        font_size: sp(14)
-                        background_color: 0, 0, 0, 0
-                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                        canvas.before:
-                            Color:
-                                rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1, 1, 1, 0.05)
-                            RoundedRectangle:
-                                size: self.size
-                                pos: self.pos
-                                radius: [dp(12)]
-                            Color:
-                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0, 0, 0, 0)
-                            Line:
-                                rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
-                                width: dp(1.2)
+                ToggleButton:
+                    text: '[b]Service[/b]'
+                    markup: True
+                    group: 'main_sell_mode'
+                    allow_no_selection: False
+                    background_color: 0,0,0,0
+                    color: (1,1,1,1) if self.state == 'down' else (0.5,0.5,0.5,1)
+                    canvas.before:
+                        Color:
+                            rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0,0,0,0)
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [dp(12)]
 
-                    ToggleButton:
-                        id: type_notes
-                        group: 'listing_type'
-                        text: 'Notes'
-                        bold: True
-                        font_size: sp(14)
-                        background_color: 0, 0, 0, 0
-                        color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                        canvas.before:
-                            Color:
-                                rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1, 1, 1, 0.05)
-                            RoundedRectangle:
-                                size: self.size
-                                pos: self.pos
-                                radius: [dp(12)]
-                            Color:
-                                rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0, 0, 0, 0)
-                            Line:
-                                rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
-                                width: dp(1.2)
-
-            # INPUT FIELDS
+            # ---------------------------------------------------
+            # UNIVERSAL FIELDS
+            # ---------------------------------------------------
             FormInput:
                 id: title_input
                 title: 'Title'
                 hint: 'e.g. Organic Chemistry 8th Edition'
 
             FormInput:
+                id: subject_input
+                title: 'Subject'
+                hint: 'e.g. Mathematics, History, Biology'
+
+            FormInput:
                 id: desc_input
                 title: 'Description'
-                hint: 'Describe condition, edition, ISBN...'
+                hint: 'Provide details about your listing...'
                 height: dp(120)
                 multilined: True
-                
 
-         
             FormInput:
                 id: price_input
                 title: 'Price'
-                hint: '₱0.00'
+                # Dynamic hint changes based on the mode!
+                hint: '₱0.00' if not root.is_service_mode else '₱0.00 (Base Rate)'
 
-            # CONDITION SELECTION
-            BoxLayout:
-                orientation: 'vertical'
+            # ---------------------------------------------------
+            # THE OVERLAP ZONE (Magic Toggle UI)
+            # ---------------------------------------------------
+            FloatLayout:
                 size_hint_y: None
-                height: dp(75)
-                spacing: dp(10)
-                Label:
-                    text: 'Condition'
-                    bold: True
-                    font_size: sp(14)
-                    size_hint_y: None
-                    height: dp(20)
-                    text_size: self.size
-                    halign: 'left'
-             
-                ScrollView:
-                    do_scroll: True, False
-                    bar_width: 0
-                    scroll_timeout: 250 
-                    scroll_distance: dp(20)
-                  
-                    BoxLayout:
-                        id: condition_group
-                        orientation: 'horizontal'
-                        spacing: dp(8)
-                        size_hint_x: None
-                        width: self.minimum_width
-                      
-                        ToggleButton:
-                            group: 'sells'
-                            text: 'New'
-                            size_hint_x: None
-                            width: dp(70)
-                            font_size: sp(12)
-                            background_color: 0, 0, 0, 0
-                            color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                            canvas.before:
-                                Color:
-                                    rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (1, 1, 1, 0.05)
-                                RoundedRectangle:
-                                    size: self.size
-                                    pos: self.pos
-                                    radius: [dp(15)]
-                     
-                        ToggleButton:
-                            group: 'sells'
-                            text: 'Like New'
-                            size_hint_x: None
-                            width: dp(90)
-                            font_size: sp(12)
-                            background_color: 0, 0, 0, 0
-                            color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                            canvas.before:
-                                Color:
-                                    rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (1, 1, 1, 0.05)
-                                RoundedRectangle:
-                                    size: self.size
-                                    pos: self.pos
-                                    radius: [dp(15)]
+                height: dp(160)
 
-                        ToggleButton:
-                            group: 'sells'
-                            text: 'Good'
-                            size_hint_x: None
-                            width: dp(70)
-                            font_size: sp(12)
-                            background_color: 0, 0, 0, 0
-                            color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                            canvas.before:
-                                Color:
-                                    rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (1, 1, 1, 0.05)
-                                RoundedRectangle:
-                                    size: self.size
-                                    pos: self.pos
-                                    radius: [dp(15)]
-                                 
-                        ToggleButton:
-                            group: 'sells'
-                            text: 'Fair'
-                            size_hint_x: None
-                            width: dp(70)
-                            font_size: sp(12)
-                            background_color: 0, 0, 0, 0
-                            color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                            canvas.before:
-                                Color:
-                                    rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (1, 1, 1, 0.05)
-                                RoundedRectangle:
-                                    size: self.size
-                                    pos: self.pos
-                                    radius: [dp(15)]
+                # ==========================================
+                # LAYER A: PRODUCT SETTINGS
+                # ==========================================
+                BoxLayout:
+                    orientation: 'vertical'
+                    pos_hint: {'x': 0, 'y': 0}
+                    size_hint: 1, 1
+                    spacing: dp(10)
+                    opacity: 1 if not root.is_service_mode else 0
+                    disabled: True if root.is_service_mode else False
 
-                        ToggleButton:
-                            group: 'sells'
-                            text: 'Digital'
+                    Label:
+                        text: 'Product Type'
+                        bold: True
+                        font_size: sp(14)
+                        size_hint_y: None
+                        height: dp(20)
+                        text_size: self.size
+                        halign: 'left'
+                    ScrollView:
+                        do_scroll: True, False
+                        bar_width: 0
+                        size_hint_y: None
+                        height: dp(40)
+                        BoxLayout:
+                            id: product_type_group
+                            orientation: 'horizontal'
                             size_hint_x: None
-                            width: dp(80)
-                            font_size: sp(12)
-                            background_color: 0, 0, 0, 0
-                            color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                            canvas.before:
-                                Color:
-                                    rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (1, 1, 1, 0.05)
-                                RoundedRectangle:
-                                    size: self.size
-                                    pos: self.pos
-                                    radius: [dp(15)]
+                            width: self.minimum_width
+                            spacing: dp(8)
+                            ToggleButton:
+                                group: 'prod_type'
+                                state: 'down'
+                                text: 'Textbook'
+                                size_hint_x: None
+                                width: dp(100)
+                                background_color: 0,0,0,0
+                                canvas.before:
+                                    Color:
+                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
+                                    RoundedRectangle:
+                                        pos: self.pos
+                                        size: self.size
+                                        radius: [dp(12)]
+                            ToggleButton:
+                                group: 'prod_type'
+                                text: 'Notes'
+                                size_hint_x: None
+                                width: dp(80)
+                                background_color: 0,0,0,0
+                                canvas.before:
+                                    Color:
+                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
+                                    RoundedRectangle:
+                                        pos: self.pos
+                                        size: self.size
+                                        radius: [dp(12)]
+                            ToggleButton:
+                                group: 'prod_type'
+                                text: 'Guides'
+                                size_hint_x: None
+                                width: dp(80)
+                                background_color: 0,0,0,0
+                                canvas.before:
+                                    Color:
+                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
+                                    RoundedRectangle:
+                                        pos: self.pos
+                                        size: self.size
+                                        radius: [dp(12)]
 
-            # PUBLISH BUTTON
+                    Label:
+                        text: 'Condition'
+                        bold: True
+                        font_size: sp(14)
+                        size_hint_y: None
+                        height: dp(20)
+                        text_size: self.size
+                        halign: 'left'
+                    ScrollView:
+                        do_scroll: True, False
+                        bar_width: 0
+                        size_hint_y: None
+                        height: dp(40)
+                        BoxLayout:
+                            id: condition_group
+                            orientation: 'horizontal'
+                            size_hint_x: None
+                            width: self.minimum_width
+                            spacing: dp(8)
+                            ToggleButton:
+                                group: 'cond'
+                                state: 'down'
+                                text: 'New'
+                                size_hint_x: None
+                                width: dp(70)
+                                background_color: 0,0,0,0
+                                canvas.before:
+                                    Color:
+                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
+                                    RoundedRectangle:
+                                        pos: self.pos
+                                        size: self.size
+                                        radius: [dp(12)]
+                            ToggleButton:
+                                group: 'cond'
+                                text: 'Good'
+                                size_hint_x: None
+                                width: dp(70)
+                                background_color: 0,0,0,0
+                                canvas.before:
+                                    Color:
+                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
+                                    RoundedRectangle:
+                                        pos: self.pos
+                                        size: self.size
+                                        radius: [dp(12)]
+                            ToggleButton:
+                                group: 'cond'
+                                text: 'Digital'
+                                size_hint_x: None
+                                width: dp(80)
+                                background_color: 0,0,0,0
+                                canvas.before:
+                                    Color:
+                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
+                                    RoundedRectangle:
+                                        pos: self.pos
+                                        size: self.size
+                                        radius: [dp(12)]
+
+                # ==========================================
+                # LAYER B: SERVICE SETTINGS
+                # ==========================================
+                BoxLayout:
+                    orientation: 'vertical'
+                    pos_hint: {'x': 0, 'y': 0}
+                    size_hint: 1, 1
+                    spacing: dp(10)
+                    opacity: 1 if root.is_service_mode else 0
+                    disabled: True if not root.is_service_mode else False
+
+                    Label:
+                        text: 'Service Type'
+                        bold: True
+                        font_size: sp(14)
+                        size_hint_y: None
+                        height: dp(20)
+                        text_size: self.size
+                        halign: 'left'
+                    ScrollView:
+                        do_scroll: True, False
+                        bar_width: 0
+                        size_hint_y: None
+                        height: dp(40)
+                        BoxLayout:
+                            id: service_type_group
+                            orientation: 'horizontal'
+                            size_hint_x: None
+                            width: self.minimum_width
+                            spacing: dp(8)
+                            ToggleButton:
+                                group: 'srv_type'
+                                state: 'down'
+                                text: 'Tutoring'
+                                size_hint_x: None
+                                width: dp(90)
+                                background_color: 0,0,0,0
+                                canvas.before:
+                                    Color:
+                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
+                                    RoundedRectangle:
+                                        pos: self.pos
+                                        size: self.size
+                                        radius: [dp(12)]
+                            ToggleButton:
+                                group: 'srv_type'
+                                text: 'Writing'
+                                size_hint_x: None
+                                width: dp(80)
+                                background_color: 0,0,0,0
+                                canvas.before:
+                                    Color:
+                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
+                                    RoundedRectangle:
+                                        pos: self.pos
+                                        size: self.size
+                                        radius: [dp(12)]
+                            ToggleButton:
+                                group: 'srv_type'
+                                text: 'Career'
+                                size_hint_x: None
+                                width: dp(80)
+                                background_color: 0,0,0,0
+                                canvas.before:
+                                    Color:
+                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
+                                    RoundedRectangle:
+                                        pos: self.pos
+                                        size: self.size
+                                        radius: [dp(12)]
+
+                    Label:
+                        text: 'Rate Format'
+                        bold: True
+                        font_size: sp(14)
+                        size_hint_y: None
+                        height: dp(20)
+                        text_size: self.size
+                        halign: 'left'
+                    ScrollView:
+                        do_scroll: True, False
+                        bar_width: 0
+                        size_hint_y: None
+                        height: dp(40)
+                        BoxLayout:
+                            id: rate_group
+                            orientation: 'horizontal'
+                            size_hint_x: None
+                            width: self.minimum_width
+                            spacing: dp(8)
+                            ToggleButton:
+                                group: 'rate'
+                                state: 'down'
+                                text: '/hr'
+                                size_hint_x: None
+                                width: dp(60)
+                                background_color: 0,0,0,0
+                                canvas.before:
+                                    Color:
+                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
+                                    RoundedRectangle:
+                                        pos: self.pos
+                                        size: self.size
+                                        radius: [dp(12)]
+                            ToggleButton:
+                                group: 'rate'
+                                text: '/week'
+                                size_hint_x: None
+                                width: dp(80)
+                                background_color: 0,0,0,0
+                                canvas.before:
+                                    Color:
+                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
+                                    RoundedRectangle:
+                                        pos: self.pos
+                                        size: self.size
+                                        radius: [dp(12)]
+                            ToggleButton:
+                                group: 'rate'
+                                text: '/month'
+                                size_hint_x: None
+                                width: dp(90)
+                                background_color: 0,0,0,0
+                                canvas.before:
+                                    Color:
+                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
+                                    RoundedRectangle:
+                                        pos: self.pos
+                                        size: self.size
+                                        radius: [dp(12)]
+
             PrimaryButton:
                 id: publish_btn
-                text: '[b]Publish[/b]'
+                text: '[b]Publish Listing[/b]'
                 on_release: root.add_product()
 #------------------------------------------------------------#
 #SERVICE                  
@@ -1774,6 +1891,7 @@
                                     root.parent.parent.parent.parent.ids.label2.text = 'view your details'
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
                                     root.parent.parent.parent.parent.ids.back_btn.disabled = False
+                                    app.root.get_screen('main').toggle_footer(False)
                               
                             MenuItem:
                                 icon_source: 'assets/chat.png'
@@ -1781,11 +1899,12 @@
                                 badge_count: app.unread_count
                                 on_release: 
                                     screenmanager.current = 'inbox'
-                                    screenmanager.get_screen('inbox').children[0].load_inbox()
+                                    screenmanager.get_screen('inbox').children[0].load_hub_data()
                                     root.parent.parent.parent.parent.ids.label1.text = '[b]INBOX[/b]'
                                     root.parent.parent.parent.parent.ids.label2.text = 'Your active conversations'
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
                                     root.parent.parent.parent.parent.ids.back_btn.disabled = False
+                                    app.root.get_screen('main').toggle_footer(False)
                               
                             MenuItem:
                                 icon_source: 'assets/wallet.png'
@@ -1797,6 +1916,7 @@
                                     root.parent.parent.parent.parent.ids.label2.text = 'manage your funds'
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
                                     root.parent.parent.parent.parent.ids.back_btn.disabled = False
+                                    app.root.get_screen('main').toggle_footer(False)
                               
                             MenuItem:
                                 icon_source: 'assets/settings.png'
@@ -1807,6 +1927,7 @@
                                     root.parent.parent.parent.parent.ids.label2.text = 'manage your preferences'
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
                                     root.parent.parent.parent.parent.ids.back_btn.disabled = False
+                                    app.root.get_screen('main').toggle_footer(False)
                               
                             MenuItem:
                                 icon_source: 'assets/logout.png'
@@ -1819,6 +1940,7 @@
                                     root.parent.parent.parent.parent.ids.label2.text = 'disconnect securely'
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
                                     root.parent.parent.parent.parent.ids.back_btn.disabled = False
+                                    app.root.get_screen('main').toggle_footer(False)
         Screen:
             name: 'profile'
             Profile:
@@ -1888,13 +2010,7 @@
 # FIX: Specialized Send Button with background styling
 <SendButton@ButtonBehavior+AnchorLayout>:
     icon_source: 'assets/send.png'
-    canvas.before:
-        Color:
-            rgba: 0.43, 0.33, 0.85, 1
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [dp(25)]
+
     Image:
         source: root.icon_source
         size_hint: 0.45, 0.45
@@ -1961,18 +2077,161 @@
         halign: 'right'
         valign: 'top'
 
+<OwnedItemTile@BoxLayout>:
+    title: ''
+    subtitle: ''
+    icon_bg: 0.15, 0.16, 0.22, 1
+    size_hint_y: None
+    height: dp(75)
+    padding: dp(15)
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.16, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(15)]
+    FloatLayout:
+        size_hint_x: None
+        width: dp(45)
+        canvas.before:
+            Color:
+                rgba: root.icon_bg
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(10)]
+        Image:
+            source: 'assets/check_circle.png'
+            size_hint: 0.5, 0.5
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: f'[b]{root.title}[/b]'
+            markup: True
+            font_size: sp(16)
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: root.subtitle
+            color: 0.6, 0.6, 0.6, 1
+            font_size: sp(13)
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+
+<SubscriptionItemTile@BoxLayout>:
+    title: ''
+    schedule: ''
+    service_id: 0
+    size_hint_y: None
+    height: dp(90)
+    padding: dp(15)
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.12, 0.20, 1 # Dark purple tint
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(15)]
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: f'[b]{root.title}[/b]'
+            markup: True
+            font_size: sp(16)
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: f'Starts: {root.schedule}'
+            color: 0.43, 0.33, 0.85, 1 # Neon Purple
+            font_size: sp(13)
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+    Button:
+        text: 'Unsubscribe'
+        size_hint: None, None
+        size: dp(100), dp(35)
+        pos_hint: {'center_y': 0.5}
+        background_color: 0,0,0,0
+        on_release: app.root.get_screen('main').ids.screenmanager.get_screen('info').children[0].ids.screenmanager.get_screen('inbox').children[0].unsubscribe(root.service_id)
+        canvas.before:
+            Color:
+                rgba: 0.85, 0.26, 0.33, 1 # Red action
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(8)]
+
 <InboxScreen>:
     orientation: 'vertical'
     padding: [dp(20), dp(5), dp(20), dp(20)]
+    spacing: dp(15)
+    
+    # 3-Way Tab Switcher
+    BoxLayout:
+        size_hint_y: None
+        height: dp(40)
+        spacing: dp(8)
+        ToggleButton:
+            text: 'Chats'
+            group: 'hub_tabs'
+            state: 'down'
+            font_size: sp(12)
+            background_color: 0,0,0,0
+            color: (1,1,1,1) if self.state == 'down' else (1,1,1,0.5)
+            on_release: root.switch_tab('chats')
+            canvas.before:
+                Color:
+                    rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.12, 0.16, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(10)]
+        ToggleButton:
+            text: 'Products'
+            group: 'hub_tabs'
+            font_size: sp(12)
+            background_color: 0,0,0,0
+            color: (1,1,1,1) if self.state == 'down' else (1,1,1,0.5)
+            on_release: root.switch_tab('products')
+            canvas.before:
+                Color:
+                    rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.12, 0.16, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(10)]
+        ToggleButton:
+            text: 'Subs'
+            group: 'hub_tabs'
+            font_size: sp(12)
+            background_color: 0,0,0,0
+            color: (1,1,1,1) if self.state == 'down' else (1,1,1,0.5)
+            on_release: root.switch_tab('subs')
+            canvas.before:
+                Color:
+                    rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.12, 0.16, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(10)]
+
     ScrollView:
         do_scroll: False, True
         bar_width: 0
         BoxLayout:
-            id: inbox_list
+            id: hub_list
             orientation: 'vertical'
             size_hint_y: None
             height: self.minimum_height
-            spacing: dp(10)        
+            spacing: dp(10)
 
 # -----------------------------------------------------------#
 # Custom Dynamic Class for Read-Only Profile Tiles
@@ -2123,13 +2382,13 @@
                 
                 ProfileDataTile:
                     id: tile_age
-                    icon_source: 'assets/person_normal.png' # Existing person icon
+                    icon_source: 'assets/age.png' # Existing person icon
                     title: 'Age'
                     subtitle: 'loading...'
                 
                 ProfileDataTile:
                     id: tile_birthday
-                    icon_source: 'assets/star.png' # Existing star icon
+                    icon_source: 'assets/birthday.png' # Existing star icon
                     title: 'Birthday'
                     subtitle: 'loading...'
 
@@ -2408,13 +2667,7 @@
             hint_text_color: 0.5, 0.5, 0.5, 1
             multiline: False
             padding: [dp(15), dp(10)]
-            canvas.before:
-                Color:
-                    rgba: 0.15, 0.16, 0.22, 1
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [dp(20)]
+            
        
         # FIX: Replaced raw ButtonBehavior with valid SendButton
         SendButton:
@@ -2531,12 +2784,6 @@
     spacing: dp(10)
 
     # Master Background for the Settings Screen
-    canvas.before:
-        Color:
-            rgba: 0.07, 0.08, 0.11, 1
-        Rectangle:
-            pos: self.pos
-            size: self.size
 
     # Scrollable Settings List
     ScrollView:
@@ -2622,12 +2869,12 @@
                             radius: [dp(12)]
                  
                     SettingsTile:
-                        icon_source: 'assets/notifaction.png'
+                        icon_source: 'assets/notification.png'
                         title: 'Notifications'
                         subtitle: 'Push, email, SMS'
                     Divider:
                     SettingsTile:
-                        icon_source: 'assets/visibility.png'
+                        icon_source: 'assets/display.png'
                         title: 'Appearance'
                         subtitle: 'Theme & display'
                     Divider:
@@ -2673,12 +2920,6 @@
 <LogOut>:
     size: root.size
     pos: root.pos
-    canvas.before:
-        Color:
-            rgba: 0.07, 0.08, 0.11, 0.95 # Slight opacity for overlay feel
-        Rectangle:
-            pos: self.pos
-            size: self.size
    
     BoxLayout:
         orientation: 'vertical'
@@ -2701,7 +2942,7 @@
                 source: 'assets/logout.png' 
                 size_hint: 0.5, 0.5
                 pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                color: 0.88, 0.25, 0.25, 1
+                color: (0.77, 0.1, 0.035, 1)
 
         # Text
         Label:

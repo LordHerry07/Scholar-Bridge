@@ -149,6 +149,36 @@ def delete_satisfied_products():
         return response.json()
     return None
 
+
+def add_service(data):
+    url = f"{BASE_URL}/services"
+    response = safe_request(requests.post, url, json=data)
+    if response and response.status_code == 201:
+        return response.json()
+    return None
+
+def get_services():
+    url = f"{BASE_URL}/services"
+    response = safe_request(requests.get, url)
+    if response and response.status_code == 200:
+        return response.json()
+    return []
+
+def subscribe_service(service_id, buyer_email, schedule):
+    url = f"{BASE_URL}/subscribe"
+    payload = {"service_id": service_id, "buyer_email": buyer_email, "schedule": schedule}
+    res = safe_request(requests.post, url, json=payload)
+    return res is not None and res.status_code == 200
+
+def unsubscribe_service(service_id):
+    url = f"{BASE_URL}/unsubscribe/{service_id}"
+    res = safe_request(requests.post, url)
+    return res is not None and res.status_code == 200
+
+def get_my_hub(email):
+    url = f"{BASE_URL}/my_hub/{email}"
+    res = safe_request(requests.get, url)
+    return res.json() if res and res.status_code == 200 else {"products": [], "subscriptions": []}
 # ---------------------------------------
 # Chat Messages
 # ---------------------------------------
@@ -296,6 +326,29 @@ def verify_reset_otp(email, otp):
     # SAFE PARSING: Don't crash if the server sends HTML instead of JSON
     try:
         error_msg = response.json().get("error", "Invalid or expired code")
+    except Exception:
+        error_msg = f"Server Error ({response.status_code})"
+        
+    return {"success": False, "error": error_msg}
+
+def finalize_password_reset(email, new_password):
+    url = f"{BASE_URL}/reset_password"
+    payload = {"email": email, "password": new_password}
+    
+    # Safely send the post request
+    response = safe_request(requests.post, url, json=payload)
+    
+    # Catch server offline errors
+    if response is None:
+        return {"success": False, "error": "Server is offline"}
+        
+    # Check for the 200 OK from Flask
+    if response.status_code == 200:
+        return {"success": True}
+    
+    # Safely parse any error messages the server sends back
+    try:
+        error_msg = response.json().get("error", "Could not update password")
     except Exception:
         error_msg = f"Server Error ({response.status_code})"
         
