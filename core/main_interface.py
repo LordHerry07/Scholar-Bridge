@@ -35,6 +35,25 @@ Builder.load_file('design/animations.kv')
 IS_OFFLINE_MODE = False
 CACHE_FILE = "scholarbridge_offline_data.json"
 
+
+class LoadingOverlay(FloatLayout):
+    angle = NumericProperty(0)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Rotates continuously
+        self.anim = Animation(angle=-360, duration=1.0)
+        self.anim.repeat = True
+        
+    def start(self):
+        self.opacity = 1
+        self.anim.start(self)
+        
+    def stop(self):
+        self.anim.stop(self)
+        self.opacity = 0
+        self.angle = 0
+
 def save_to_cache(key, data):
     """Saves API data to the local offline file."""
     # 1. Read the existing file so we don't overwrite other tabs
@@ -369,11 +388,15 @@ class ProductDetailsModal(ModalView):
 
     def buy_item(self):
         my_email = Data.user.get('email')
+        my_name = Data.user.get('full_name')
         if not my_email: 
             print("Not logged in!")
             return
         
-        # 1. Call the API
+        if my_name == self.fullname:
+            NotificationModal().show("Action Blocked", "You cannot buy your own listing.", is_error=True)
+            return
+
         result = request.buy_product(self.product_id, my_email)
         
         # Safely check success
@@ -432,6 +455,7 @@ class ProductDetailsModal(ModalView):
     def go_to_chat(self):
         self.dismiss()
         app = App.get_running_app()
+        app.root.get_screen('main').toggle_footer(False)
         main_interface = app.root.get_screen('main')
         main_interface.ids.screenmanager.current = 'info'
         status_screen = main_interface.ids.screenmanager.get_screen('info').children[0]
@@ -552,6 +576,10 @@ class ServiceDetailsModal(ModalView):
     rate_type = StringProperty("")
 
     def subscribe_service(self):
+        my_name = Data.user.get('full_name')
+        if my_name == self.fullname:
+            NotificationModal().show("Action Blocked", "You cannot subscribe to your own service.", is_error=True)
+            return
         self.dismiss()
         modal = BookingCalendarModal()
         modal.service_title = self.title
@@ -702,7 +730,8 @@ class InboxScreen(BoxLayout):
                 tile = Factory.OwnedItemTile()
                 tile.title = prod['title']
                 tile.subtitle = f"Purchased from {prod['full_name']}"
-                tile.icon_bg = (0.16, 0.67, 0.38, 1) # Green
+                tile.seller_name = prod['full_name'] # <--- NEW LINE
+                tile.icon_bg = (0.16, 0.67, 0.38, 1) 
                 container.add_widget(tile)
                 
         elif self.current_tab == 'subs':
@@ -712,6 +741,9 @@ class InboxScreen(BoxLayout):
                 tile.title = sub['title']
                 tile.schedule = sub.get('booked_schedule', 'Pending')
                 tile.service_id = sub['id']
+                # Subscriptions need a slight API tweak to return 'full_name' too, 
+                # assuming it does, pass it here:
+                tile.seller_name = sub.get('full_name', 'Unknown Seller') # <--- NEW LINE
                 container.add_widget(tile)
 
     def unsubscribe(self, service_id):
@@ -728,6 +760,11 @@ class InboxScreen(BoxLayout):
                         if type(widget).__name__ == 'Service':
                             widget.get_services() 
             except: pass
+    def open_review(self, seller_name):
+
+        modal = ReviewModal()
+        modal.seller_name = seller_name
+        modal.open()
 
 #-----------------------------------------------------------#
 # Starting_Interface
@@ -759,6 +796,16 @@ class StartInterface(Screen):
         notif.y = Window.height - notif.height - dp(10)
         
         notif.show()
+    def switch_tab(self, tab_name):
+        sm = self.ids.screenmanager
+        
+        # Change direction securely without creating new transition objects
+        if tab_name == 'login':
+            sm.transition.direction = 'right'
+        else:
+            sm.transition.direction = 'left'
+            
+        sm.current = tab_name
 
 #Children
 class Login(Widget):
@@ -800,46 +847,131 @@ class Login(Widget):
 
     def login_user(self, email, password):
         global IS_OFFLINE_MODE
-        
-        # --- THE BYPASS ---
         if IS_OFFLINE_MODE:
             print("📴 Offline Mode Active: Faking login and bypassing server!")
             App.get_running_app().root.logged = True
             App.get_running_app().root.current = "main"
-            return # Stop here!
+            return 
             
-        # --- NORMAL ONLINE LOGIN ---
         if email == '' or password == '':
             return
             
+        # 1. Start the Spinner!
+        self.ids.loading_overlay.start()
+        
+        # 2. Fire the Background Thread so UI doesn't freeze
+        threading.Thread(target=self._thread_login, args=(email, password), daemon=True).start()
+
+    def _thread_login(self, email, password):
         try:
             response = request.log_user(email, password)
-            if response.status_code == 200:
-                data = response.json()
-                Data.user = data.get('user', {})
-                
-                try:
-                    import json # Ensure json is imported at the top of your file!
-                    with open('local_state.json', 'w', encoding='utf-8') as f:
-                        json.dump(Data.user, f)
-                except Exception as e:
-                    print("Failed to save session:", e)
-                
-                # Use standard App execution to switch screens
-                from kivy.app import App
-                App.get_running_app().root.logged = True
-                App.get_running_app().root.current = "main"
+            # Use Clock.schedule_once to safely jump back to the Main UI Thread
+            Clock.schedule_once(lambda dt: self._process_login(response), 0)
         except Exception as e:
-            print(f"🚨 Network Error during login: {e}")
+            print(f"Login Thread Error: {e}")
+            Clock.schedule_once(lambda dt: self._process_login(None), 0)
+
+    def _process_login(self, response):
+        # 3. Stop the Spinner!
+        self.ids.loading_overlay.stop()
+        
+        if response and response.status_code == 200:
+            data = response.json()
+            Data.user = data.get('user', {})
+            
+            try:
+                import json 
+                with open('local_state.json', 'w', encoding='utf-8') as f:
+                    json.dump(Data.user, f)
+            except Exception as e:
+                print("Failed to save session:", e)
+            
+            app = App.get_running_app()
+            app.root.logged = True
+            app.root.current = "main"
+        else:
+            NotificationModal().show("Login Failed", "Invalid email or password.", is_error=True)
 
 class Signup(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def sign_user(self, full_name, email, password, confirm_password):
-        if password != confirm_password:
+        # 0. Clean up accidental trailing spaces from the inputs
+        full_name = full_name.strip()
+        email = email.strip()
+        password = password.strip()
+        confirm_password = confirm_password.strip()
+
+        # 1. Constraint: Must fill up everything
+        if not full_name or not email or not password or not confirm_password:
+            NotificationModal().show("Action Blocked", "Please fill up all fields.", is_error=True)
             return
-        request.add_user(full_name, email, password)
+
+        # 2. Constraint: Fullname must have > 3 elements (4 or more words)
+        name_elements = full_name.split()
+        if len(name_elements) < 3:
+            NotificationModal().show("Invalid Name", "Please enter your complete full name (First, Middle, Last, etc).", is_error=True)
+            return
+
+        # --- UPDATED 3. Constraint: Any valid .edu.ph email ---
+        if "@" not in email or not email.endswith(".edu.ph"):
+            NotificationModal().show(
+                "Invalid Email", 
+                "You must use a valid Philippine university email ending in '.edu.ph' (e.g., student@up.edu.ph).", 
+                is_error=True
+            )
+            return
+
+        # 4. Constraint: Password must be greater than 7 characters
+        if len(password) <= 7:
+            NotificationModal().show("Weak Password", "Password must be at least 8 characters long.", is_error=True)
+            return
+
+        # 5. Constraint: Passwords must match
+        if password != confirm_password:
+            NotificationModal().show("Error", "Passwords do not match.", is_error=True)
+            return
+            
+        # --- ALL CHECKS PASSED: FIRE THE ENGINE ---
+        
+        # 1. Start the Spinner!
+        self.ids.loading_overlay.start()
+        
+        # 2. Fire the Background Thread
+        threading.Thread(target=self._thread_signup, args=(full_name, email, password), daemon=True).start()
+
+    def _thread_signup(self, full_name, email, password):
+        try:
+            response = request.add_user(full_name, email, password)
+            Clock.schedule_once(lambda dt: self._process_signup(response), 0)
+        except Exception as e:
+            print(f"Signup Thread Error: {e}")
+            Clock.schedule_once(lambda dt: self._process_signup(None), 0)
+
+    def _process_signup(self, response):
+        # 3. Stop the Spinner!
+        self.ids.loading_overlay.stop()
+        
+        # In request_http, add_user returns a JSON dict directly, not a response object
+        if response and "error" not in response:
+            self.ids.sign_name.text = ''
+            self.ids.sign_mail.text = ''
+            self.ids.sign_pass.text = ''
+            self.ids.sign_confirm_pass.text = ''
+            NotificationModal().show("Success", "Account created! Please log in.", is_error=False)
+            
+            # Auto-switch the toggle button to Login mode
+            app = App.get_running_app()
+            try:
+                start_screen = app.root.ids.start
+                start_screen.ids.login.state = 'down'
+                start_screen.ids.signup.state = 'normal'
+                start_screen.switch_tab('login')
+            except: pass
+        else:
+            error_msg = response.get("error", "Could not create account.") if response else "Server offline."
+            NotificationModal().show("Signup Failed", error_msg, is_error=True)
         
 
 # ---------------------------------------------------
@@ -1070,6 +1202,9 @@ class ChatBox(BoxLayout):
     def set_target_user(self, full_name):
         self.target_user = full_name
         self.ids.chat_header_name.text = f'[b]{full_name}[/b]'
+        initials = "".join([x[0].upper() for x in full_name.split() if x])[:2]
+        if hasattr(self.ids, 'chat_header_initials'):
+            self.ids.chat_header_initials.text = f'[b]{initials}[/b]'
         self.ids.chat_history.clear_widgets()
         self.load_messages()
         
@@ -1171,7 +1306,27 @@ class UserSettings(BoxLayout):
         super().__init__(**kwargs)
 
 class LogOut(FloatLayout):
-    pass
+    def perform_logout(self):
+        # 1. Clear the active session memory
+        Data.user = {}
+        
+        # 2. Delete the saved token file
+        if os.path.exists('local_state.json'):
+            try: 
+                os.remove('local_state.json')
+            except: 
+                pass
+                
+        # 3. Boot the user back to the login screen
+        app = App.get_running_app()
+        app.root.logged = False
+        app.root.current = "start"
+        
+        # 4. Reset the Main Interface silently in the background
+        try:
+            app.root.get_screen('main').switch_tab('dashboard')
+        except: 
+            pass
 
 #-----------------------------------------------------------#
 # System_Interface
@@ -1476,44 +1631,56 @@ class Product(Widget):
         self.filter_products()
 
     def filter_products(self, *args):
-        # 1. Grab the search text
         search_text = self.ids.search_bar.text.lower()
-        
         container = self.ids.dynamic_product
         container.clear_widgets() 
         
         for data in self.all_products:
-            # We now check product_type for filtering! (Fallback to subject for older DB rows)
-            item_type = data.get('product_type', data.get('subject', ''))
-            item_subject = data.get('subject', 'General')
+            # 1. Safe extraction to prevent NoneType crashes
+            item_type = str(data.get('product_type') or data.get('subject') or '')
+            item_subject = str(data.get('subject') or 'General')
             
             # Skip Services (They belong on the Service screen)
             if item_type == 'Service':
                 continue
                 
-            # Apply Category Filter (Notes/Guides/Materials)
+            # 2. Legacy Name Safetynet! (If an old DB entry says "Textbook", treat it as "Textbooks")
+            if self.current_category == 'Textbooks' and item_type == 'Textbook':
+                item_type = 'Textbooks'
+            if self.current_category == 'Guidelines' and (item_type == 'Guides' or item_type == 'Guide'):
+                item_type = 'Guidelines'
+                
+            # 3. Apply Category Filter
             if self.current_category != 'All' and item_type != self.current_category:
                 continue
                 
             # 4. Apply Search Bar Filter (Checks both Title and Description)
-            title = data.get('title', '').lower()
-            desc = str(data.get('review', '')).lower()
+            title = str(data.get('title') or '').lower()
+            desc = str(data.get('review') or '').lower()
             if search_text and (search_text not in title and search_text not in desc):
                 continue
                 
-            # 5. If it passes all filters, draw the widget!
-            container.add_widget(DynamicProduct(
-                product_id=data.get('id'), 
-                fullname=data.get('full_name'), 
-                initial=data.get('initial'), 
-                title=data.get('title'), 
-                price=float(data.get('price', 0)),
-                condition=data.get('condition_status'),
-                product_type=item_type,
-                subject=item_subject,
-                description=str(data.get('review')),
-                rating=round(float(data.get('seller_rating', 0)), 1)
-            ))
+            # 5. Bulletproof Widget Rendering
+            try:
+                p_id = int(data.get('id') or 0)
+                price_val = float(data.get('price') or 0.0)
+                seller_rating = float(data.get('seller_rating') or 0.0)
+                
+                container.add_widget(DynamicProduct(
+                    product_id=p_id, 
+                    fullname=data.get('full_name') or 'Unknown', 
+                    initial=data.get('initial') or 'U', 
+                    title=data.get('title') or 'No Title', 
+                    price=price_val,
+                    condition=data.get('condition_status') or 'Good',
+                    product_type=item_type,
+                    subject=item_subject,
+                    description=str(data.get('review') or 'No description provided.'),
+                    rating=round(seller_rating, 1)
+                ))
+            except Exception as e:
+                # If a specific card fails, Kivy prints the error here instead of crashing the whole screen!
+                print(f"🚨 CRASH AVERTED: Skipping a corrupt product card because: {e}")
 
 class Sell(Widget):
     # This Boolean controls the entire UI state automatically!

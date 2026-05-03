@@ -61,35 +61,40 @@
 					radius: [50]
 					
 			ToggleButton:
-				id: login
-				text: "[b]Log-in[/b]"
-				markup: True
-				group: 'account'
-				state: 'down'
-				background_color: 0,0,0,0
-				disabled: True if self.state == 'down' else False
-				disabled_color: 1,1,1,1
-				on_state: 
-					screenmanager.current = "login" if self.state == 'down' else "signup"
-					screenmanager.transition = SlideTransition(direction='left') if self.state == 'down' else SlideTransition(direction='right')
-				canvas.before:
-					Color:
-						rgba: (0.40, 0.31, 0.85, 1) if self.state == 'down' else (0,0,0,0)
+                id: login
+                text: "[b]Log-in[/b]"
+                markup: True
+                group: 'account'
+                state: 'down'
+                background_color: 0,0,0,0
+                disabled: True if self.state == 'down' else False
+                disabled_color: 1,1,1,1
+                
+                # --- THE FIX: Replaced on_state with on_release ---
+                on_release: root.switch_tab('login')
+                
+                canvas.before:
+                    Color:
+                        rgba: (0.40, 0.31, 0.85, 1) if self.state == 'down' else (0,0,0,0)
 					RoundedRectangle:
 						size: self.size[0] - dp(10), self.size[1] - dp(10)
 						pos: self.pos[0] + dp(5), self.pos[1] + dp(5)
-						radius: [50]		
+						radius: [50]
 			ToggleButton:
-				id: signup
-				text: "[b]Sign-up[/b]"
-				markup: True
-				group: 'account'
-				background_color: 0,0,0,0
-				disabled: True if self.state == 'down' else False
-				disabled_color: 1,1,1,1
-				canvas.before:
-					Color:
-						rgba: (0.40, 0.31, 0.85, 1) if self.state == 'down' else (0,0,0,0)
+                id: signup
+                text: "[b]Sign-up[/b]"
+                markup: True
+                group: 'account'
+                background_color: 0,0,0,0
+                disabled: True if self.state == 'down' else False
+                disabled_color: 1,1,1,1
+                
+                # --- THE FIX: Added on_release trigger ---
+                on_release: root.switch_tab('signup')
+                
+                canvas.before:
+                    Color:
+                        rgba: (0.40, 0.31, 0.85, 1) if self.state == 'down' else (0,0,0,0)
 					RoundedRectangle:
 						size: self.size[0] - dp(10), self.size[1] - dp(10)
 						pos: self.pos[0] + dp(5), self.pos[1] + dp(5)
@@ -222,6 +227,7 @@
 				Button:
                     text: '[b][color=#6251B4]Forgot?[/b][/color]'
                     font_size: dp(14)
+                    text_size: self.size
                     markup: True
                     background_color: 0,0,0,0
                     halign: 'right'
@@ -302,6 +308,10 @@
 				login_mail.text = ''
 				login_pass.text = ''
 		Label:
+	LoadingOverlay:
+        id: loading_overlay
+        size: root.size
+        pos: root.pos
 
 #--------------------------------------------------------#
 
@@ -578,10 +588,6 @@
 			markup: True
 			on_press:
 				if sign_name.text and sign_mail.text and sign_pass.text and sign_confirm_pass.text: root.sign_user(sign_name.text, sign_mail.text, sign_pass.text, sign_confirm_pass.text)
-				sign_name.text = ''
-				sign_mail.text = ''
-				sign_pass.text = ''
-				sign_confirm_pass.text = ''
 			canvas.before:
 				Color:
 					rgba: (0.40, 0.31, 0.85, 1) if self.state == 'normal' else (0.40, 0.31, 0.85, 0.5)
@@ -589,3 +595,7 @@
 					size: self.size
 					pos: self.pos
 					radius: [20]
+	LoadingOverlay:
+        id: loading_overlay
+        size: root.size
+        pos: root.pos

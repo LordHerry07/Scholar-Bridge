@@ -148,7 +148,7 @@
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                     size_hint_y: 0.5
                     text: "[b]DASHBOARD[/b]"
-                    color: (1,1,1,1) if dashboard.state == 'down' else (0.20, 0.11, 0.44, 1)
+                    color: (1,1,1,1) if dashboard.state == 'normal' else (0.20, 0.11, 0.44, 1)
                     font_size: dp(10)
                     text_size: self.size
                     markup: True
@@ -176,7 +176,7 @@
                     size_hint_y: 0.5
                     text: "[b]PRODUCT[/b]"
                     font_size: dp(10)
-                    color: (1,1,1,1) if product.state == 'down' else (0.20, 0.11, 0.44, 1)
+                    color: (1,1,1,1) if product.state == 'normal' else (0.20, 0.11, 0.44, 1)
                     text_size: self.size
                     markup: True
                     halign: 'center'
@@ -208,7 +208,7 @@
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                     size_hint_y: 0.5
                     text: "[b]SELL[/b]"
-                    color: (1,1,1,1) if sell.state == 'down' else (0.20, 0.11, 0.44, 1)
+                    color: (1,1,1,1) if sell.state == 'normal' else (0.20, 0.11, 0.44, 1)
                     font_size: dp(10)
                     text_size: self.size
                     markup: True
@@ -235,7 +235,7 @@
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                     size_hint_y: 0.5
                     text: "[b]SERVICE[/b]"
-                    color: (1,1,1,1) if service.state == 'down' else (0.20, 0.11, 0.44, 1)
+                    color: (1,1,1,1) if service.state == 'normal' else (0.20, 0.11, 0.44, 1)
                     font_size: dp(10)
                     text_size: self.size
                     markup: True
@@ -281,7 +281,7 @@
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                     size_hint_y: 0.5
                     text: "[b]STATUS[/b]"
-                    color: (1,1,1,1) if info.state == 'down' else (0.20, 0.11, 0.44, 1)
+                    color: (1,1,1,1) if info.state == 'normal' else (0.20, 0.11, 0.44, 1)
                     font_size: dp(10)
                     text_size: self.size
                     markup: True
@@ -704,6 +704,7 @@
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        on_release: root.set_category('All') # <--- ADDED THIS!
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -721,6 +722,7 @@
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        on_release: root.set_category('Textbooks') # <--- ADDED THIS!
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -738,6 +740,7 @@
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        on_release: root.set_category('Notes') # <--- ADDED THIS!
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -748,13 +751,14 @@
 
                     ToggleButton:
                         group: 'products'
-                        text: 'Guides'
+                        text: 'Guidelines' # <--- UPDATED FROM "Guides"
                         size_hint_x: None
-                        width: dp(80)
+                        width: dp(100) # Slightly wider to fit "Guidelines"
                         font_size: sp(14)
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        on_release: root.set_category('Guidelines') # <--- ADDED THIS!
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -772,6 +776,7 @@
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                        on_release: root.set_category('Materials') # <--- ADDED THIS!
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -829,7 +834,6 @@
             text_size: self.size
             halign: 'left'
             valign: 'top'
-
 <FormInput@BoxLayout>:
     orientation: 'vertical'
     size_hint_y: None
@@ -849,6 +853,7 @@
         text_size: self.size
         halign: 'left'
         valign: 'middle'
+        
     BoxLayout:
         pos_hint: {'center_y': 0.5}
         padding: [dp(15), 0]
@@ -864,6 +869,7 @@
             Line:
                 rounded_rectangle: [self.x, self.y, self.width, self.height, dp(8)]
                 width: dp(1)
+                
         TextInput:
             id: internal_input
             hint_text: root.hint
@@ -874,7 +880,11 @@
             background_color: 0, 0, 0, 0
             cursor_color: 0.42, 0.35, 0.88, 1
             multiline: root.multilined
-            padding: [dp(15), (self.height - self.line_height) / 2]
+            
+            # --- THE FIX: Conditional 4-Point Padding ---
+            # If multilined=True, snap text to the top-left with standard 15dp padding.
+            # If multilined=False, use math to perfectly vertically center the single line!
+            padding: [dp(15), dp(15), dp(15), dp(15)] if root.multilined else [dp(15), (self.height - self.line_height) / 2, dp(15), (self.height - self.line_height) / 2]
         
 <PrimaryButton@ButtonBehavior+FloatLayout>:
     text: ''
@@ -895,6 +905,22 @@
 #------------------------------------------------------------#
 #SELL              
 #-----------------------------------------------------------#
+<SelectionBadge@ToggleButton>:
+    background_normal: ''
+    background_down: ''
+    background_color: 0, 0, 0, 0 
+    markup: True
+    color: (1, 1, 1, 1) if self.state == 'down' else (0.6, 0.6, 0.6, 1)
+    size_hint_x: None
+    canvas.before:
+        Color:
+            # Purple if selected, translucent white if unselected
+            rgba: (0.42, 0.35, 0.88, 0.4) if self.state == 'down' else (1, 1, 1, 0.05)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+
 <Sell>:
     ScrollView:
         size: root.size
@@ -966,11 +992,13 @@
                 id: title_input
                 title: 'Title'
                 hint: 'e.g. Organic Chemistry 8th Edition'
+                multilined: False
 
             FormInput:
                 id: subject_input
                 title: 'Subject'
                 hint: 'e.g. Mathematics, History, Biology'
+                multilined: False
 
             FormInput:
                 id: desc_input
@@ -984,6 +1012,7 @@
                 title: 'Price'
                 # Dynamic hint changes based on the mode!
                 hint: '₱0.00' if not root.is_service_mode else '₱0.00 (Base Rate)'
+                multilined: False
 
             # ---------------------------------------------------
             # THE OVERLAP ZONE (Magic Toggle UI)
@@ -997,7 +1026,7 @@
                 # ==========================================
                 BoxLayout:
                     orientation: 'vertical'
-                    pos_hint: {'x': 0, 'y': 0}
+                    pos_hint: {'x': 0, 'y': 0} if not root.is_service_mode else {'x': 50, 'y': 0}
                     size_hint: 1, 1
                     spacing: dp(10)
                     opacity: 1 if not root.is_service_mode else 0
@@ -1022,46 +1051,23 @@
                             size_hint_x: None
                             width: self.minimum_width
                             spacing: dp(8)
-                            ToggleButton:
+                            SelectionBadge:
                                 group: 'prod_type'
-                                state: 'down'
-                                text: 'Textbook'
-                                size_hint_x: None
+                                text: 'Textbooks'
                                 width: dp(100)
-                                background_color: 0,0,0,0
-                                canvas.before:
-                                    Color:
-                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
-                                    RoundedRectangle:
-                                        pos: self.pos
-                                        size: self.size
-                                        radius: [dp(12)]
-                            ToggleButton:
+                                state: 'down'
+                            SelectionBadge:
                                 group: 'prod_type'
                                 text: 'Notes'
-                                size_hint_x: None
                                 width: dp(80)
-                                background_color: 0,0,0,0
-                                canvas.before:
-                                    Color:
-                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
-                                    RoundedRectangle:
-                                        pos: self.pos
-                                        size: self.size
-                                        radius: [dp(12)]
-                            ToggleButton:
+                            SelectionBadge:
                                 group: 'prod_type'
-                                text: 'Guides'
-                                size_hint_x: None
-                                width: dp(80)
-                                background_color: 0,0,0,0
-                                canvas.before:
-                                    Color:
-                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
-                                    RoundedRectangle:
-                                        pos: self.pos
-                                        size: self.size
-                                        radius: [dp(12)]
+                                text: 'Guidelines'
+                                width: dp(100)
+                            SelectionBadge:
+                                group: 'prod_type'
+                                text: 'Materials'
+                                width: dp(100)
 
                     Label:
                         text: 'Condition'
@@ -1128,7 +1134,7 @@
                 # ==========================================
                 BoxLayout:
                     orientation: 'vertical'
-                    pos_hint: {'x': 0, 'y': 0}
+                    pos_hint: {'x': 0, 'y': 0} if root.is_service_mode else {'x': 50, 'y': 0}
                     size_hint: 1, 1
                     spacing: dp(10)
                     opacity: 1 if root.is_service_mode else 0
@@ -1153,46 +1159,23 @@
                             size_hint_x: None
                             width: self.minimum_width
                             spacing: dp(8)
-                            ToggleButton:
+                            SelectionBadge:
                                 group: 'srv_type'
-                                state: 'down'
                                 text: 'Tutoring'
-                                size_hint_x: None
                                 width: dp(90)
-                                background_color: 0,0,0,0
-                                canvas.before:
-                                    Color:
-                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
-                                    RoundedRectangle:
-                                        pos: self.pos
-                                        size: self.size
-                                        radius: [dp(12)]
-                            ToggleButton:
+                                state: 'down'
+                            SelectionBadge:
                                 group: 'srv_type'
                                 text: 'Writing'
-                                size_hint_x: None
                                 width: dp(80)
-                                background_color: 0,0,0,0
-                                canvas.before:
-                                    Color:
-                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
-                                    RoundedRectangle:
-                                        pos: self.pos
-                                        size: self.size
-                                        radius: [dp(12)]
-                            ToggleButton:
+                            SelectionBadge:
                                 group: 'srv_type'
                                 text: 'Career'
-                                size_hint_x: None
                                 width: dp(80)
-                                background_color: 0,0,0,0
-                                canvas.before:
-                                    Color:
-                                        rgba: (0.42, 0.35, 0.88, 0.2) if self.state == 'down' else (1,1,1,0.05)
-                                    RoundedRectangle:
-                                        pos: self.pos
-                                        size: self.size
-                                        radius: [dp(12)]
+                            SelectionBadge:
+                                group: 'srv_type'
+                                text: 'Test Prep'
+                                width: dp(100)
 
                     Label:
                         text: 'Rate Format'
@@ -2076,13 +2059,16 @@
         text_size: self.size
         halign: 'right'
         valign: 'top'
-
 <OwnedItemTile@BoxLayout>:
     title: ''
     subtitle: ''
+    seller_name: '' 
     icon_bg: 0.15, 0.16, 0.22, 1
+    
+    # --- 1. INCREASED HEIGHT TO FIT 2 LINES OF TEXT ---
     size_hint_y: None
-    height: dp(75)
+    height: dp(90) 
+    
     padding: dp(15)
     spacing: dp(15)
     canvas.before:
@@ -2092,9 +2078,14 @@
             pos: self.pos
             size: self.size
             radius: [dp(15)]
+            
+    # Green Check Icon
     FloatLayout:
-        size_hint_x: None
-        width: dp(45)
+        # --- THE FIX: Lock both axes to create a perfect square ---
+        size_hint: None, None
+        size: dp(45), dp(45)
+        pos_hint: {'center_y': 0.5} # Keeps it perfectly centered vertically!
+        
         canvas.before:
             Color:
                 rgba: root.icon_bg
@@ -2103,34 +2094,68 @@
                 size: self.size
                 radius: [dp(10)]
         Image:
-            source: 'assets/check_circle.png'
+            source: 'assets/check_solid.png'
             size_hint: 0.5, 0.5
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            
+    # Text Container
     BoxLayout:
         orientation: 'vertical'
+        pos_hint: {'center_y': 0.5} # Vertically centers the text block
+        
         Label:
             text: f'[b]{root.title}[/b]'
             markup: True
             font_size: sp(16)
+            size_hint_y: None
+            height: dp(22)
             text_size: self.size
             halign: 'left'
             valign: 'bottom'
+            shorten: True
+            shorten_from: 'right'
+            
         Label:
             text: root.subtitle
             color: 0.6, 0.6, 0.6, 1
             font_size: sp(13)
-            text_size: self.size
+            
+            # --- 2. DYNAMIC TEXT WRAPPING FIX ---
+            size_hint_y: None
+            text_size: self.width, None       # Force horizontal wrap
+            height: self.texture_size[1]      # Auto-expand vertical height
+            
             halign: 'left'
             valign: 'top'
 
+    # Rate Button
+    Button:
+        text: '[b]Rate[/b]' # Removed the broken star character
+        markup: True
+        size_hint: None, None
+        size: dp(70), dp(35)
+        pos_hint: {'center_y': 0.5}
+        background_color: 0,0,0,0
+        on_release: app.root.get_screen('main').ids.screenmanager.get_screen('info').children[0].ids.screenmanager.get_screen('inbox').children[0].open_review(root.seller_name)
+        canvas.before:
+            Color:
+                rgba: 1, 0.8, 0.2, 0.8
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(8)]
 <SubscriptionItemTile@BoxLayout>:
     title: ''
     schedule: ''
+    seller_name: ''
     service_id: 0
+    
+    # --- 1. INCREASED HEIGHT TO FIT BUTTONS ---
     size_hint_y: None
-    height: dp(90)
+    height: dp(110) 
+    
     padding: dp(15)
-    spacing: dp(15)
+    spacing: dp(10)
     canvas.before:
         Color:
             rgba: 0.15, 0.12, 0.20, 1 # Dark purple tint
@@ -2138,8 +2163,11 @@
             pos: self.pos
             size: self.size
             radius: [dp(15)]
+            
+    # --- LEFT SIDE: TEXT ---
     BoxLayout:
         orientation: 'vertical'
+        pos_hint: {'center_y': 0.5}
         Label:
             text: f'[b]{root.title}[/b]'
             markup: True
@@ -2154,20 +2182,42 @@
             text_size: self.size
             halign: 'left'
             valign: 'top'
-    Button:
-        text: 'Unsubscribe'
-        size_hint: None, None
-        size: dp(100), dp(35)
+
+    # --- RIGHT SIDE: BUTTON COLUMN ---
+    BoxLayout:
+        orientation: 'vertical'  # Forces them to stack cleanly
+        size_hint_x: None
+        width: dp(100)           # Unifies the width of both buttons
+        spacing: dp(8)           # Breathing room between buttons
         pos_hint: {'center_y': 0.5}
-        background_color: 0,0,0,0
-        on_release: app.root.get_screen('main').ids.screenmanager.get_screen('info').children[0].ids.screenmanager.get_screen('inbox').children[0].unsubscribe(root.service_id)
-        canvas.before:
-            Color:
-                rgba: 0.85, 0.26, 0.33, 1 # Red action
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(8)]
+        
+        Button:
+            text: 'Rate'
+            size_hint: 1, None   # Stretches to fill the 100dp width
+            height: dp(32)
+            background_color: 0,0,0,0
+            on_release: app.root.get_screen('main').ids.screenmanager.get_screen('info').children[0].ids.screenmanager.get_screen('inbox').children[0].open_review(root.seller_name)
+            canvas.before:
+                Color:
+                    rgba: 1, 0.8, 0.2, 0.8 # Gold action
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(8)]
+                    
+        Button:
+            text: 'Unsubscribe'
+            size_hint: 1, None   # Stretches to fill the 100dp width
+            height: dp(32)
+            background_color: 0,0,0,0
+            on_release: app.root.get_screen('main').ids.screenmanager.get_screen('info').children[0].ids.screenmanager.get_screen('inbox').children[0].unsubscribe(root.service_id)
+            canvas.before:
+                Color:
+                    rgba: 0.85, 0.26, 0.33, 1 # Red action
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(8)]
 
 <InboxScreen>:
     orientation: 'vertical'
@@ -2607,6 +2657,13 @@
                 Ellipse:
                     pos: self.pos
                     size: self.size
+            Label:
+                id: chat_header_initials
+                text: '[b]-[/b]'
+                markup: True
+                font_size: sp(16)
+                color: 0.43, 0.33, 0.85, 1  # ScholarBridge Purple
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         BoxLayout:
             orientation: 'vertical'
             Label:
@@ -2984,12 +3041,11 @@
                         pos: self.pos
                         size: self.size
                         radius: [dp(12)]
-                on_release:
-                    main_interface.Data.user = {} # Clear active user cache
-                    if os.path.exists('local_state.json'): os.remove('local_state.json')
-                    app.root.logged = False
-                    app.root.current = "start"
-         
+                on_release: 
+                    root.perform_logout()
+                    app.root.get_screen('main').toggle_footer(True)
+                    app.root.get_screen('main').ids.dashboard.state = 'down'
+                    app.root.get_screen('main').ids.info.state = 'normal'        
             Button:
                 text: '[b]Cancel[/b]'
                 markup: True

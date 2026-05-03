@@ -1,3 +1,17 @@
+<SelectionBadge@ToggleButton>:
+    background_normal: ''
+    background_down: ''
+    background_color: 0, 0, 0, 0 # Turn off default ugly Kivy gray
+    markup: True
+    color: (1, 1, 1, 1) if self.state == 'down' else (0.6, 0.6, 0.6, 1) # White text if selected, gray if not
+    canvas.before:
+        Color:
+            # Purple if selected, Dark Gray if unselected
+            rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.15, 0.16, 0.22, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(8)]
 # -----------------------------------------------------
 # REUSABLE COMPONENT: ITEM / SERVICE CARD
 # -----------------------------------------------------
