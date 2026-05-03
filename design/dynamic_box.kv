@@ -1,506 +1,29 @@
-<SelectionBadge@ToggleButton>:
-    background_normal: ''
-    background_down: ''
-    background_color: 0, 0, 0, 0 # Turn off default ugly Kivy gray
-    markup: True
-    color: (1, 1, 1, 1) if self.state == 'down' else (0.6, 0.6, 0.6, 1) # White text if selected, gray if not
-    canvas.before:
-        Color:
-            # Purple if selected, Dark Gray if unselected
-            rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.15, 0.16, 0.22, 1)
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [dp(8)]
-# -----------------------------------------------------
-# REUSABLE COMPONENT: ITEM / SERVICE CARD
-# -----------------------------------------------------
-<ProfileItemCard@BoxLayout>:
-    title: 'Item Name'
-    price: '$0.00'
-    icon_color: 0.40, 0.31, 0.85, 1  # Default to purple
-    
-    size_hint_y: None
-    height: dp(60)
-    padding: dp(10)
-    spacing: dp(15)
-    canvas.before:
-        Color:
-            rgba: 0.11, 0.12, 0.18, 1  # Card Background
-        RoundedRectangle:
-            size: self.size
-            pos: self.pos
-            radius: [dp(10)]
-            
-    # Tiny Icon Box
-    Widget:
-        size_hint_x: None
-        width: dp(40)
-        canvas.before:
-            Color:
-                rgba: root.icon_color
-            RoundedRectangle:
-                size: self.size
-                pos: self.pos
-                radius: [dp(8)]
-                
-    # Item Title
-    Label:
-        text: root.title
-        font_size: sp(14)
-        text_size: self.size
-        halign: 'left'
-        valign: 'center'
-        color: 1, 1, 1, 1
-        
-    # Price Tag
-    Label:
-        text: '[b]' + root.price + '[/b]'
-        markup: True
-        font_size: sp(14)
-        size_hint_x: None
-        width: dp(60)
-        text_size: self.size
-        halign: 'right'
-        valign: 'center'
-        color: 0.65, 0.50, 1.0, 1  # Neon purple text
+# ==========================================
+# DOMAIN: MARKETPLACE CARDS
+# ==========================================
 
-# -----------------------------------------------------
-# MAIN PROFILE SCREEN
-# -----------------------------------------------------
-<ProfileInterface>:
-    canvas.before:
-        Color:
-            rgba: 0.08, 0.09, 0.14, 1  # App Background
-        Rectangle:
-            size: self.size
-            pos: self.pos
-
-    ScrollView:
-        do_scroll_x: False
-        do_scroll_y: True
-        
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: self.minimum_height
-            padding: dp(20)
-            spacing: dp(25)
-            
-            # --- 1. THE PROFILE HEADER CARD ---
-            BoxLayout:
-                size_hint_y: None
-                height: dp(110)
-                padding: dp(15)
-                spacing: dp(15)
-                canvas.before:
-                    Color:
-                        rgba: 0.11, 0.12, 0.18, 1
-                    RoundedRectangle:
-                        size: self.size
-                        pos: self.pos
-                        radius: [dp(15)]
-                        
-                # Avatar Base (Pure Canvas Circle)
-                Widget:
-                    size_hint_x: None
-                    width: dp(80)
-                    canvas.before:
-                        Color:
-                            rgba: 0.40, 0.31, 0.85, 1  # ScholarBridge Purple
-                        Ellipse:
-                            size: self.size
-                            pos: self.pos
-                            
-                # User Info & Badges
-                BoxLayout:
-                    orientation: 'vertical'
-                    spacing: dp(5)
-                    
-                    Label:
-                        text: '[b]Juan Dela Cruz[/b]'
-                        markup: True
-                        font_size: sp(18)
-                        text_size: self.size
-                        halign: 'left'
-                        valign: 'bottom'
-                        
-                    Label:
-                        text: 'student@university.edu.ph'
-                        font_size: sp(12)
-                        color: 1, 1, 1, 0.5
-                        text_size: self.size
-                        halign: 'left'
-                        valign: 'top'
-                        
-                    # Trust Badges Row
-                    BoxLayout:
-                        spacing: dp(10)
-                        Label:
-                            text: '✓ Verified Uni'
-                            font_size: sp(10)
-                            color: 0.40, 0.85, 0.50, 1 # Green
-                            text_size: self.size
-                            halign: 'left'
-                            valign: 'center'
-                        Label:
-                            text: '★ 4.9 Rating'
-                            font_size: sp(10)
-                            color: 1, 0.8, 0.2, 1 # Gold
-                            text_size: self.size
-                            halign: 'left'
-                            valign: 'center'
-
-            # --- 2. MARKETPLACE LISTINGS SECTION ---
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_y: None
-                height: self.minimum_height
-                spacing: dp(10)
-                
-                # Section Header
-                BoxLayout:
-                    size_hint_y: None
-                    height: dp(30)
-                    Label:
-                        text: '[b]YOUR MARKETPLACE LISTINGS[/b]'
-                        markup: True
-                        font_size: sp(12)
-                        color: 1, 1, 1, 0.5
-                        text_size: self.size
-                        halign: 'left'
-                        valign: 'center'
-                    Button:
-                        text: '[b]+ Add[/b]'
-                        markup: True
-                        size_hint_x: None
-                        width: dp(60)
-                        background_color: 0,0,0,0
-                        color: 0.65, 0.50, 1.0, 1
-                        
-                # Dynamic Items
-                ProfileItemCard:
-                    title: 'Digital Logic Textbook'
-                    price: '₱1,250'
-                    icon_color: 0.25, 0.75, 1.0, 1  # Blue icon
-                    
-                ProfileItemCard:
-                    title: 'Arduino Starter Kit'
-                    price: '₱850'
-                    icon_color: 0.25, 0.75, 1.0, 1
-
-            # --- 3. FREELANCE SERVICES SECTION ---
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_y: None
-                height: self.minimum_height
-                spacing: dp(10)
-                
-                # Section Header
-                BoxLayout:
-                    size_hint_y: None
-                    height: dp(30)
-                    Label:
-                        text: '[b]YOUR FREELANCE SERVICES[/b]'
-                        markup: True
-                        font_size: sp(12)
-                        color: 1, 1, 1, 0.5
-                        text_size: self.size
-                        halign: 'left'
-                        valign: 'center'
-                    Button:
-                        text: '[b]+ Add[/b]'
-                        markup: True
-                        size_hint_x: None
-                        width: dp(60)
-                        background_color: 0,0,0,0
-                        color: 0.65, 0.50, 1.0, 1
-                        
-                # Dynamic Items
-                ProfileItemCard:
-                    title: 'Godot Engine Tutoring'
-                    price: '₱500/hr'
-                    icon_color: 0.40, 0.31, 0.85, 1  # Purple icon
-                    
-                ProfileItemCard:
-                    title: 'Python Scripting Help'
-                    price: '₱400/hr'
-                    icon_color: 0.40, 0.31, 0.85, 1
-
-# -----------------------------------------------------
-# REUSABLE COMPONENT: SETTINGS TOGGLE ROW
-# -----------------------------------------------------
-<SettingsToggleRow@BoxLayout>:
-    title: 'Setting Name'
-    # 'active_state' allows us to bind the switch from outside
-    active_state: False  
-    
-    size_hint_y: None
-    height: dp(60)
-    padding: [dp(20), dp(10)]
-    spacing: dp(15)
-    canvas.before:
-        Color:
-            rgba: 0.11, 0.12, 0.18, 1  # Dark Card Background
-        RoundedRectangle:
-            size: self.size
-            pos: self.pos
-            radius: [dp(10)]
-            
-    Label:
-        text: root.title
-        font_size: sp(14)
-        color: 1, 1, 1, 1
-        text_size: self.size
-        halign: 'left'
-        valign: 'center'
-        
-    Switch:
-        active: root.active_state
-        size_hint_x: None
-        width: dp(50)
-
-# -----------------------------------------------------
-# REUSABLE COMPONENT: SETTINGS BUTTON ROW
-# -----------------------------------------------------
-<SettingsButtonRow@ButtonBehavior+BoxLayout>:
-    title: 'Action Name'
-    title_color: 1, 1, 1, 1
-    
-    size_hint_y: None
-    height: dp(60)
-    padding: [dp(20), dp(10)]
-    canvas.before:
-        Color:
-            rgba: 0.11, 0.12, 0.18, 1
-        RoundedRectangle:
-            size: self.size
-            pos: self.pos
-            radius: [dp(10)]
-            
-    Label:
-        text: root.title
-        font_size: sp(14)
-        color: root.title_color
-        text_size: self.size
-        halign: 'left'
-        valign: 'center'
-        
-    Label:
-        text: '>'
-        font_size: sp(18)
-        color: 0.5, 0.5, 0.5, 1
-        size_hint_x: None
-        width: dp(20)
-        text_size: self.size
-        halign: 'right'
-        valign: 'center'
-
-# -----------------------------------------------------
-# MAIN SETTINGS SCREEN
-# -----------------------------------------------------
-<SettingsInterface>:
-    canvas.before:
-        Color:
-            rgba: 0.08, 0.09, 0.14, 1  # App Background
-        Rectangle:
-            size: self.size
-            pos: self.pos
-
-    ScrollView:
-        do_scroll_x: False
-        do_scroll_y: True
-        
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: self.minimum_height
-            padding: dp(20)
-            spacing: dp(25)
-            
-            # --- HEADER ---
-            Label:
-                text: '[b]Settings[/b]'
-                markup: True
-                font_size: sp(24)
-                size_hint_y: None
-                height: dp(40)
-                text_size: self.size
-                halign: 'left'
-                valign: 'center'
-
-            # --- NETWORK & STORAGE SECTION ---
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_y: None
-                height: self.minimum_height
-                spacing: dp(10)
-                
-                Label:
-                    text: 'NETWORK & STORAGE'
-                    font_size: sp(12)
-                    color: 1, 1, 1, 0.5
-                    size_hint_y: None
-                    height: dp(20)
-                    text_size: self.size
-                    halign: 'left'
-                    valign: 'bottom'
-                    
-                SettingsToggleRow:
-                    title: 'Force Offline Cache Mode'
-                    # You can bind this to toggle the global variable!
-                    
-                SettingsButtonRow:
-                    title: 'Clear Local JSON Database'
-                    title_color: 0.85, 0.26, 0.33, 1  # Red text for destructive action
-                    on_release: root.clear_local_cache()
-
-            # --- SECURITY SECTION ---
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_y: None
-                height: self.minimum_height
-                spacing: dp(10)
-                
-                Label:
-                    text: 'SECURITY'
-                    font_size: sp(12)
-                    color: 1, 1, 1, 0.5
-                    size_hint_y: None
-                    height: dp(20)
-                    text_size: self.size
-                    halign: 'left'
-                    valign: 'bottom'
-                    
-                SettingsButtonRow:
-                    title: 'Manage Escrow PIN'
-                    
-                SettingsButtonRow:
-                    title: 'Two-Factor Authentication'
-
-            # --- ACCOUNT SECTION ---
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_y: None
-                height: self.minimum_height
-                spacing: dp(10)
-                
-                Label:
-                    text: 'ACCOUNT'
-                    font_size: sp(12)
-                    color: 1, 1, 1, 0.5
-                    size_hint_y: None
-                    height: dp(20)
-                    text_size: self.size
-                    halign: 'left'
-                    valign: 'bottom'
-                    
-                SettingsButtonRow:
-                    title: 'Log Out'
-                    on_release: root.logout_user()
-# -----------------------------------------------------------
-# Polished Listing Card (Used for both Product and Service)
-# -----------------------------------------------------------
-<ActivityTile>:
-    size_hint_y: None
-    height: dp(70)
-    padding: dp(12)
-    spacing: dp(15)
-    canvas.before:
-        Color:
-            rgba: 0.11, 0.12, 0.16, 1  # Dark card background
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [dp(12)]
-            
-    # --- 1. Left Icon Box ---
-    AnchorLayout:
-        size_hint_x: None
-        width: dp(45)
-        canvas.before:
-            Color:
-                rgba: root.icon_bg_color
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(10)]
-        Image:
-            source: root.icon_source
-            size_hint: 0.5, 0.5 # Scales the image down so it fits nicely inside the rounded box
-            allow_stretch: True
-            keep_ratio: True
-                
-    # --- 2. Middle Text (Title & Description) ---
-    BoxLayout:
-        orientation: 'vertical'
-        spacing: dp(2)
-        Label:
-            text: f"[b]{root.activity_type}[/b]"
-            markup: True
-            font_size: sp(15)
-            color: 1, 1, 1, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'bottom'
-        Label:
-            text: root.item_title
-            font_size: sp(13)
-            color: 0.5, 0.5, 0.5, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'top'
-            shorten: True
-            shorten_from: 'right'
-            
-    # --- 3. Right Text (Amount & Time) ---
-    BoxLayout:
-        orientation: 'vertical'
-        size_hint_x: None
-        width: dp(80)
-        spacing: dp(2)
-        Label:
-            text: f"[b]{root.amount}[/b]"
-            markup: True
-            font_size: sp(15)
-            color: root.text_color
-            text_size: self.size
-            halign: 'right'
-            valign: 'bottom'
-        Label:
-            text: root.time_ago
-            font_size: sp(12)
-            color: 0.5, 0.5, 0.5, 1
-            text_size: self.size
-            halign: 'right'
-            valign: 'top'
+# -------------------------------
+# COMPONENT: Product Listing
+# -------------------------------
 <DynamicProduct>:
-    # 1. Main Card Settings
     size_hint_y: None
     height: dp(120)
     padding: dp(15)
     spacing: dp(15)
-    
-    # Dim slightly on press (handled by Python Animation)
     canvas.before:
         Color:
-            rgba: 0.11, 0.12, 0.16, 1  # Dark background
+            rgba: 0.11, 0.12, 0.16, 1 
         RoundedRectangle:
             pos: self.pos
             size: self.size
             radius: [dp(12)]
-
-    # ---------------------------------------------------
-    # LEFT PANEL: Rounded Square Avatar
-    # ---------------------------------------------------
     FloatLayout:
         size_hint: None, None
         size: dp(85), dp(85)
         pos_hint: {'center_y': 0.5}
         canvas.before:
             Color:
-                # Deep purple/gray background for the square
-                rgba: 0.15, 0.13, 0.22, 1  
+                rgba: 0.15, 0.13, 0.22, 1 
             RoundedRectangle:
                 pos: self.pos
                 size: self.size
@@ -509,18 +32,11 @@
             text: root.initial
             font_size: sp(22)
             bold: True
-            # Bright purple text for initials
-            color: 0.6, 0.25, 0.95, 1  
+            color: 0.6, 0.25, 0.95, 1
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-    # ---------------------------------------------------
-    # RIGHT PANEL: Data Rows
-    # ---------------------------------------------------
     BoxLayout:
         orientation: 'vertical'
         spacing: dp(4)
-
-        # ROW 1: Title & Heart Icon
         BoxLayout:
             size_hint_y: None
             height: dp(22)
@@ -534,17 +50,13 @@
                 valign: 'middle'
                 shorten: True
                 shorten_from: 'right'
-            
-            # Optional: Heart Icon (Ensure you have a heart.png asset)
             Image:
                 source: 'assets/heart_outline.png' 
                 size_hint_x: None
                 width: dp(20)
                 color: 0.5, 0.5, 0.5, 1
-
-        # ROW 2: Author & Category
         Label:
-            text: f'{root.fullname} · {root.subject}'
+            text: f'{root.fullname}   {root.subject}'
             font_size: sp(12)
             color: 0.6, 0.6, 0.6, 1
             size_hint_y: None
@@ -553,23 +65,17 @@
             halign: 'left'
             valign: 'middle'
             shorten: True
-
-        # ROW 3: Ratings, Reviews & Condition Pill
         BoxLayout:
             size_hint_y: None
             height: dp(20)
             spacing: dp(6)
             orientation: 'horizontal'
-            
-            # Star Icon
             Image:
                 source: 'assets/star.png'
                 size_hint: None, None
                 size: dp(12), dp(12)
                 pos_hint: {'center_y': 0.5}
-                color: 0.6, 0.25, 0.95, 1  # Matches purple theme
-
-            # Rating Number
+                color: 0.6, 0.25, 0.95, 1 
             Label:
                 text: f'[b]{root.rating}[/b]'
                 markup: True
@@ -577,16 +83,12 @@
                 color: 1, 1, 1, 1
                 size_hint_x: None
                 width: self.texture_size[0]
-
-            # Review Count
             Label:
                 text: f'({root.review} reviews)'
                 font_size: sp(12)
                 color: 0.5, 0.5, 0.5, 1
                 size_hint_x: None
                 width: self.texture_size[0]
-
-            # Condition Pill (Outline)
             BoxLayout:
                 size_hint: None, None
                 size: self.minimum_width, dp(18)
@@ -594,7 +96,7 @@
                 padding: [dp(8), 0]
                 canvas.before:
                     Color:
-                        rgba: 0.5, 0.5, 0.5, 0.4  # Faint gray outline
+                        rgba: 0.5, 0.5, 0.5, 0.4 
                     Line:
                         rounded_rectangle: [self.x, self.y, self.width, self.height, dp(9)]
                         width: dp(1)
@@ -605,25 +107,18 @@
                     bold: True
                     size_hint_x: None
                     width: self.texture_size[0]
-            
-            # Spacer pushes everything to the left
-            Widget: 
-
-        # ROW 4: Price & Escrow Badge
+            Widget:
         BoxLayout:
             size_hint_y: None
             height: dp(24)
             Label:
-                # Formats price with commas (e.g. ₱1,200)
                 text: f'[b]₱{root.price:,.0f}[/b]' 
                 markup: True
                 font_size: sp(18)
-                color: 0.6, 0.25, 0.95, 1  # Purple Price
+                color: 0.6, 0.25, 0.95, 1 
                 text_size: self.size
                 halign: 'left'
                 valign: 'bottom'
-            
-            # Escrow Badge anchored to the right
             BoxLayout:
                 size_hint_x: None
                 width: self.minimum_width
@@ -636,18 +131,14 @@
                 Label:
                     text: 'Escrow'
                     font_size: sp(12)
-                    color: 0.15, 0.76, 0.51, 1  # Bright Green
+                    color: 0.15, 0.76, 0.51, 1 
                     size_hint_x: None
                     width: self.texture_size[0]
                     pos_hint: {'center_y': 0.4}
-<DynamicActivity>:
-	canvas.before:
-		Color:
-			rgba: 0.15, 0.17, 0.23, 0.5
-		RoundedRectangle:
-			size: self.size
-			pos: self.pos
 
+# -------------------------------
+# COMPONENT: Service Listing
+# -------------------------------
 <DynamicService>:
     size_hint_y: None
     height: dp(130)
@@ -660,8 +151,6 @@
             pos: self.pos
             size: self.size
             radius: [dp(12)]
-
-    # LEFT PANEL: Circular Avatar with Shield
     FloatLayout:
         size_hint: None, None
         size: dp(65), dp(65)
@@ -678,20 +167,14 @@
             bold: True
             color: 1, 1, 1, 1
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-        
-        # Escrow/Verified Shield
         Image:
-            source: 'assets/green_shield.png' # Ensure this exists
+            source: 'assets/green_shield.png'
             size_hint: None, None
             size: dp(16), dp(16)
             pos_hint: {'right': 1.0, 'y': 0}
-
-    # RIGHT PANEL: Data Rows
     BoxLayout:
         orientation: 'vertical'
         spacing: dp(4)
-
-        # ROW 1: Title
         Label:
             text: f'[b]{root.title}[/b]'
             markup: True
@@ -703,10 +186,8 @@
             halign: 'left'
             valign: 'middle'
             shorten: True
-
-        # ROW 2: Author & Subject
         Label:
-            text: f'{root.fullname} · {root.subject}'
+            text: f'{root.fullname}   {root.subject}'
             font_size: sp(12)
             color: 0.6, 0.6, 0.6, 1
             size_hint_y: None
@@ -715,8 +196,6 @@
             halign: 'left'
             valign: 'middle'
             shorten: True
-
-        # ROW 3: Stats (Rating + Reviews + Schedule)
         BoxLayout:
             size_hint_y: None
             height: dp(20)
@@ -740,18 +219,14 @@
                 color: 0.5, 0.5, 0.5, 1
                 size_hint_x: None
                 width: self.texture_size[0]
-            
-            # Divider
             Label:
                 text: '|'
                 font_size: sp(12)
                 color: 0.3, 0.3, 0.3, 1
                 size_hint_x: None
                 width: dp(10)
-
-            # Schedule Icon & Text
             Image:
-                source: 'assets/clock.png' # Fallback to a clock or calendar icon
+                source: 'assets/clock.png' 
                 size_hint: None, None
                 size: dp(12), dp(12)
                 pos_hint: {'center_y': 0.5}
@@ -763,13 +238,9 @@
                 size_hint_x: None
                 width: self.texture_size[0]
             Widget:
-
-        # ROW 4: Price & Book Button
         FloatLayout:
             size_hint_y: None
             height: dp(35)
-            
-            # Price
             Label:
                 text: f'[b]₱{root.price:,.0f}[/b][size=12sp]/{root.rate_type}[/size]' 
                 markup: True
@@ -778,8 +249,6 @@
                 pos_hint: {'x': 0, 'center_y': 0.3}
                 size_hint: None, None
                 size: self.texture_size
-
-            # Book Button
             Button:
                 text: '[b]Book[/b]'
                 markup: True
@@ -791,12 +260,99 @@
                 on_release: root.open_booking()
                 canvas.before:
                     Color:
-                        rgba: 0.5, 0.1, 0.9, 1 # Deep Purple
+                        rgba: 0.5, 0.1, 0.9, 1
                     RoundedRectangle:
                         pos: self.pos
                         size: self.size
-                        radius: [dp(8)]					
+                        radius: [dp(8)]
 
+
+# ==========================================
+# DOMAIN: DASHBOARD & ACTIVITY
+# ==========================================
+
+# -------------------------------
+# COMPONENT: Activity Overview Row
+# -------------------------------
+<DynamicActivity>:
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.17, 0.23, 0.5
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+
+<ActivityTile>:
+    size_hint_y: None
+    height: dp(70)
+    padding: dp(12)
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.16, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+    AnchorLayout:
+        size_hint_x: None
+        width: dp(45)
+        canvas.before:
+            Color:
+                rgba: root.icon_bg_color
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(10)]
+        Image:
+            source: root.icon_source
+            size_hint: 0.5, 0.5 
+            allow_stretch: True
+            keep_ratio: True
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(2)
+        Label:
+            text: f"[b]{root.activity_type}[/b]"
+            markup: True
+            font_size: sp(15)
+            color: 1, 1, 1, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: root.item_title
+            font_size: sp(13)
+            color: 0.5, 0.5, 0.5, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+            shorten: True
+            shorten_from: 'right'
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_x: None
+        width: dp(80)
+        spacing: dp(2)
+        Label:
+            text: f"[b]{root.amount}[/b]"
+            markup: True
+            font_size: sp(15)
+            color: root.text_color
+            text_size: self.size
+            halign: 'right'
+            valign: 'bottom'
+        Label:
+            text: root.time_ago
+            font_size: sp(12)
+            color: 0.5, 0.5, 0.5, 1
+            text_size: self.size
+            halign: 'right'
+            valign: 'top'
+
+# -------------------------------
+# COMPONENT: Wallet Transaction
+# -------------------------------
 <TransactionTile>:
     size_hint_y: None
     height: dp(65)
@@ -812,7 +368,7 @@
     BoxLayout:
         orientation: 'vertical'
         Label:
-            id: desc_label       # Using ID instead of root.property
+            id: desc_label
             text: ''
             markup: True
             font_size: sp(14)
@@ -820,7 +376,7 @@
             halign: 'left'
             valign: 'bottom'
         Label:
-            id: date_label       # Using ID instead of root.property
+            id: date_label
             text: ''
             color: 0.6, 0.6, 0.6, 1
             font_size: sp(11)
@@ -828,7 +384,7 @@
             halign: 'left'
             valign: 'top'
     Label:
-        id: amount_label         # Using ID instead of root.property
+        id: amount_label
         text: ''
         markup: True
         font_size: sp(15)
@@ -838,3 +394,113 @@
         text_size: self.size
         halign: 'right'
         valign: 'middle'
+
+
+# ==========================================
+# DOMAIN: PROFILE & SETTINGS
+# ==========================================
+
+# -------------------------------
+# COMPONENT: Profile Listing Cards
+# -------------------------------
+<ProfileItemCard@BoxLayout>:
+    title: 'Item Name'
+    price: '$0.00'
+    icon_color: 0.40, 0.31, 0.85, 1 
+    size_hint_y: None
+    height: dp(60)
+    padding: dp(10)
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.18, 1 
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(10)]
+    Widget:
+        size_hint_x: None
+        width: dp(40)
+        canvas.before:
+            Color:
+                rgba: root.icon_color
+            RoundedRectangle:
+                size: self.size
+                pos: self.pos
+                radius: [dp(8)]
+    Label:
+        text: root.title
+        font_size: sp(14)
+        text_size: self.size
+        halign: 'left'
+        valign: 'center'
+        color: 1, 1, 1, 1
+    Label:
+        text: '[b]' + root.price + '[/b]'
+        markup: True
+        font_size: sp(14)
+        size_hint_x: None
+        width: dp(60)
+        text_size: self.size
+        halign: 'right'
+        valign: 'center'
+        color: 0.65, 0.50, 1.0, 1
+
+# -------------------------------
+# COMPONENT: Settings Rows
+# -------------------------------
+<SettingsToggleRow@BoxLayout>:
+    title: 'Setting Name'
+    active_state: False
+    size_hint_y: None
+    height: dp(60)
+    padding: [dp(20), dp(10)]
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.18, 1 
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(10)]
+    Label:
+        text: root.title
+        font_size: sp(14)
+        color: 1, 1, 1, 1
+        text_size: self.size
+        halign: 'left'
+        valign: 'center'
+    Switch:
+        active: root.active_state
+        size_hint_x: None
+        width: dp(50)
+
+<SettingsButtonRow@ButtonBehavior+BoxLayout>:
+    title: 'Action Name'
+    title_color: 1, 1, 1, 1
+    size_hint_y: None
+    height: dp(60)
+    padding: [dp(20), dp(10)]
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.18, 1
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(10)]
+    Label:
+        text: root.title
+        font_size: sp(14)
+        color: root.title_color
+        text_size: self.size
+        halign: 'left'
+        valign: 'center'
+    Label:
+        text: '>'
+        font_size: sp(18)
+        color: 0.5, 0.5, 0.5, 1
+        size_hint_x: None
+        width: dp(20)
+        text_size: self.size
+        halign: 'right'
+        valign: 'center'

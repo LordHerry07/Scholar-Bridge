@@ -1,131 +1,10 @@
-# --- CUSTOM INTERACTIVE STAR COMPONENT ---
-<StarButton@ButtonBehavior+Image>:
-    rating_index: 1
-    current_rating: 0
-    # Magically swaps the image based on the selected rating!
-    source: 'assets/star.png' if self.current_rating >= self.rating_index else 'assets/star-hallow.png'
-    size_hint: None, None
-    size: dp(40), dp(40)
-    # Slight dim effect when pressed
-    opacity: 0.7 if self.state == 'down' else 1.0
-<ServiceDetailsModal@ModalView>:
-    size_hint: 0.9, 0.7
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(20)
-        spacing: dp(15)
-        canvas.before:
-            Color:
-                rgba: 0.11, 0.12, 0.16, 1
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(20)]
-        
-        Label:
-            text: f"[b]{root.title}[/b]"
-            markup: True
-            font_size: sp(22)
-            size_hint_y: None
-            height: dp(30)
-            text_size: self.size
-            halign: 'left'
-        
-        Label:
-            text: f"By {root.fullname}"
-            color: 0.6, 0.6, 0.6, 1
-            size_hint_y: None
-            height: dp(20)
-            text_size: self.size
-            halign: 'left'
+# ==========================================
+# DOMAIN: SYSTEM & NETWORK MODALS
+# ==========================================
 
-        ScrollView:
-            Label:
-                text: root.description
-                text_size: self.width, None
-                size_hint_y: None
-                height: self.texture_size[1]
-                halign: 'left'
-                valign: 'top'
-        
-        FloatLayout:
-            size_hint_y: None
-            height: dp(50)
-            Label:
-                text: f"[b]₱{root.price:,.0f}[/b][size=14sp]/{root.rate_type}[/size]"
-                markup: True
-                font_size: sp(20)
-                color: 0.6, 0.25, 0.95, 1
-                pos_hint: {'x': 0, 'center_y': 0.5}
-
-<BookingCalendarModal@ModalView>:
-    size_hint: 0.85, 0.6
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(20)
-        spacing: dp(15)
-        canvas.before:
-            Color:
-                rgba: 0.11, 0.12, 0.16, 1
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(20)]
-        Label:
-            text: '[b]Select a Schedule[/b]'
-            markup: True
-            font_size: sp(18)
-            size_hint_y: 0.15
-        
-        # The empty grid Python will automatically populate
-        GridLayout:
-            id: calendar_grid
-            cols: 7
-            spacing: dp(5)
-            size_hint_y: 0.7
-            
-        PrimaryButton:
-            text: "[b]Confirm Booking[/b]"
-            size_hint_y: None
-            height: dp(50)
-            on_release: root.confirm_booking()
-
-<NewPasswordModal>:
-    size_hint: 0.85, 0.45
-    auto_dismiss: False
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(20)
-        spacing: dp(15)
-        canvas.before:
-            Color:
-                rgba: 0.11, 0.12, 0.16, 1
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(20)]
-
-        Label:
-            text: '[b]Set New Password[/b]'
-            markup: True
-            font_size: sp(18)
-            size_hint_y: None
-            height: dp(30)
-
-        FormInput:
-            id: new_pwd
-            title: "New Password"
-            hint: "Enter new password"
-            # password: True  <-- Ensure your FormInput supports this or set it manually
-
-        FormInput:
-            id: confirm_pwd
-            title: "Confirm Password"
-            hint: "Re-type password"
-
-        PrimaryButton:
-            text: "Reset Password"
-            on_release: root.change_password(new_pwd.ids.internal_input.text, confirm_pwd.ids.internal_input.text)
+# -------------------------------
+# COMPONENT: Global Notification
+# -------------------------------
 <SimulatedNotification>:
     size_hint: 0.9, None
     height: dp(70)
@@ -142,17 +21,14 @@
         Line:
             width: dp(1.5)
             rounded_rectangle: [self.x, self.y, self.width, self.height, dp(15)]
-
     BoxLayout:
         padding: dp(15)
         spacing: dp(15)
-        
         Image:
-            source: 'assets/mail.png'
+            source: 'assets/email.png'
             size_hint_x: None
             width: dp(30)
             color: 0.43, 0.33, 0.85, 1
-
         BoxLayout:
             orientation: 'vertical'
             Label:
@@ -167,97 +43,69 @@
                 color: 0.8, 0.8, 0.8, 1
                 halign: 'left'
                 text_size: self.size
-# --------------------------------------------------------#
-# NEW: 6-Digit OTP Reset Modal
-# --------------------------------------------------------#
-<ResetPasswordModal@ModalView>:
-    size_hint: 0.85, 0.45
-    background_color: 0, 0, 0, 0.7
-    auto_dismiss: False
 
+# -------------------------------
+# COMPONENT: Basic Alert Box
+# -------------------------------
+<NotificationModal>:
+    size_hint: 0.8, None
+    height: dp(200)
+    background: ''
+    background_color: 0, 0, 0, 0
     BoxLayout:
         orientation: 'vertical'
         padding: dp(20)
         spacing: dp(15)
         canvas.before:
             Color:
-                rgba: 0.08, 0.09, 0.14, 1
+                rgba: 0.15, 0.16, 0.22, 1
             RoundedRectangle:
                 pos: self.pos
                 size: self.size
-                radius: [dp(20)]
-
+                radius: [dp(15)]
         Label:
-            text: "[b]RESET PASSWORD[/b]"
+            id: notif_title
+            text: '[b]Notice[/b]'
             markup: True
             font_size: sp(18)
             size_hint_y: None
             height: dp(30)
-
+            color: 1, 1, 1, 1
         Label:
-            text: "Enter the 6-digit code sent to your email"
-            font_size: sp(13)
-            color: 0.6, 0.6, 0.6, 1
+            id: notif_message
+            text: 'Message goes here.'
+            font_size: sp(14)
+            color: 0.8, 0.8, 0.8, 1
+            text_size: self.width, None
+            halign: 'center'
+            valign: 'middle'
+        Button:
+            text: '[b]OK[/b]'
+            markup: True
             size_hint_y: None
-            height: dp(20)
+            height: dp(45)
+            background_color: 0,0,0,0
+            canvas.before:
+                Color:
+                    rgba: 0.43, 0.33, 0.85, 1
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [dp(22)]
+            on_release: root.dismiss()
 
-        # OTP Input Field
-        TextInput:
-            id: otp_input
-            hint_text: "000000"
-            input_filter: "int"
-            halign: "center"
-            font_size: sp(24)
-            multiline: False
-            background_color: 0.11, 0.12, 0.18, 1
-            foreground_color: 1, 1, 1, 1
-            size_hint_y: None
-            height: dp(50)
-            cursor_color: 1,1,1,1
-
-        BoxLayout:
-            spacing: dp(10)
-            size_hint_y: None
-            height: dp(50)
-            
-            Button:
-                text: "Cancel"
-                background_color: 0,0,0,0
-                on_release: root.dismiss()
-                canvas.before:
-                    Color:
-                        rgba: 1,1,1,0.1
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [dp(10)]
-
-            Button:
-                text: "[b]Verify[/b]"
-                markup: True
-                background_color: 0,0,0,0
-                on_release: root.verify_otp(otp_input.text)
-                canvas.before:
-                    Color:
-                        rgba: 0.4, 0.31, 0.85, 1
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [dp(10)]
-#-----------------------------------------------------------#
-# GLOBAL OFFLINE BANNER
-#-----------------------------------------------------------#
+# -------------------------------
+# COMPONENT: Server & Offline Modals
+# -------------------------------
 <OfflineBanner>:
     canvas.before:
         Color:
-            rgba: 0.85, 0.26, 0.33, 0.95  # Slightly transparent neon red
+            rgba: 0.85, 0.26, 0.33, 0.95
         Rectangle:
             pos: self.pos
             size: self.size
-            
-    # Centered Warning Text
     Label:
-        text: '⚠ You are offline. Viewing cached data.'
+        text: '  You are offline. Viewing cached data.'
         font_size: sp(13)
         color: 1, 1, 1, 1
         bold: True
@@ -266,8 +114,7 @@
     size_hint: 0.85, None
     height: dp(230)
     background: '' 
-    background_color: 0, 0, 0, 0 
-    
+    background_color: 0, 0, 0, 0     
     BoxLayout:
         orientation: 'vertical'
         padding: dp(25)
@@ -279,7 +126,6 @@
                 pos: self.pos
                 size: self.size
                 radius: [dp(20)]
-                
         Label:
             text: '[b]Server Configuration[/b]'
             markup: True
@@ -289,7 +135,6 @@
             text_size: self.size
             halign: 'left'
             valign: 'middle'
-            
         Label:
             text: 'Enter the IPv4 address and port of your active ScholarBridge host.'
             color: 0.6, 0.6, 0.6, 1
@@ -299,7 +144,6 @@
             text_size: self.size
             halign: 'left'
             valign: 'top'
-            
         TextInput:
             id: server_ip_input
             hint_text: 'e.g. 192.168.1.5:5000'
@@ -318,99 +162,474 @@
                 Line:
                     rounded_rectangle: [self.x, self.y, self.width, self.height, dp(8)]
                     width: dp(1)
-
-        # --- UNIFIED BUTTON ROW ---
         BoxLayout:
             size_hint_y: None
             height: dp(45)
             spacing: dp(10)
-            
-            # Left Button: Work Offline
             Button:
                 text: '[b]Work Offline[/b]'
                 markup: True
                 background_color: 0,0,0,0
                 canvas.before:
                     Color:
-                        rgba: 0.15, 0.16, 0.22, 1 # Dark Gray Theme
+                        rgba: 0.15, 0.16, 0.22, 1
                     RoundedRectangle:
                         size: self.size
                         pos: self.pos
                         radius: [dp(10)]
                 on_release: root.set_offline_mode()
-                
-            # Right Button: Connect Online
             Button:
                 text: '[b]Connect[/b]'
                 markup: True
                 background_color: 0,0,0,0
                 canvas.before:
                     Color:
-                        rgba: 0.43, 0.33, 0.85, 1 # Purple Accent Theme
+                        rgba: 0.43, 0.33, 0.85, 1
                     RoundedRectangle:
                         size: self.size
                         pos: self.pos
                         radius: [dp(10)]
-                on_release:
+                on_release: 
                     root.save_server()
                     root.set_online_mode(server_ip_input.text)
 
-<NotificationModal>:
-    size_hint: 0.8, None
-    height: dp(200)
-    background: ''
-    background_color: 0, 0, 0, 0
-    
+
+# ==========================================
+# DOMAIN: AUTHENTICATION MODALS
+# ==========================================
+
+# -------------------------------
+# COMPONENT: OTP Reset Modal
+# -------------------------------
+<ResetPasswordModal@ModalView>:
+    size_hint: 0.85, 0.45
+    background_color: 0, 0, 0, 0.7
+    auto_dismiss: False
     BoxLayout:
         orientation: 'vertical'
         padding: dp(20)
         spacing: dp(15)
         canvas.before:
             Color:
-                rgba: 0.15, 0.16, 0.22, 1
+                rgba: 0.08, 0.09, 0.14, 1
             RoundedRectangle:
                 pos: self.pos
                 size: self.size
-                radius: [dp(15)]
-                
+                radius: [dp(20)]
         Label:
-            id: notif_title
-            text: '[b]Notice[/b]'
+            text: "[b]RESET PASSWORD[/b]"
             markup: True
             font_size: sp(18)
             size_hint_y: None
             height: dp(30)
-            color: 1, 1, 1, 1
-            
         Label:
-            id: notif_message
-            text: 'Message goes here.'
-            font_size: sp(14)
-            color: 0.8, 0.8, 0.8, 1
-            text_size: self.width, None
-            halign: 'center'
-            valign: 'middle'
-            
-        Button:
-            text: '[b]OK[/b]'
-            markup: True
+            text: "Enter the 6-digit code sent to your email"
+            font_size: sp(13)
+            color: 0.6, 0.6, 0.6, 1
             size_hint_y: None
-            height: dp(45)
-            background_color: 0,0,0,0
+            height: dp(20)
+        TextInput:
+            id: otp_input
+            hint_text: "000000"
+            input_filter: "int"
+            halign: "center"
+            font_size: sp(24)
+            multiline: False
+            background_color: 0.11, 0.12, 0.18, 1
+            foreground_color: 1, 1, 1, 1
+            size_hint_y: None
+            height: dp(50)
+            cursor_color: 1,1,1,1
+        BoxLayout:
+            spacing: dp(10)
+            size_hint_y: None
+            height: dp(50)
+            Button:
+                text: "Cancel"
+                background_color: 0,0,0,0
+                on_release: root.dismiss()
+                canvas.before:
+                    Color:
+                        rgba: 1,1,1,0.1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(10)]
+            Button:
+                text: "[b]Verify[/b]"
+                markup: True
+                background_color: 0,0,0,0
+                on_release: root.verify_otp(otp_input.text)
+                canvas.before:
+                    Color:
+                        rgba: 0.4, 0.31, 0.85, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(10)]
+
+# -------------------------------
+# COMPONENT: New Password Input
+# -------------------------------
+<NewPasswordModal>:
+    size_hint: 0.85, 0.45
+    auto_dismiss: False
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(15)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+        Label:
+            text: '[b]Set New Password[/b]'
+            markup: True
+            font_size: sp(18)
+            size_hint_y: None
+            height: dp(30)
+        FormInput:
+            id: new_pwd
+            title: "New Password"
+            hint: "Enter new password"
+        FormInput:
+            id: confirm_pwd
+            title: "Confirm Password"
+            hint: "Re-type password"
+        PrimaryButton:
+            text: "Reset Password"
+            on_release: root.change_password(new_pwd.ids.internal_input.text, confirm_pwd.ids.internal_input.text)
+
+
+# ==========================================
+# DOMAIN: PROFILES & LISTINGS MODALS
+# ==========================================
+
+# -------------------------------
+# COMPONENT: Public Profile Card
+# -------------------------------
+<PublicProfileModal>:
+    size_hint: 0.9, 0.85
+    background: '' 
+    background_color: 0, 0, 0, 0     
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(15)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1  
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+        BoxLayout:
+            size_hint_y: None
+            height: dp(80)
+            spacing: dp(15)
+            FloatLayout:
+                size_hint_x: None
+                width: dp(60)
+                canvas.before:
+                    Color:
+                        rgba: 0.43, 0.33, 0.85, 1
+                    Ellipse:
+                        pos: [self.center_x - dp(30), self.center_y - dp(30)]
+                        size: dp(60), dp(60)
+                Label:
+                    text: f'[b]{root.initial}[/b]'
+                    markup: True
+                    font_size: sp(20)
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            BoxLayout:
+                orientation: 'vertical'
+                padding: [0, dp(10), 0, dp(10)]
+                Label:
+                    id: profile_name
+                    text: 'Loading...'
+                    markup: True
+                    font_size: sp(18)
+                    text_size: self.size
+                    halign: 'left'
+                    valign: 'bottom'
+                Label:
+                    id: profile_stats
+                    text: '  -- Rating   -- Active Listings'
+                    color: 0.6, 0.6, 0.6, 1
+                    font_size: sp(13)
+                    text_size: self.size
+                    halign: 'left'
+                    valign: 'top'
+        Widget:
+            size_hint_y: None
+            height: dp(1)
             canvas.before:
                 Color:
-                    rgba: 0.43, 0.33, 0.85, 1
-                RoundedRectangle:
-                    size: self.size
+                    rgba: 1, 1, 1, 0.1
+                Rectangle:
                     pos: self.pos
-                    radius: [dp(22)]
-            on_release: root.dismiss()
+                    size: self.size
+        Label:
+            text: '[b]Active Listings[/b]'
+            markup: True
+            size_hint_y: None
+            height: dp(30)
+            font_size: sp(16)
+            text_size: self.size
+            halign: 'left'
+            valign: 'middle'
+        ScrollView:
+            do_scroll: False, True
+            bar_width: 0
+            BoxLayout:
+                id: active_listings
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(10)
+
+# -------------------------------
+# COMPONENT: Product Details View
+# -------------------------------
+<ProductDetailsModal>:
+    size_hint: 0.85, 0.65
+    background_color: 0, 0, 0, 0.6
+    background: '' 
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(15)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            orientation: 'vertical'
+            Label:
+                text: f'[b]{root.title}[/b]'
+                markup: True
+                font_size: sp(18)
+                text_size: self.size
+                halign: 'left'
+                valign: 'bottom'
+            Label:
+                text: f'[color=#6b59e0]₱{root.price:,.2f}[/color]   Condition: {root.condition}'
+                markup: True
+                font_size: sp(14)
+                color: 0.6, 0.6, 0.6, 1
+                text_size: self.size
+                halign: 'left'
+                valign: 'top'
+        ScrollView:
+            do_scroll: False, True
+            bar_width: dp(4)
+            Label:
+                text: root.description
+                size_hint_y: None
+                height: self.texture_size[1]
+                text_size: self.width, None
+                font_size: sp(14)
+                color: 0.8, 0.8, 0.8, 1
+                halign: 'left'
+                valign: 'top'
+        BoxLayout:
+            size_hint_y: None
+            height: dp(50)
+            spacing: dp(10)
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 0.05
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(10)]
+            FloatLayout:
+                size_hint_x: None
+                width: dp(50)
+                canvas.before:
+                    Color:
+                        rgba: 0.43, 0.33, 0.85, 1
+                    Ellipse:
+                        pos: [self.center_x - dp(17.5), self.center_y - dp(17.5)]
+                        size: dp(35), dp(35)
+                Label:
+                    text: f'[b]{root.initial}[/b]'
+                    markup: True
+                    font_size: sp(14)
+            BoxLayout:
+                orientation: 'vertical'
+                padding: [0, dp(8), 0, dp(8)]
+                Label:
+                    text: f'[b]{root.fullname}[/b]'
+                    markup: True
+                    font_size: sp(14)
+                    text_size: self.size
+                    halign: 'left'
+                Label:
+                    text: 'Online Now'
+                    color: 0.16, 0.67, 0.38, 1
+                    font_size: sp(11)
+                    text_size: self.size
+                    halign: 'left'
+        BoxLayout:
+            size_hint_y: None
+            height: dp(45)
+            spacing: dp(10)
+            ToggleButton:
+                text: 'View Profile'
+                size_hint_x: 0.4
+                font_size: sp(13)
+                background_color: 0,0,0,0
+                color: (1, 0.3, 0.3, 1) if self.state == 'down' else (1, 1, 1, 0.5)
+                on_release: root.view_profile()
+                canvas.before:
+                    Color:
+                        rgba: (1, 0.3, 0.3, 0.2) if self.state == 'down' else (1, 1, 1, 0.1)
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(10)]
+            Button:
+                text: '[b]Chat Now[/b]'
+                markup: True
+                size_hint_x: 0.6
+                font_size: sp(14)
+                background_color: 0,0,0,0
+                on_release: root.go_to_chat()
+                canvas.before:
+                    Color:
+                        rgba: 0.43, 0.33, 0.85, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(10)]
+        Button:
+            size_hint_y: None
+            height: dp(45)
+            text: 'Buy Securely via Escrow'
+            font_size: sp(14)
+            bold: True
+            color: 1, 1, 1, 1
+            background_color: 0,0,0,0
+            on_release: root.buy_item()
+            canvas.before:
+                Color:
+                    rgba: 0.16, 0.67, 0.38, 1 
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(10)]
+
+# -------------------------------
+# COMPONENT: Service Details View
+# -------------------------------
+<ServiceDetailsModal@ModalView>:
+    size_hint: 0.9, 0.7
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(15)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+        Label:
+            text: f"[b]{root.title}[/b]"
+            markup: True
+            font_size: sp(22)
+            size_hint_y: None
+            height: dp(30)
+            text_size: self.size
+            halign: 'left'
+        Label:
+            text: f"By {root.fullname}"
+            color: 0.6, 0.6, 0.6, 1
+            size_hint_y: None
+            height: dp(20)
+            text_size: self.size
+            halign: 'left'
+        ScrollView:
+            Label:
+                text: root.description
+                text_size: self.width, None
+                size_hint_y: None
+                height: self.texture_size[1]
+                halign: 'left'
+                valign: 'top'
+        FloatLayout:
+            size_hint_y: None
+            height: dp(50)
+            Label:
+                text: f"[b]₱{root.price:,.0f}[/b][size=14sp]/{root.rate_type}[/size]"
+                markup: True
+                font_size: sp(20)
+                color: 0.6, 0.25, 0.95, 1
+                pos_hint: {'x': 0, 'center_y': 0.5}
+
+
+# ==========================================
+# DOMAIN: TRANSACTIONS & ACTIONS
+# ==========================================
+
+# -------------------------------
+# COMPONENT: Booking Scheduler
+# -------------------------------
+<BookingCalendarModal@ModalView>:
+    size_hint: 0.85, 0.6
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(15)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+        Label:
+            text: '[b]Select a Schedule[/b]'
+            markup: True
+            font_size: sp(18)
+            size_hint_y: 0.15
+        GridLayout:
+            id: calendar_grid
+            cols: 7
+            spacing: dp(5)
+            size_hint_y: 0.7
+        PrimaryButton:
+            text: "[b]Confirm Booking[/b]"
+            size_hint_y: None
+            height: dp(50)
+            on_release: root.confirm_booking()
+
+# -------------------------------
+# COMPONENT: Review & Ratings
+# -------------------------------
+<StarButton@ButtonBehavior+Image>:
+    rating_index: 1
+    current_rating: 0
+    source: 'assets/star.png' if self.current_rating >= self.rating_index else 'assets/star-hallow.png'
+    size_hint: None, None
+    size: dp(40), dp(40)
+    opacity: 0.7 if self.state == 'down' else 1.0
+
 <ReviewModal>:
     size_hint: 0.85, None
-    height: dp(370) # <-- Increased slightly to give the text room to breathe
+    height: dp(370) 
     background: '' 
     background_color: 0, 0, 0, 0 
-    
     BoxLayout:
         orientation: 'vertical'
         padding: dp(25)
@@ -422,7 +641,6 @@
                 pos: self.pos
                 size: self.size
                 radius: [dp(20)]
-                
         Label:
             text: '[b]Rate your transaction[/b]'
             markup: True
@@ -432,22 +650,16 @@
             text_size: self.size
             halign: 'center'
             valign: 'middle'
-            
         Label:
             text: f'How was your experience with what you purchased from [color=#6b59e0]{root.seller_name}[/color]?'
             markup: True
             color: 0.7, 0.7, 0.7, 1
             font_size: sp(14)
-            
-            # --- THE FIX: DYNAMIC MULTI-LINE TEXT ---
             size_hint_y: None
-            text_size: self.width, None       # Forces text to wrap horizontally
-            height: self.texture_size[1]      # Automatically expands height to fit the wrapped text
-            
+            text_size: self.width, None       
+            height: self.texture_size[1]      
             halign: 'center'
             valign: 'top'
-            
-        # --- THE NEW INTERACTIVE STARS ---
         BoxLayout:
             size_hint_y: None
             height: dp(50)
@@ -455,7 +667,6 @@
             pos_hint: {'center_x': 0.5}
             size_hint_x: None
             width: self.minimum_width
-            
             StarButton:
                 rating_index: 1
                 current_rating: root.current_rating
@@ -476,8 +687,6 @@
                 rating_index: 5
                 current_rating: root.current_rating
                 on_release: root.current_rating = 5
-
-        # Refined Text Input
         TextInput:
             id: review_comment
             hint_text: 'Leave a comment (optional)...'
@@ -498,8 +707,6 @@
                 Line:
                     rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
                     width: dp(1)
-
-        # Submit Button
         Button:
             text: '[b]Submit Review[/b]'
             markup: True
@@ -514,245 +721,3 @@
                     pos: self.pos
                     radius: [dp(25)]
             on_release: root.submit()
-<PublicProfileModal>:
-    size_hint: 0.9, 0.85
-    background: '' 
-    background_color: 0, 0, 0, 0 
-    
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(20)
-        spacing: dp(15)
-        canvas.before:
-            Color:
-                rgba: 0.11, 0.12, 0.16, 1  
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(20)]
-                
-        # Header Block
-        BoxLayout:
-            size_hint_y: None
-            height: dp(80)
-            spacing: dp(15)
-            
-            # Avatar
-            FloatLayout:
-                size_hint_x: None
-                width: dp(60)
-                canvas.before:
-                    Color:
-                        rgba: 0.43, 0.33, 0.85, 1
-                    Ellipse:
-                        pos: [self.center_x - dp(30), self.center_y - dp(30)]
-                        size: dp(60), dp(60)
-                Label:
-                    text: f'[b]{root.initial}[/b]'
-                    markup: True
-                    font_size: sp(20)
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                    
-            # Name & Stats
-            BoxLayout:
-                orientation: 'vertical'
-                padding: [0, dp(10), 0, dp(10)]
-                Label:
-                    id: profile_name
-                    text: 'Loading...'
-                    markup: True
-                    font_size: sp(18)
-                    text_size: self.size
-                    halign: 'left'
-                    valign: 'bottom'
-                Label:
-                    id: profile_stats
-                    text: '⭐ -- Rating • -- Active Listings'
-                    color: 0.6, 0.6, 0.6, 1
-                    font_size: sp(13)
-                    text_size: self.size
-                    halign: 'left'
-                    valign: 'top'
-                    
-        # Divider Line
-        Widget:
-            size_hint_y: None
-            height: dp(1)
-            canvas.before:
-                Color:
-                    rgba: 1, 1, 1, 0.1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-                    
-        Label:
-            text: '[b]Active Listings[/b]'
-            markup: True
-            size_hint_y: None
-            height: dp(30)
-            font_size: sp(16)
-            text_size: self.size
-            halign: 'left'
-            valign: 'middle'
-            
-        # Scrollable Listings
-        ScrollView:
-            do_scroll: False, True
-            bar_width: 0
-            BoxLayout:
-                id: active_listings
-                orientation: 'vertical'
-                size_hint_y: None
-                height: self.minimum_height
-                spacing: dp(10)
-<ProductDetailsModal>:
-    size_hint: 0.85, 0.65
-    background_color: 0, 0, 0, 0.6
-    background: '' # Removes default Kivy modal background
-    
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(20)
-        spacing: dp(15)
-        canvas.before:
-            Color:
-                rgba: 0.11, 0.12, 0.16, 1  # Dark modal background
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(20)]
-                
-        # Header: Title & Price
-        BoxLayout:
-            size_hint_y: None
-            height: dp(60)
-            orientation: 'vertical'
-            Label:
-                text: f'[b]{root.title}[/b]'
-                markup: True
-                font_size: sp(18)
-                text_size: self.size
-                halign: 'left'
-                valign: 'bottom'
-            Label:
-                text: f'[color=#6b59e0]₱{root.price:,.2f}[/color] • Condition: {root.condition}'
-                markup: True
-                font_size: sp(14)
-                color: 0.6, 0.6, 0.6, 1
-                text_size: self.size
-                halign: 'left'
-                valign: 'top'
-
-        # Scrollable Description
-        ScrollView:
-            do_scroll: False, True
-            bar_width: dp(4)
-            Label:
-                text: root.description
-                size_hint_y: None
-                height: self.texture_size[1]
-                text_size: self.width, None
-                font_size: sp(14)
-                color: 0.8, 0.8, 0.8, 1
-                halign: 'left'
-                valign: 'top'
-
-        # Seller Info Block
-        BoxLayout:
-            size_hint_y: None
-            height: dp(50)
-            spacing: dp(10)
-            canvas.before:
-                Color:
-                    rgba: 1, 1, 1, 0.05
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [dp(10)]
-            # Avatar
-            FloatLayout:
-                size_hint_x: None
-                width: dp(50)
-                canvas.before:
-                    Color:
-                        rgba: 0.43, 0.33, 0.85, 1
-                    Ellipse:
-                        pos: [self.center_x - dp(17.5), self.center_y - dp(17.5)]
-                        size: dp(35), dp(35)
-                Label:
-                    text: f'[b]{root.initial}[/b]'
-                    markup: True
-                    font_size: sp(14)
-            # Name & Status
-            BoxLayout:
-                orientation: 'vertical'
-                padding: [0, dp(8), 0, dp(8)]
-                Label:
-                    text: f'[b]{root.fullname}[/b]'
-                    markup: True
-                    font_size: sp(14)
-                    text_size: self.size
-                    halign: 'left'
-                Label:
-                    text: 'Online Now'
-                    color: 0.16, 0.67, 0.38, 1
-                    font_size: sp(11)
-                    text_size: self.size
-                    halign: 'left'
-
-        # Action Buttons
-        BoxLayout:
-            size_hint_y: None
-            height: dp(45)
-            spacing: dp(10)
-            
-            # Interested (Heart) Button
-            ToggleButton:
-                text: 'View Profile'
-                size_hint_x: 0.4
-                font_size: sp(13)
-                background_color: 0,0,0,0
-                color: (1, 0.3, 0.3, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                on_release: root.view_profile()
-                canvas.before:
-                    Color:
-                        rgba: (1, 0.3, 0.3, 0.2) if self.state == 'down' else (1, 1, 1, 0.1)
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [dp(10)]
-                        
-            # Chat Now Button
-            Button:
-                text: '[b]Chat Now[/b]'
-                markup: True
-                size_hint_x: 0.6
-                font_size: sp(14)
-                background_color: 0,0,0,0
-                on_release: root.go_to_chat()
-                canvas.before:
-                    Color:
-                        rgba: 0.43, 0.33, 0.85, 1
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [dp(10)]
-
-        # View Profile Button (Faint text button at bottom)
-        # Secure Buy Button
-        Button:
-            size_hint_y: None
-            height: dp(45)
-            text: 'Buy Securely via Escrow'
-            font_size: sp(14)
-            bold: True
-            color: 1, 1, 1, 1
-            background_color: 0,0,0,0
-            on_release: root.buy_item()
-            canvas.before:
-                Color:
-                    rgba: 0.16, 0.67, 0.38, 1  # A trustworthy green!
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [dp(10)]

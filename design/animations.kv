@@ -1,14 +1,21 @@
+# ==========================================
+# DOMAIN: ANIMATIONS & LOADING STATES
+# ==========================================
+
+# -------------------------------
+# COMPONENT: Circular Loading Spinner
+# -------------------------------
 <LoadingOverlay>:
-    opacity: 0 # Hidden by default
+    opacity: 0
     canvas.before:
-        # 1. Darken the background slightly
+        # Darken the background slightly
         Color:
             rgba: 0.08, 0.09, 0.14, 0.85 
         Rectangle:
             pos: self.pos
             size: self.size
-            
-        # 2. Draw the rotating purple arc
+        
+        # Draw the rotating purple arc
         Color:
             rgba: 0.42, 0.35, 0.88, 1
         PushMatrix
@@ -20,9 +27,10 @@
             width: dp(4)
             cap: 'round'
         PopMatrix
-# -----------------------------------------------------------
-# SKELETON LOADING CARD
-# -----------------------------------------------------------
+
+# -------------------------------
+# COMPONENT: Skeleton Loading Card
+# -------------------------------
 <ProductSkeleton>:
     size_hint_y: None
     height: dp(85)
@@ -30,23 +38,23 @@
     spacing: dp(15)
     canvas.before:
         Color:
-            rgba: 0.11, 0.12, 0.16, 1  # Dark card background
+            rgba: 0.11, 0.12, 0.16, 1
         RoundedRectangle:
             pos: self.pos
             size: self.size
             radius: [dp(12)]
-            
+        
     # Fake Avatar Circle
     FloatLayout:
         size_hint_x: None
         width: dp(50)
         canvas.before:
             Color:
-                rgba: 0.15, 0.16, 0.22, 1  # Slightly lighter grey/purple
+                rgba: 0.15, 0.16, 0.22, 1
             Ellipse:
                 pos: [self.center_x - dp(25), self.center_y - dp(25)]
                 size: dp(50), dp(50)
-                
+            
     # Fake Text Lines
     BoxLayout:
         orientation: 'vertical'
@@ -65,7 +73,7 @@
         Widget:
             size_hint_y: None
             height: dp(10)
-            size_hint_x: 0.6  # Make the second line shorter to look like a subtitle
+            size_hint_x: 0.6
             canvas.before:
                 Color:
                     rgba: 0.15, 0.16, 0.22, 1
@@ -73,7 +81,7 @@
                     pos: self.pos
                     size: self.size
                     radius: [dp(5)]
-                    
+                
     # Fake Price Badge
     Widget:
         size_hint_x: None

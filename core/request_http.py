@@ -2,14 +2,17 @@ import requests
 from requests.exceptions import RequestException
 from kivy.clock import Clock
 import os
-from flask import jsonify
 
 CONFIG_FILE = 'server_config.txt'
 TIMEOUT = 5  # Seconds before giving up on the server
 
-# ---------------------------------------
-# Network Armor
-# ---------------------------------------
+# ==========================================
+# DOMAIN: NETWORK ARMOR & UTILS
+# ==========================================
+
+# -------------------------------
+# CONFIG: Server IP Management
+# -------------------------------
 def load_base_url():
     """Loads the saved server IP, defaulting to localhost if none exists."""
     if os.path.exists(CONFIG_FILE):
@@ -22,14 +25,15 @@ BASE_URL = load_base_url()
 def set_base_url(new_url):
     """Updates the global API bridge and saves it locally."""
     global BASE_URL
-    # Ensure it always has the http:// prefix
     if not new_url.startswith("http"):
         new_url = "http://" + new_url
-        
     BASE_URL = new_url
     with open(CONFIG_FILE, 'w') as f:
         f.write(BASE_URL)
 
+# -------------------------------
+# CONFIG: Safety Wrappers
+# -------------------------------
 def show_network_error():
     """Safely triggers the UI Notification Modal from outside the main thread."""
     from core.main_interface import NotificationModal
@@ -50,14 +54,18 @@ def safe_request(method, url, **kwargs):
         show_network_error()
         return None
 
-# A dummy response for functions that expect an object with a status_code
 class FailedResponse:
     status_code = 500
     def json(self): return {"error": "Connection failed"}
 
-# ---------------------------------------
-# Users Table
-# ---------------------------------------
+
+# ==========================================
+# DOMAIN: USERS & AUTHENTICATION
+# ==========================================
+
+# -------------------------------
+# POST: Auth (Signup & Login)
+# -------------------------------
 def add_user(full_name, email, password):
     url = f"{BASE_URL}/users"
     payload = {"full_name": full_name, "email": email, "password": password}
@@ -70,6 +78,44 @@ def log_user(email, password):
     response = safe_request(requests.post, url, json=payload)
     return response if response else FailedResponse()
 
+# -------------------------------
+# POST: Password Reset
+# -------------------------------
+def request_password_reset(email):
+    url = f"{BASE_URL}/request_reset"
+    payload = {"email": email}
+    response = safe_request(requests.post, url, json=payload)
+    if response is None: return {"success": False, "error": "Server connection failed"}
+    if response.status_code == 200:
+        data = response.json()
+        return {"success": True, "debug_otp": data.get("debug_otp")}
+    try: error_msg = response.json().get("error", "Error requesting OTP")
+    except: error_msg = f"Server Error ({response.status_code})"
+    return {"success": False, "error": error_msg}
+
+def verify_reset_otp(email, otp):
+    url = f"{BASE_URL}/verify_reset"
+    payload = {"email": email, "otp": otp}
+    response = safe_request(requests.post, url, json=payload)
+    if response is None: return {"success": False, "error": "Server is offline"}
+    if response.status_code == 200: return {"success": True}
+    try: error_msg = response.json().get("error", "Invalid or expired code")
+    except Exception: error_msg = f"Server Error ({response.status_code})"
+    return {"success": False, "error": error_msg}
+
+def finalize_password_reset(email, new_password):
+    url = f"{BASE_URL}/reset_password"
+    payload = {"email": email, "password": new_password}
+    response = safe_request(requests.post, url, json=payload)
+    if response is None: return {"success": False, "error": "Server is offline"}
+    if response.status_code == 200: return {"success": True}
+    try: error_msg = response.json().get("error", "Could not update password")
+    except Exception: error_msg = f"Server Error ({response.status_code})"
+    return {"success": False, "error": error_msg}
+
+# -------------------------------
+# CRUD: User Management
+# -------------------------------
 def get_users():
     url = f"{BASE_URL}/users"
     response = safe_request(requests.get, url)
@@ -86,29 +132,29 @@ def delete_user(user_id):
     response = safe_request(requests.delete, url)
     return response.json() if response else {"error": "Failed"}
 
-# ---------------------------------------
-# Products Table
-# ---------------------------------------
-def add_product(data):
-    response = safe_request(requests.post, f"{BASE_URL}/products", json=data)
-    if response and response.status_code == 201:
+
+# ==========================================
+# DOMAIN: PROFILES & DASHBOARD
+# ==========================================
+
+# -------------------------------
+# GET: Profile Data
+# -------------------------------
+def get_user_profile(fullname):
+    url = f"{BASE_URL}/profile/{fullname}"
+    response = safe_request(requests.get, url)
+    if response and response.status_code == 200:
         return response.json()
-    return None
+    return {"full_name": fullname, "rating": 0.0, "products": []}
 
 def get_user_stats(full_name):
     url = f"{BASE_URL}/stats/{full_name}"
     response = safe_request(requests.get, url)
     if response and response.status_code == 200:
         return response.json()
-        
-    # FALLBACK DATA: Returned if offline or API isn't built yet
-    print(f"⚠️ Using fallback stats for {full_name}")
     return {
-        "total_earnings": 3450.00,
-        "active_listings": 8,
-        "items_sold": 24,
-        "rating": 4.9,                 # <-- The new rating key for the 4th panel!
-        "graph_data": [5, 10, 8, 25, 40, 30, 50, 45, 60] 
+        "total_earnings": 0.00, "active_listings": 0, "items_sold": 0,
+        "rating": 0.0, "graph_data": [0] * 15
     }
 
 def get_recent_activity(email):
@@ -116,53 +162,67 @@ def get_recent_activity(email):
     response = safe_request(requests.get, url)
     if response and response.status_code == 200:
         return response.json()
-        
-    # FALLBACK DATA: Exact list of dictionaries your Dashboard expects
-    print(f"⚠️ Using fallback recent activity for {email}")
-    return [
-        {
-            "type": "Sold", 
-            "title": "Organic Chemistry 8th Ed.", 
-            "amount": "45.00", 
-            "time": "2h ago"
-        }
-    ]
+    return []
+
+# -------------------------------
+# PUT: Update Profile
+# -------------------------------
+def update_profile(email, old_name, new_name, new_password, role, age, birthday, location):
+    url = f"{BASE_URL}/update_profile"
+    payload = {
+        "email": email, "old_name": old_name, "full_name": new_name, "password": new_password,
+        "role": role, "age": age, "birthday": birthday, "location": location
+    }
+    response = safe_request(requests.put, url, json=payload)
+    if response is None: return {"success": False, "error": "Could not connect to server."}
+    if response.status_code == 200: return {"success": True, "message": "Updated successfully!"}
+    try: error_msg = response.json().get("error", "Update failed.")
+    except: error_msg = "Unknown error occurred."
+    return {"success": False, "error": error_msg}
+
+
+# ==========================================
+# DOMAIN: MARKETPLACE (PRODUCTS)
+# ==========================================
+
+# -------------------------------
+# CRUD: Products
+# -------------------------------
+def add_product(data):
+    response = safe_request(requests.post, f"{BASE_URL}/products", json=data)
+    return response.json() if response and response.status_code == 201 else None
+
 def get_products(satisfied=None):
     params = {}
-    if satisfied is not None:
-        params["satisfied"] = int(satisfied)
-    
+    if satisfied is not None: params["satisfied"] = int(satisfied)
     response = safe_request(requests.get, f"{BASE_URL}/products", params=params)
-    if response and response.status_code == 200:
-        return response.json()
-    return []
+    return response.json() if response and response.status_code == 200 else []
 
 def update_product(product_id, data):
     response = safe_request(requests.put, f"{BASE_URL}/products/{product_id}", json=data)
-    if response and response.status_code == 200:
-        return response.json()
-    return None
+    return response.json() if response and response.status_code == 200 else None
 
 def delete_satisfied_products():
     response = safe_request(requests.delete, f"{BASE_URL}/products/satisfied")
-    if response and response.status_code == 200:
-        return response.json()
-    return None
+    return response.json() if response and response.status_code == 200 else None
 
 
+# ==========================================
+# DOMAIN: FREELANCE (SERVICES)
+# ==========================================
+
+# -------------------------------
+# CRUD: Services & Subscriptions
+# -------------------------------
 def add_service(data):
     url = f"{BASE_URL}/services"
     response = safe_request(requests.post, url, json=data)
-    if response and response.status_code == 201:
-        return response.json()
-    return None
+    return response.json() if response and response.status_code == 201 else None
 
 def get_services():
     url = f"{BASE_URL}/services"
     response = safe_request(requests.get, url)
-    if response and response.status_code == 200:
-        return response.json()
-    return []
+    return response.json() if response and response.status_code == 200 else []
 
 def subscribe_service(service_id, buyer_email, schedule):
     url = f"{BASE_URL}/subscribe"
@@ -175,58 +235,38 @@ def unsubscribe_service(service_id):
     res = safe_request(requests.post, url)
     return res is not None and res.status_code == 200
 
-def get_my_hub(email):
-    url = f"{BASE_URL}/my_hub/{email}"
-    res = safe_request(requests.get, url)
-    return res.json() if res and res.status_code == 200 else {"products": [], "subscriptions": []}
-# ---------------------------------------
-# Chat Messages
-# ---------------------------------------
-def send_message(sender, receiver, text):
-    url = f"{BASE_URL}/messages"
-    payload = {"sender_name": sender, "receiver_name": receiver, "message_text": text}
-    response = safe_request(requests.post, url, json=payload)
-    return response is not None and response.status_code == 201
 
-def get_messages(user1, user2):
-    url = f"{BASE_URL}/messages/{user1}/{user2}"
-    response = safe_request(requests.get, url)
-    if response and response.status_code == 200:
-        return response.json()
-    return []
+# ==========================================
+# DOMAIN: ESCROW & TRANSACTIONS
+# ==========================================
 
-def get_inbox(username):
-    url = f"{BASE_URL}/inbox/{username}"
-    response = safe_request(requests.get, url)
-    if response and response.status_code == 200:
-        return response.json()
-    return []
-
-def get_unread_count(username):
-    url = f"{BASE_URL}/inbox/unread/{username}"
-    response = safe_request(requests.get, url)
-    if response and response.status_code == 200:
-        return response.json().get('unread_count', 0)
-    return 0
-
-# ---------------------------------------
-# Escrow / Purchasing
-# ---------------------------------------
+# -------------------------------
+# POST: Escrow Triggers
+# -------------------------------
 def buy_product(product_id, buyer_email):
     url = f"{BASE_URL}/buy"
     payload = {"product_id": product_id, "buyer_email": buyer_email}
     response = safe_request(requests.post, url, json=payload)
     return response is not None and response.status_code == 200
 
-# ---------------------------------------
-# Wallet
-# ---------------------------------------
+def submit_review(reviewer_email, seller_name, rating, comment):
+    url = f"{BASE_URL}/review"
+    payload = {"reviewer_email": reviewer_email, "seller_name": seller_name, "rating": rating, "comment": comment}
+    response = safe_request(requests.post, url, json=payload)
+    return response is not None and response.status_code == 201
+
+
+# ==========================================
+# DOMAIN: WALLET
+# ==========================================
+
+# -------------------------------
+# GET & POST: Wallet Actions
+# -------------------------------
 def get_wallet_balance(email):
     url = f"{BASE_URL}/wallet/{email}"
     response = safe_request(requests.get, url)
-    if response and response.status_code == 200:
-        return response.json().get('balance', 0.0)
-    return 0.0
+    return response.json().get('balance', 0.0) if response and response.status_code == 200 else 0.0
 
 def process_wallet_transaction(email, amount, action):
     url = f"{BASE_URL}/wallet/transaction"
@@ -237,130 +277,38 @@ def process_wallet_transaction(email, amount, action):
 def get_wallet_history(email):
     url = f"{BASE_URL}/wallet/history/{email}"
     response = safe_request(requests.get, url)
-    if response and response.status_code == 200:
-        return response.json()
-    return []
+    return response.json() if response and response.status_code == 200 else []
 
-# ---------------------------------------
-# Public Profile & Reviews
-# ---------------------------------------
-def get_user_profile(fullname):
-    url = f"{BASE_URL}/profile/{fullname}"
-    response = safe_request(requests.get, url)
-    if response and response.status_code == 200:
-        return response.json()
-        
-    # FALLBACK DATA: Keeps the Menu and Dashboard perfectly synced when offline
-    print(f"⚠️ Using fallback profile for {fullname}")
-    return {
-        "full_name": fullname,
-        "rating": 4.2,
-        "products": []
-    }
 
-def update_profile(email, old_name, new_name, new_password, role, age, birthday, location):
-    url = f"{BASE_URL}/update_profile"
-    
-    # Pack all 8 variables into the JSON payload
-    payload = {
-        "email": email,
-        "old_name": old_name,
-        "full_name": new_name,
-        "password": new_password,
-        "role": role,
-        "age": age,
-        "birthday": birthday,
-        "location": location
-    }
-    
-    response = safe_request(requests.put, url, json=payload)
-    
-    if response is None:
-        return {"success": False, "error": "Could not connect to server."}
-        
-    if response.status_code == 200:
-        return {"success": True, "message": "Updated successfully!"}
-        
-    try:
-        error_msg = response.json().get("error", "Update failed.")
-    except:
-        error_msg = "Unknown error occurred."
-        
-    return {"success": False, "error": error_msg}
+# ==========================================
+# DOMAIN: INBOX & MESSAGING
+# ==========================================
 
-def request_password_reset(email):
-    url = f"{BASE_URL}/request_reset"
-    payload = {"email": email} # We only send the email to the server
-    response = safe_request(requests.post, url, json=payload)
-    
-    if response is None:
-        return {"success": False, "error": "Server connection failed"}
-
-    if response.status_code == 200:
-        # 1. Parse the JSON 'envelope' from the server
-        data = response.json()
-        # 2. Return the success status AND the OTP we found inside
-        return {
-            "success": True, 
-            "debug_otp": data.get("debug_otp") # <--- CATCH THE CODE
-        }
-
-    try:
-        error_msg = response.json().get("error", "Error requesting OTP")
-    except:
-        error_msg = f"Server Error ({response.status_code})"
-        
-    return {"success": False, "error": error_msg}
-
-def verify_reset_otp(email, otp):
-    url = f"{BASE_URL}/verify_reset"
-    payload = {"email": email, "otp": otp}
-    response = safe_request(requests.post, url, json=payload)
-    
-    if response is None:
-        return {"success": False, "error": "Server is offline"}
-
-    if response.status_code == 200:
-        return {"success": True}
-
-    # SAFE PARSING: Don't crash if the server sends HTML instead of JSON
-    try:
-        error_msg = response.json().get("error", "Invalid or expired code")
-    except Exception:
-        error_msg = f"Server Error ({response.status_code})"
-        
-    return {"success": False, "error": error_msg}
-
-def finalize_password_reset(email, new_password):
-    url = f"{BASE_URL}/reset_password"
-    payload = {"email": email, "password": new_password}
-    
-    # Safely send the post request
-    response = safe_request(requests.post, url, json=payload)
-    
-    # Catch server offline errors
-    if response is None:
-        return {"success": False, "error": "Server is offline"}
-        
-    # Check for the 200 OK from Flask
-    if response.status_code == 200:
-        return {"success": True}
-    
-    # Safely parse any error messages the server sends back
-    try:
-        error_msg = response.json().get("error", "Could not update password")
-    except Exception:
-        error_msg = f"Server Error ({response.status_code})"
-        
-    return {"success": False, "error": error_msg}
-
-def submit_review(reviewer_email, seller_name, rating, comment):
-    url = f"{BASE_URL}/review"
-    payload = {
-        "reviewer_email": reviewer_email, 
-        "seller_name": seller_name, 
-        "rating": rating, 
-        "comment": comment
-    }
+# -------------------------------
+# GET & POST: Chat Actions
+# -------------------------------
+def send_message(sender, receiver, text):
+    url = f"{BASE_URL}/messages"
+    payload = {"sender_name": sender, "receiver_name": receiver, "message_text": text}
     response = safe_request(requests.post, url, json=payload)
     return response is not None and response.status_code == 201
+
+def get_messages(user1, user2):
+    url = f"{BASE_URL}/messages/{user1}/{user2}"
+    response = safe_request(requests.get, url)
+    return response.json() if response and response.status_code == 200 else []
+
+def get_inbox(username):
+    url = f"{BASE_URL}/inbox/{username}"
+    response = safe_request(requests.get, url)
+    return response.json() if response and response.status_code == 200 else []
+
+def get_unread_count(username):
+    url = f"{BASE_URL}/inbox/unread/{username}"
+    response = safe_request(requests.get, url)
+    return response.json().get('unread_count', 0) if response and response.status_code == 200 else 0
+
+def get_my_hub(email):
+    url = f"{BASE_URL}/my_hub/{email}"
+    res = safe_request(requests.get, url)
+    return res.json() if res and res.status_code == 200 else {"products": [], "subscriptions": []}

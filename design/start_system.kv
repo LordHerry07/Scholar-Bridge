@@ -1,66 +1,72 @@
 #:import SlideTransition kivy.uix.screenmanager.SlideTransition
+
+# ==========================================
+# DOMAIN: AUTHENTICATION SCREENS
+# ==========================================
+
+# -------------------------------
+# SCREEN: Start Interface Base
+# -------------------------------
 <StartInterface>:
-	canvas.before:
-		Color:
-			rgba: 0.08, 0.09, 0.14, 1
-		Rectangle:
-			size: root.size
-			pos: root.pos
-	IconButton:
+    canvas.before:
+        Color:
+            rgba: 0.08, 0.09, 0.14, 1
+        Rectangle:
+            size: root.size
+            pos: root.pos
+            
+    IconButton:
         icon_source: 'assets/settings.png'
         size_hint: None, None
         size: dp(45), dp(45)
         pos_hint: {'top': 0.98, 'right': 0.96}
         on_release: root.open_server_settings()
-        
+            
     BoxLayout:
         size_hint: 0.9, 0.9
         pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         orientation: 'vertical'
-	BoxLayout:
-		size_hint: 0.9, 0.9
-		pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-		orientation: 'vertical'
-		BoxLayout:
-			size_hint_y: 0.4
-			orientation: 'vertical'
-			Image:
-				size_hint: 0.25, 0.3
-				pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-				source: 'assets/logo.png'
-			Label:
-				text: '[b]Scholar[color=#664FD9FF]Bridge[/b][/color]'
-				font_size: dp(25)
-				markup: True
-				size_hint_y: 0.1
-				text_size: self.size
-				halign: 'center'
-			Label:
-				text: 'The Secure Campus Marketplace'
-				font_color: 1,1,1,0.5
-				font_size: dp(15)
-				size_hint_y: 0.1
-				text_size: self.size
-				halign: 'center'
-				valign: 'top'
-		BoxLayout:
-			orientation: 'horizontal'
-			size_hint_y: 0.15
-			canvas.before:
-				Color:
-					rgba: 1,1,1,0.1
-				RoundedRectangle:
-					size: self.size[0] + dp(2), self.size[1] + dp(2)
-					pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
-					radius: [50]
-				Color:
-					rgba: 0.11, 0.12, 0.18, 1
-				RoundedRectangle:
-					size: self.size
-					pos: self.pos
-					radius: [50]
-					
-			ToggleButton:
+        
+        BoxLayout:
+            size_hint_y: 0.4
+            orientation: 'vertical'
+            Image:
+                size_hint: 0.25, 0.3
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                source: 'assets/logo.png'
+            Label:
+                text: '[b]Scholar[color=#664FD9FF]Bridge[/b][/color]'
+                font_size: dp(25)
+                markup: True
+                size_hint_y: 0.1
+                text_size: self.size
+                halign: 'center'
+            Label:
+                text: 'The Secure Campus Marketplace'
+                font_color: 1,1,1,0.5
+                font_size: dp(15)
+                size_hint_y: 0.1
+                text_size: self.size
+                halign: 'center'
+                valign: 'top'
+                
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.15
+            canvas.before:
+                Color:
+                    rgba: 1,1,1,0.1
+                RoundedRectangle:
+                    size: self.size[0] + dp(2), self.size[1] + dp(2)
+                    pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
+                    radius: [50]
+                Color:
+                    rgba: 0.11, 0.12, 0.18, 1
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [50]
+            ToggleButton:
                 id: login
                 text: "[b]Log-in[/b]"
                 markup: True
@@ -69,18 +75,15 @@
                 background_color: 0,0,0,0
                 disabled: True if self.state == 'down' else False
                 disabled_color: 1,1,1,1
-                
-                # --- THE FIX: Replaced on_state with on_release ---
                 on_release: root.switch_tab('login')
-                
                 canvas.before:
                     Color:
                         rgba: (0.40, 0.31, 0.85, 1) if self.state == 'down' else (0,0,0,0)
-					RoundedRectangle:
-						size: self.size[0] - dp(10), self.size[1] - dp(10)
-						pos: self.pos[0] + dp(5), self.pos[1] + dp(5)
-						radius: [50]
-			ToggleButton:
+                    RoundedRectangle:
+                        size: self.size[0] - dp(10), self.size[1] - dp(10)
+                        pos: self.pos[0] + dp(5), self.pos[1] + dp(5)
+                        radius: [50]
+            ToggleButton:
                 id: signup
                 text: "[b]Sign-up[/b]"
                 markup: True
@@ -88,143 +91,136 @@
                 background_color: 0,0,0,0
                 disabled: True if self.state == 'down' else False
                 disabled_color: 1,1,1,1
-                
-                # --- THE FIX: Added on_release trigger ---
                 on_release: root.switch_tab('signup')
-                
                 canvas.before:
                     Color:
                         rgba: (0.40, 0.31, 0.85, 1) if self.state == 'down' else (0,0,0,0)
-					RoundedRectangle:
-						size: self.size[0] - dp(10), self.size[1] - dp(10)
-						pos: self.pos[0] + dp(5), self.pos[1] + dp(5)
-						radius: [50]
-		ScreenManager:
-			id: screenmanager
-			Screen:
-				name: "login"
-				Login:
-			Screen:
-				name: "signup"
-				Signup:
-		BoxLayout:
-			orientation: 'vertical'
-			size_hint_y: 0.2
-			BoxLayout:
-				orientation: 'horizontal'
-				BoxLayout:
-					orientation: 'horizontal'
-					Image:
-						size_hint_x: 0.2
-						source: 'assets/shield.png'
-					Label:
-						text: '[b]ESCROW PROTECTED[/b]'
-						font_size: dp(10)
-						text_size: self.size
-						markup: True
-						halign: 'left'
-						valign: 'center'
-				BoxLayout:
-					orientation: 'horizontal'
-					Image:
-						size_hint_x: 0.2
-						source: 'assets/check_circle.png'
-					Label:
-						text: '[b]VERIFIED UNI ONLY[/b]'
-						text_size: self.size
-						font_size: dp(10)
-						markup: True
-						halign: 'left'
-						valign: 'center'
-			Label:
-				text: '©2026 ScholarBridge.inc'
-				font_size: dp(8)
-#--------------------------------------------------------#
+                    RoundedRectangle:
+                        size: self.size[0] - dp(10), self.size[1] - dp(10)
+                        pos: self.pos[0] + dp(5), self.pos[1] + dp(5)
+                        radius: [50]
+                        
+        ScreenManager:
+            id: screenmanager
+            Screen:
+                name: "login"
+                Login:
+            Screen:
+                name: "signup"
+                Signup:
+                
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: 0.2
+            BoxLayout:
+                orientation: 'horizontal'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Image:
+                        size_hint_x: 0.2
+                        source: 'assets/shield.png'
+                    Label:
+                        text: '[b]ESCROW PROTECTED[/b]'
+                        font_size: dp(10)
+                        text_size: self.size
+                        markup: True
+                        halign: 'left'
+                        valign: 'center'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Image:
+                        size_hint_x: 0.2
+                        source: 'assets/check_circle.png'
+                    Label:
+                        text: '[b]VERIFIED UNI ONLY[/b]'
+                        text_size: self.size
+                        font_size: dp(10)
+                        markup: True
+                        halign: 'left'
+                        valign: 'center'
+            Label:
+                text: ' 2026 ScholarBridge.inc'
+                font_size: dp(8)
 
-
-#--------------------------------------------------------#
+# -------------------------------
+# COMPONENT: Login Form
+# -------------------------------
 <Login>:
-	BoxLayout:
-		size: root.size
-		pos: root.pos
-		orientation: 'vertical'
-#--------------------------------------------------------#
-#University Email - Login
-#--------------------------------------------------------#
-		Label:
-			size_hint_y: 0.2
-		BoxLayout:
-			size_hint_y: 0.5
-			orientation: 'vertical'
-			Label:
-				size_hint_y: 0.2
-				text: '[b]UNIVERSITY EMAIL[/b]'
-				font_size: dp(14)
-				text_size: self.size	
-				markup: True
-				halign: 'left'
-				valign: 'center'
-			FloatLayout:
-				size_hint_y: 0.3
-				GridLayout:
-					rows: 1
-					cols: 3
-					size_hint_x: 0.98
-					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-					canvas.before:
-						Color:
-							rgba: 1,1,1,0.1
-						RoundedRectangle:
-							size: self.size[0] + dp(2), self.size[1] + dp(2)
-							pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
-							radius: [10]
-						Color:
-							rgba: 0.11, 0.12, 0.18, 1
-						RoundedRectangle:
-							size: self.size
-							pos: self.pos
-							radius: [10]
-					Label:
-						size_hint_x: 0.18
-					BoxLayout:
-						orientation: 'vertical'
-						Label:
-							size_hint_y: 0.25
-						TextInput:
-							id: login_mail
-							hint_text: 'student@university.edu.ph'
-							hint_text_color: 1,1,1,0.5
-							foreground_color: 1,1,1,1
-							multiline: False
-							password: False
-							background_color: (0,0,0,0)
-							cursor_color: 1,1,1,1
-					Label:
-						size_hint_x: 0.18
-				Image:
-					source: 'assets/email_white.png'
-					size_hint: 0.5, 0.5
-					pos_hint: {'x': -0.17, 'center_y': 0.5}
-					fit_mode: 'scale-down'
-#--------------------------------------------------------#
-#Password - Login
-#--------------------------------------------------------#
-		Label:
-			size_hint_y: 0.1
-		BoxLayout:
-			size_hint_y: 0.5
-			orientation: 'vertical'
-			BoxLayout:
-				orientation: 'horizontal'
-				size_hint_y: 0.2
-				Label:
-					text: '[b]PASSWORD[/b]'
-					font_size: dp(14)
-					text_size: self.size	
-					markup: True
-					halign: 'left'
-					valign: 'center'
-				Button:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        Label:
+            size_hint_y: 0.2
+        BoxLayout:
+            size_hint_y: 0.5
+            orientation: 'vertical'
+            Label:
+                size_hint_y: 0.2
+                text: '[b]UNIVERSITY EMAIL[/b]'
+                font_size: dp(14)
+                text_size: self.size
+                markup: True
+                halign: 'left'
+                valign: 'center'
+            FloatLayout:
+                size_hint_y: 0.3
+                GridLayout:
+                    rows: 1
+                    cols: 3
+                    size_hint_x: 0.98
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    canvas.before:
+                        Color:
+                            rgba: 1,1,1,0.1
+                        RoundedRectangle:
+                            size: self.size[0] + dp(2), self.size[1] + dp(2)
+                            pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
+                            radius: [10]
+                        Color:
+                            rgba: 0.11, 0.12, 0.18, 1
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+                            radius: [10]
+                    Label:
+                        size_hint_x: 0.18
+                    BoxLayout:
+                        orientation: 'vertical'
+                        Label:
+                            size_hint_y: 0.25
+                        TextInput:
+                            id: login_mail
+                            hint_text: 'student@university.edu.ph'
+                            hint_text_color: 1,1,1,0.5
+                            foreground_color: 1,1,1,1
+                            multiline: False
+                            password: False
+                            background_color: (0,0,0,0)
+                            cursor_color: 1,1,1,1
+                    Label:
+                        size_hint_x: 0.18
+                Image:
+                    source: 'assets/email_white.png'
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'x': -0.17, 'center_y': 0.5}
+                    fit_mode: 'scale-down'
+        Label:
+            size_hint_y: 0.1
+        BoxLayout:
+            size_hint_y: 0.5
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: 0.2
+                Label:
+                    text: '[b]PASSWORD[/b]'
+                    font_size: dp(14)
+                    text_size: self.size
+                    markup: True
+                    halign: 'left'
+                    valign: 'center'
+                Button:
                     text: '[b][color=#6251B4]Forgot?[/b][/color]'
                     font_size: dp(14)
                     text_size: self.size
@@ -233,369 +229,347 @@
                     halign: 'right'
                     valign: 'center'
                     on_release: root.open_reset_modal(login_mail.text)
-			FloatLayout:
-				size_hint_y: 0.3
-				GridLayout:
-					rows: 1
-					cols: 3
-					size_hint_x: 0.98
-					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-					canvas.before:
-						Color:
-							rgba: 1,1,1,0.1
-						RoundedRectangle:
-							size: self.size[0] + dp(2), self.size[1] + dp(2)
-							pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
-							radius: [10]
-						Color:
-							rgba: 0.11, 0.12, 0.18, 1
-						RoundedRectangle:
-							size: self.size
-							pos: self.pos
-							radius: [10]
-					Label:
-						size_hint_x: 0.18
-					BoxLayout:
-						orientation: 'vertical'
-						Label:
-							size_hint_y: 0.25
-						TextInput:
-							id: login_pass
-							hint_text: 'Password'
-							hint_text_color: 1,1,1,0.5
-							foreground_color: 1,1,1,1
-							multiline: False
-							password: True if visibility_pass.state == 'normal' else False
-							background_color: (0,0,0,0)
-							cursor_color: 1,1,1,1
-					Label:
-						size_hint_x: 0.18
-					
-				Image:
-					source: 'assets/lock_white.png'
-					size_hint: 0.5, 0.5
-					pos_hint: {'x': -0.17, 'center_y': 0.5}
-					fit_mode: 'scale-down'
-				Image:
-					source: 'assets/visibility_off.png' if visibility_pass.state == 'normal' else 'assets/visibility.png'
-					size_hint: 0.5, 0.5
-					pos_hint: {'x': 0.666, 'center_y': 0.5}
-					fit_mode: 'scale-down'
-					ToggleButton:
-						id: visibility_pass
-						size: self.parent.size[0]//5, self.parent.size[1] * 2
-						pos: self.parent.pos[0] + self.parent.pos[0]//3, self.parent.pos[1] //1.05
-						background_color: 0,0,0,0
-#--------------------------------------------------------#
-#Submit - Login
-#--------------------------------------------------------#
-		Label:
-			size_hint_y: 0.1
-		Button:
-			size_hint_y: 0.3
-			background_color: 0,0,0,0
-			text: '[b]Submit[/b]'
-			markup: True
-			canvas.before:
-				Color:
-					rgba: (0.40, 0.31, 0.85, 1) if self.state == 'normal' else (0.40, 0.31, 0.85, 0.5)
-				RoundedRectangle:
-					size: self.size
-					pos: self.pos
-					radius: [20]
-			on_press:
-				if login_mail and login_pass: root.login_user(login_mail.text, login_pass.text)
-				login_mail.text = ''
-				login_pass.text = ''
-		Label:
-	LoadingOverlay:
+            FloatLayout:
+                size_hint_y: 0.3
+                GridLayout:
+                    rows: 1
+                    cols: 3
+                    size_hint_x: 0.98
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    canvas.before:
+                        Color:
+                            rgba: 1,1,1,0.1
+                        RoundedRectangle:
+                            size: self.size[0] + dp(2), self.size[1] + dp(2)
+                            pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
+                            radius: [10]
+                        Color:
+                            rgba: 0.11, 0.12, 0.18, 1
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+                            radius: [10]
+                    Label:
+                        size_hint_x: 0.18
+                    BoxLayout:
+                        orientation: 'vertical'
+                        Label:
+                            size_hint_y: 0.25
+                        TextInput:
+                            id: login_pass
+                            hint_text: 'Password'
+                            hint_text_color: 1,1,1,0.5
+                            foreground_color: 1,1,1,1
+                            multiline: False
+                            password: True if visibility_pass.state == 'normal' else False
+                            background_color: (0,0,0,0)
+                            cursor_color: 1,1,1,1
+                    Label:
+                        size_hint_x: 0.18
+                Image:
+                    source: 'assets/lock_white.png'
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'x': -0.17, 'center_y': 0.5}
+                    fit_mode: 'scale-down'
+                Image:
+                    source: 'assets/visibility_off.png' if visibility_pass.state == 'normal' else 'assets/visibility.png'
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'x': 0.666, 'center_y': 0.5}
+                    fit_mode: 'scale-down'
+                ToggleButton:
+                    id: visibility_pass
+                    size_hint: 0.15, 1 
+                    pos_hint: {'right': 0.98, 'center_y': 0.5} 
+                    background_color: 0, 0, 0, 0
+        Label:
+            size_hint_y: 0.1
+        Button:
+            size_hint_y: 0.3
+            background_color: 0,0,0,0
+            text: '[b]Submit[/b]'
+            markup: True
+            canvas.before:
+                Color:
+                    rgba: (0.40, 0.31, 0.85, 1) if self.state == 'normal' else (0.40, 0.31, 0.85, 0.5)
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [20]
+            on_press:
+                if login_mail and login_pass: root.login_user(login_mail.text, login_pass.text)
+                login_mail.text = ''
+                login_pass.text = ''
+        Label:
+    LoadingOverlay:
         id: loading_overlay
         size: root.size
         pos: root.pos
 
-#--------------------------------------------------------#
-
-
-#--------------------------------------------------------#
+# -------------------------------
+# COMPONENT: Signup Form
+# -------------------------------
 <Signup>:
-	BoxLayout:
-		size: root.size
-		pos: root.pos
-		orientation: 'vertical'
-#--------------------------------------------------------#
-#Full Name - Signup
-#--------------------------------------------------------#
-		Label:
-			size_hint_y: 0.2
-		BoxLayout:
-			size_hint_y: 0.5
-			orientation: 'vertical'
-			Label:
-				size_hint_y: 0.2
-				text: '[b]FULLNAME[/b]'
-				font_size: dp(14)
-				text_size: self.size	
-				markup: True
-				halign: 'left'
-				valign: 'center'
-			FloatLayout:
-				size_hint_y: 0.3
-				GridLayout:
-					rows: 1
-					cols: 3
-					size_hint_x: 0.98
-					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-					canvas.before:
-						Color:
-							rgba: 1,1,1,0.1
-						RoundedRectangle:
-							size: self.size[0] + dp(2), self.size[1] + dp(2)
-							pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
-							radius: [10]
-						Color:
-							rgba: 0.11, 0.12, 0.18, 1
-						RoundedRectangle:
-							size: self.size
-							pos: self.pos
-							radius: [10]
-					Label:
-						size_hint_x: 0.18
-					BoxLayout:
-						orientation: 'vertical'
-						Label:
-							size_hint_y: 0.25
-						TextInput:
-							id: sign_name
-							hint_text: 'Juan Dela Cruz'
-							hint_text_color: 1,1,1,0.5
-							foreground_color: 1,1,1,1
-							multiline: False
-							password: False
-							background_color: (0,0,0,0)
-							cursor_color: 1,1,1,1
-					Label:
-						size_hint_x: 0.18
-				Image:
-					source: 'assets/person_normal.png'
-					size_hint: 0.5, 0.5
-					pos_hint: {'x': -0.17, 'center_y': 0.5}
-					fit_mode: 'scale-down'
-#--------------------------------------------------------#
-#University Email - Signup
-#--------------------------------------------------------#
-		Label:
-			size_hint_y: 0.1
-		BoxLayout:
-			size_hint_y: 0.5
-			orientation: 'vertical'
-			Label:
-				size_hint_y: 0.2
-				text: '[b]UNIVERSITY EMAIL[/b]'
-				font_size: dp(14)
-				text_size: self.size	
-				markup: True
-				halign: 'left'
-				valign: 'center'
-			FloatLayout:
-				size_hint_y: 0.3
-				GridLayout:
-					rows: 1
-					cols: 3
-					size_hint_x: 0.98
-					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-					canvas.before:
-						Color:
-							rgba: 1,1,1,0.1
-						RoundedRectangle:
-							size: self.size[0] + dp(2), self.size[1] + dp(2)
-							pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
-							radius: [10]
-						Color:
-							rgba: 0.11, 0.12, 0.18, 1
-						RoundedRectangle:
-							size: self.size
-							pos: self.pos
-							radius: [10]
-					Label:
-						size_hint_x: 0.18
-					BoxLayout:
-						orientation: 'vertical'
-						Label:
-							size_hint_y: 0.25
-						TextInput:
-							id: sign_mail
-							hint_text: 'student@university.edu.ph'
-							hint_text_color: 1,1,1,0.5
-							foreground_color: 1,1,1,1
-							multiline: False
-							password: False
-							background_color: (0,0,0,0)
-							cursor_color: 1,1,1,1
-					Label:
-						size_hint_x: 0.18
-				Image:
-					source: 'assets/email_white.png'
-					size_hint: 0.5, 0.5
-					pos_hint: {'x': -0.17, 'center_y': 0.5}
-					fit_mode: 'scale-down'
-#--------------------------------------------------------#
-#Password - Signup
-#--------------------------------------------------------#	
-		Label:
-			size_hint_y: 0.1
-		BoxLayout:
-			size_hint_y: 0.5
-			orientation: 'vertical'
-			Label:
-				size_hint_y: 0.2
-				text: '[b]PASSWORD[/b]'
-				font_size: dp(14)
-				text_size: self.size	
-				markup: True
-				halign: 'left'
-				valign: 'center'
-			FloatLayout:
-				size_hint_y: 0.3
-				GridLayout:
-					rows: 1
-					cols: 3
-					size_hint_x: 0.98
-					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-					canvas.before:
-						Color:
-							rgba: 1,1,1,0.1
-						RoundedRectangle:
-							size: self.size[0] + dp(2), self.size[1] + dp(2)
-							pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
-							radius: [10]
-						Color:
-							rgba: 0.11, 0.12, 0.18, 1
-						RoundedRectangle:
-							size: self.size
-							pos: self.pos
-							radius: [10]
-					Label:
-						size_hint_x: 0.18
-					BoxLayout:
-						orientation: 'vertical'
-						Label:
-							size_hint_y: 0.25
-						TextInput:
-							id: sign_pass
-							hint_text: 'Password'
-							hint_text_color: 1,1,1,0.5
-							foreground_color: 1,1,1,1
-							multiline: False
-							password: True if visibility_pass.state == 'normal' else False
-							background_color: (0,0,0,0)
-							cursor_color: 1,1,1,1
-					Label:
-						size_hint_x: 0.18
-				Image:
-					source: 'assets/lock_white.png'
-					size_hint: 0.5, 0.5
-					pos_hint: {'x': -0.17, 'center_y': 0.5}
-					fit_mode: 'scale-down'
-	
-				Image:
-					source: 'assets/visibility_off.png' if visibility_pass.state == 'normal' else 'assets/visibility.png'
-					size_hint: 0.5, 0.5
-					pos_hint: {'x': 0.666, 'center_y': 0.5}
-					fit_mode: 'scale-down'
-					ToggleButton:
-						id: visibility_pass
-						size: self.parent.size[0]//5, self.parent.size[1] * 2
-						pos: self.parent.pos[0] + self.parent.pos[0]//3, self.parent.pos[1] //1.05
-						background_color: 0,0,0,0
-					
-#--------------------------------------------------------#
-#Confirm Pass - Signup
-#--------------------------------------------------------#
-		Label:
-			size_hint_y: 0.1
-		BoxLayout:
-			size_hint_y: 0.5
-			orientation: 'vertical'
-			Label:
-				size_hint_y: 0.2
-				text: '[b]CONFIRM PASSWORD[/b]'
-				font_size: dp(14)
-				text_size: self.size	
-				markup: True
-				halign: 'left'
-				valign: 'center'
-			FloatLayout:
-				size_hint_y: 0.3
-				GridLayout:
-					rows: 1
-					cols: 3
-					size_hint_x: 0.98
-					pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-					canvas.before:
-						Color:
-							rgba: 1,1,1,0.1
-						RoundedRectangle:
-							size: self.size[0] + dp(2), self.size[1] + dp(2)
-							pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
-							radius: [10]
-						Color:
-							rgba: 0.11, 0.12, 0.18, 1
-						RoundedRectangle:
-							size: self.size
-							pos: self.pos
-							radius: [10]
-					Label:
-						size_hint_x: 0.18
-					BoxLayout:
-						orientation: 'vertical'
-						Label:
-							size_hint_y: 0.25
-						TextInput:
-							id: sign_confirm_pass
-							hint_text: 'Confirm Password'
-							hint_text_color: 1,1,1,0.5
-							foreground_color: 1,1,1,1
-							multiline: False
-							password: True if visibility_confirm_pass.state == 'normal' else False
-							background_color: (0,0,0,0)
-							cursor_color: 1,1,1,1
-					Label:
-						size_hint_x: 0.18
-				Image:
-					source: 'assets/lock_white.png'
-					size_hint: 0.5, 0.5
-					pos_hint: {'x': -0.17, 'center_y': 0.5}
-					fit_mode: 'scale-down'
-				Image:
-					source: 'assets/visibility_off.png' if visibility_confirm_pass.state == 'normal' else 'assets/visibility.png'
-					size_hint: 0.5, 0.5
-					pos_hint: {'x': 0.666, 'center_y': 0.5}
-					fit_mode: 'scale-down'
-					ToggleButton:
-						id: visibility_confirm_pass
-						size: self.parent.size[0]//5, self.parent.size[1] * 2
-						pos: self.parent.pos[0] + self.parent.pos[0]//3, self.parent.pos[1] //1.05
-						background_color: 0,0,0,0
-#--------------------------------------------------------#
-#Submit - Signup
-#--------------------------------------------------------#
-		Label:
-			size_hint_y: 0.1
-		Button:
-			size_hint_y: 0.3
-			background_color: 0,0,0,0
-			text: '[b]Submit[/b]'
-			markup: True
-			on_press:
-				if sign_name.text and sign_mail.text and sign_pass.text and sign_confirm_pass.text: root.sign_user(sign_name.text, sign_mail.text, sign_pass.text, sign_confirm_pass.text)
-			canvas.before:
-				Color:
-					rgba: (0.40, 0.31, 0.85, 1) if self.state == 'normal' else (0.40, 0.31, 0.85, 0.5)
-				RoundedRectangle:
-					size: self.size
-					pos: self.pos
-					radius: [20]
-	LoadingOverlay:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        Label:
+            size_hint_y: 0.2
+        BoxLayout:
+            size_hint_y: 0.5
+            orientation: 'vertical'
+            Label:
+                size_hint_y: 0.2
+                text: '[b]FULLNAME[/b]'
+                font_size: dp(14)
+                text_size: self.size
+                markup: True
+                halign: 'left'
+                valign: 'center'
+            FloatLayout:
+                size_hint_y: 0.3
+                GridLayout:
+                    rows: 1
+                    cols: 3
+                    size_hint_x: 0.98
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    canvas.before:
+                        Color:
+                            rgba: 1,1,1,0.1
+                        RoundedRectangle:
+                            size: self.size[0] + dp(2), self.size[1] + dp(2)
+                            pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
+                            radius: [10]
+                        Color:
+                            rgba: 0.11, 0.12, 0.18, 1
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+                            radius: [10]
+                    Label:
+                        size_hint_x: 0.18
+                    BoxLayout:
+                        orientation: 'vertical'
+                        Label:
+                            size_hint_y: 0.25
+                        TextInput:
+                            id: sign_name
+                            hint_text: 'Juan Dela Cruz'
+                            hint_text_color: 1,1,1,0.5
+                            foreground_color: 1,1,1,1
+                            multiline: False
+                            password: False
+                            background_color: (0,0,0,0)
+                            cursor_color: 1,1,1,1
+                    Label:
+                        size_hint_x: 0.18
+                Image:
+                    source: 'assets/person_normal.png'
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'x': -0.17, 'center_y': 0.5}
+                    fit_mode: 'scale-down'
+        Label:
+            size_hint_y: 0.1
+        BoxLayout:
+            size_hint_y: 0.5
+            orientation: 'vertical'
+            Label:
+                size_hint_y: 0.2
+                text: '[b]UNIVERSITY EMAIL[/b]'
+                font_size: dp(14)
+                text_size: self.size
+                markup: True
+                halign: 'left'
+                valign: 'center'
+            FloatLayout:
+                size_hint_y: 0.3
+                GridLayout:
+                    rows: 1
+                    cols: 3
+                    size_hint_x: 0.98
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    canvas.before:
+                        Color:
+                            rgba: 1,1,1,0.1
+                        RoundedRectangle:
+                            size: self.size[0] + dp(2), self.size[1] + dp(2)
+                            pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
+                            radius: [10]
+                        Color:
+                            rgba: 0.11, 0.12, 0.18, 1
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+                            radius: [10]
+                    Label:
+                        size_hint_x: 0.18
+                    BoxLayout:
+                        orientation: 'vertical'
+                        Label:
+                            size_hint_y: 0.25
+                        TextInput:
+                            id: sign_mail
+                            hint_text: 'student@university.edu.ph'
+                            hint_text_color: 1,1,1,0.5
+                            foreground_color: 1,1,1,1
+                            multiline: False
+                            password: False
+                            background_color: (0,0,0,0)
+                            cursor_color: 1,1,1,1
+                    Label:
+                        size_hint_x: 0.18
+                Image:
+                    source: 'assets/email_white.png'
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'x': -0.17, 'center_y': 0.5}
+                    fit_mode: 'scale-down'
+        Label:
+            size_hint_y: 0.1
+        BoxLayout:
+            size_hint_y: 0.5
+            orientation: 'vertical'
+            Label:
+                size_hint_y: 0.2
+                text: '[b]PASSWORD[/b]'
+                font_size: dp(14)
+                text_size: self.size
+                markup: True
+                halign: 'left'
+                valign: 'center'
+            FloatLayout:
+                size_hint_y: 0.3
+                GridLayout:
+                    rows: 1
+                    cols: 3
+                    size_hint_x: 0.98
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    canvas.before:
+                        Color:
+                            rgba: 1,1,1,0.1
+                        RoundedRectangle:
+                            size: self.size[0] + dp(2), self.size[1] + dp(2)
+                            pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
+                            radius: [10]
+                        Color:
+                            rgba: 0.11, 0.12, 0.18, 1
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+                            radius: [10]
+                    Label:
+                        size_hint_x: 0.18
+                    BoxLayout:
+                        orientation: 'vertical'
+                        Label:
+                            size_hint_y: 0.25
+                        TextInput:
+                            id: sign_pass
+                            hint_text: 'Password'
+                            hint_text_color: 1,1,1,0.5
+                            foreground_color: 1,1,1,1
+                            multiline: False
+                            password: True if visibility_pass.state == 'normal' else False
+                            background_color: (0,0,0,0)
+                            cursor_color: 1,1,1,1
+                    Label:
+                        size_hint_x: 0.18
+                Image:
+                    source: 'assets/lock_white.png'
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'x': -0.17, 'center_y': 0.5}
+                    fit_mode: 'scale-down'
+                Image:
+                    source: 'assets/visibility_off.png' if visibility_pass.state == 'normal' else 'assets/visibility.png'
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'x': 0.666, 'center_y': 0.5}
+                    fit_mode: 'scale-down'
+                ToggleButton:
+                    id: visibility_pass
+                    size_hint: 0.15, 1 
+                    pos_hint: {'right': 0.98, 'center_y': 0.5} 
+                    background_color: 0, 0, 0, 0
+        Label:
+            size_hint_y: 0.1
+        BoxLayout:
+            size_hint_y: 0.5
+            orientation: 'vertical'
+            Label:
+                size_hint_y: 0.2
+                text: '[b]CONFIRM PASSWORD[/b]'
+                font_size: dp(14)
+                text_size: self.size
+                markup: True
+                halign: 'left'
+                valign: 'center'
+            FloatLayout:
+                size_hint_y: 0.3
+                GridLayout:
+                    rows: 1
+                    cols: 3
+                    size_hint_x: 0.98
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    canvas.before:
+                        Color:
+                            rgba: 1,1,1,0.1
+                        RoundedRectangle:
+                            size: self.size[0] + dp(2), self.size[1] + dp(2)
+                            pos: self.pos[0] - dp(1), self.pos[1] - dp(1)
+                            radius: [10]
+                        Color:
+                            rgba: 0.11, 0.12, 0.18, 1
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+                            radius: [10]
+                    Label:
+                        size_hint_x: 0.18
+                    BoxLayout:
+                        orientation: 'vertical'
+                        Label:
+                            size_hint_y: 0.25
+                        TextInput:
+                            id: sign_confirm_pass
+                            hint_text: 'Confirm Password'
+                            hint_text_color: 1,1,1,0.5
+                            foreground_color: 1,1,1,1
+                            multiline: False
+                            password: True if visibility_confirm_pass.state == 'normal' else False
+                            background_color: (0,0,0,0)
+                            cursor_color: 1,1,1,1
+                    Label:
+                        size_hint_x: 0.18
+                Image:
+                    source: 'assets/lock_white.png'
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'x': -0.17, 'center_y': 0.5}
+                    fit_mode: 'scale-down'
+                Image:
+                    source: 'assets/visibility_off.png' if visibility_confirm_pass.state == 'normal' else 'assets/visibility.png'
+                    size_hint: 0.5, 0.5
+                    pos_hint: {'x': 0.666, 'center_y': 0.5}
+                    fit_mode: 'scale-down'
+                ToggleButton:
+                    id: visibility_confirm_pass
+                    size_hint: 0.15, 1 
+                    pos_hint: {'right': 0.98, 'center_y': 0.5} 
+                    background_color: 0, 0, 0, 0
+        Label:
+            size_hint_y: 0.1
+        Button:
+            size_hint_y: 0.3
+            background_color: 0,0,0,0
+            text: '[b]Submit[/b]'
+            markup: True
+            on_press:
+                if sign_name.text and sign_mail.text and sign_pass.text and sign_confirm_pass.text: root.sign_user(sign_name.text, sign_mail.text, sign_pass.text, sign_confirm_pass.text)
+            canvas.before:
+                Color:
+                    rgba: (0.40, 0.31, 0.85, 1) if self.state == 'normal' else (0.40, 0.31, 0.85, 0.5)
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [20]
+    LoadingOverlay:
         id: loading_overlay
         size: root.size
         pos: root.pos

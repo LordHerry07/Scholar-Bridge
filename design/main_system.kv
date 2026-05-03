@@ -1,14 +1,24 @@
 #:import main_interface core.main_interface
-#:import os os
-<Interface>:
-	id: interface
-	StartInterface:
-		name: "start"
-		id: start
-	MainInterface:
-		name: "main"
-		id: main
 
+# ==========================================
+# DOMAIN: CORE NAVIGATION & LAYOUT
+# ==========================================
+
+# -------------------------------
+# SCREEN: Root Manager
+# -------------------------------
+<Interface>:
+    id: interface
+    StartInterface:
+        name: "start"
+        id: start
+    MainInterface:
+        name: "main"
+        id: main
+
+# -------------------------------
+# SCREEN: Main Wrapper & Footer
+# -------------------------------
 <MainInterface>:
     canvas.before:
         Color:
@@ -20,20 +30,15 @@
     BoxLayout:
         orientation: 'vertical'
         
-        # -------------------------------------------------------------
         # 1. THE GLOBAL HEADER
-        # -------------------------------------------------------------
         BoxLayout:
             size_hint_y: 0.1
             orientation: 'vertical'
             spacing: dp(10)
-            
             BoxLayout:
                 size_hint: 0.9, 0.1
                 pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                 orientation: 'horizontal'
-                
-                # Left Side: Vertically Stacked Labels
                 BoxLayout:
                     orientation: 'vertical'
                     Label:
@@ -51,39 +56,25 @@
                         text_size: self.size
                         valign: 'top'
                         halign: 'left'
-                        
-                # Right Side: Global Back Button
                 NavBackButton:
                     id: back_btn
-                    opacity: 0    
+                    opacity: 0
                     disabled: True 
                     pos_hint: {'center_y': 0.5}
                     on_release:
-                        # 1. Reset Screen to Menu
                         screenmanager.get_screen('info').children[0].ids.screenmanager.current = 'menu'
-                        
-                        # 2. Reset Header Text
                         label1.text = '[b]MENU[/b]'
                         label2.text = 'manage your account'
-                        
-                        # 3. Hide Back Button
                         self.opacity = 0
                         self.disabled = True
                         root.toggle_footer(True)
-                        
-                        # 4. RESTORE FOOTER VISIBILITY
                         footer_nav.opacity = 1
                         footer_nav.size_hint_y = 0.1
                         footer_nav.disabled = False
-                        
-                        # 5. FORCE TOGGLE BUTTON RESET 
-                        # Ensures the 'Status' icon is correctly highlighted when returning
                         info.state = 'down'
                         app.root.get_screen('main').toggle_footer(True)
                         
-        # -------------------------------------------------------------
         # 2. THE MAIN SCREEN MANAGER
-        # -------------------------------------------------------------
         ScreenManager:
             id: screenmanager
             size_hint: 0.9, 0.95
@@ -104,35 +95,30 @@
                 name: 'info'
                 Status:
 
-        # -------------------------------------------------------------
         # 3. THE GLOBAL FOOTER NAVIGATION
-        # -------------------------------------------------------------
         BoxLayout:
             id: footer_nav 
             size_hint: 0.98, 0.1
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             orientation: 'horizontal'
-            
             canvas.before:
                 Color:
                     rgba: 1,1,1,0.1
                 Rectangle:
                     size: self.size[0] + dp(50), self.size[1] + dp(2)
-                    pos: self.pos[0] - dp(25), self.pos[1] - dp(1)   
+                    pos: self.pos[0] - dp(25), self.pos[1] - dp(1)
                 Color:
                     rgba: 0.11, 0.12, 0.18, 1
                 Rectangle:
                     size: self.size[0] + dp(48), self.size[1] 
                     pos: self.pos[0] - dp(24), self.pos[1]
-
-            # --- Nav Item 1: Dashboard ---
+                    
             BoxLayout:
                 orientation: 'vertical'
                 pos_hint: {'center_x': 0.5, 'center_y': 0.35}
                 Image:
                     size_hint: 0.5, 0.5
                     pos_hint: {'center_x': 0.5, 'center_y': 0}
-                    # MAGIC BINDING: Auto-switches icon based on button state!
                     source: 'assets/dashboard_down.png' if dashboard.state == 'down' else 'assets/dashboard_normal.png'
                     ToggleButton:
                         id: dashboard
@@ -142,9 +128,8 @@
                         background_color: 0,0,0,0
                         disabled: True if self.state == 'down' else False
                         state: 'down'
-                        # THE FIX: Only fire when the user physically clicks!
                         on_release: app.root.get_screen('main').switch_tab('dashboard')
-                Label:   
+                Label:
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                     size_hint_y: 0.5
                     text: "[b]DASHBOARD[/b]"
@@ -154,8 +139,7 @@
                     markup: True
                     halign: 'center'
                     valign: 'top'
-
-            # --- Nav Item 2: Product ---
+                    
             BoxLayout:
                 orientation: 'vertical'
                 pos_hint: {'center_x': 0.5, 'center_y': 0.35}
@@ -181,8 +165,7 @@
                     markup: True
                     halign: 'center'
                     valign: 'top'
-
-            # --- Nav Item 3: Sell ---
+                    
             BoxLayout:
                 orientation: 'vertical'
                 pos_hint: {'center_x': 0.5, 'center_y': 0.6}
@@ -214,8 +197,7 @@
                     markup: True
                     halign: 'center'
                     valign: 'bottom'
-
-            # --- Nav Item 4: Service ---
+                    
             BoxLayout:
                 orientation: 'vertical'
                 pos_hint: {'center_x': 0.5, 'center_y': 0.35}
@@ -241,8 +223,7 @@
                     markup: True
                     halign: 'center'
                     valign: 'top'
-
-            # --- Nav Item 5: Status (Account) ---
+                    
             BoxLayout:
                 orientation: 'vertical'
                 pos_hint: {'center_x': 0.5, 'center_y': 0.35}
@@ -288,9 +269,14 @@
                     halign: 'center'
                     valign: 'top'
 
-#------------------------------------------------------------#
-#DASHBOARD                   
-#-----------------------------------------------------------#
+
+# ==========================================
+# DOMAIN: PRIMARY SCREENS (TABS)
+# ==========================================
+
+# -------------------------------
+# TAB: Dashboard
+# -------------------------------
 <Dashboard>:
     ScrollView:
         size: root.size
@@ -301,14 +287,10 @@
             orientation: 'vertical'
             size_hint_y: 1.5
             spacing: dp(10)
-#-------------------------------------------------------------#
-# 0
-#-------------------------------------------------------------#
             GridLayout:
                 rows: 2
                 cols: 2
                 spacing: dp(10)
-#1------------------------------------------------------------#
                 BoxLayout:
                     orientation: 'vertical'
                     spacing: dp(5)
@@ -328,7 +310,6 @@
                         Image:
                             source: 'assets/peso.png'
                             size_hint_x: 0.3
-                          
                             canvas.before:
                                 Color:
                                     rgba: 0.15, 0.17, 0.23, 0.5
@@ -356,7 +337,7 @@
                             size_hint_x: 0.1
                     Label:
                         id: earnings_label
-                        text: '[b]₱0.00[/b]'
+                        text: '[b] 0.00[/b]'
                         font_size: dp(16)
                         text_size: self.size
                         markup: True
@@ -367,7 +348,6 @@
                         text_size: self.size
                         halign: 'center'
                         valign: 'top'
-#2------------------------------------------------------------#
                 BoxLayout:
                     orientation: 'vertical'
                     spacing: dp(5)
@@ -387,7 +367,6 @@
                         Image:
                             source: 'assets/active_listing.png'
                             size_hint_x: 0.3
-                          
                             canvas.before:
                                 Color:
                                     rgba: 0.15, 0.17, 0.23, 0.5
@@ -426,7 +405,6 @@
                         text_size: self.size
                         halign: 'center'
                         valign: 'top'
-#3------------------------------------------------------------#
                 BoxLayout:
                     orientation: 'vertical'
                     spacing: dp(5)
@@ -484,7 +462,6 @@
                         text_size: self.size
                         halign: 'center'
                         valign: 'top'
-#4------------------------------------------------------------#
                 BoxLayout:
                     orientation: 'vertical'
                     spacing: dp(5)
@@ -502,7 +479,7 @@
                         Label:
                             size_hint_x: 0.1
                         Image:
-                            source: 'assets/star-hallow.png'  # Make sure this icon exists!
+                            source: 'assets/star-hallow.png'
                             size_hint_x: 0.3
                             canvas.before:
                                 Color:
@@ -519,7 +496,7 @@
                             markup: True
                             font_size: dp(12)
                             text_size: self.size
-                            color: 1, 0.8, 0.2, 1  # Gold color
+                            color: 1, 0.8, 0.2, 1
                             halign: 'center'
                             valign: 'center'
                             canvas.before:
@@ -543,8 +520,6 @@
                         text_size: self.size
                         halign: 'center'
                         valign: 'top'
-         
-#5----------------------------------------------------------#
             BoxLayout:
                 id: graph
                 orientation: 'vertical'
@@ -570,7 +545,6 @@
                             text_size: self.size
                             halign: 'center'
                             valign: 'center'
-                         
                 ScrollView:
                     size_hint: 0.9, 0.3
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
@@ -591,9 +565,6 @@
                 Label:
                     size_hint: 0.9, 0.2   
                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                 
-                         
-#------------------------------------------------------------#
             Label:
                 size_hint_y: 0.2
                 text: '[b]RECENT ACTIVITY[/b]'
@@ -603,35 +574,26 @@
                 halign: 'left'
             ScrollView:
                 do_scroll: False, True
-                size_hint_y: 1 # Let it take up the remaining screen space
-                
+                size_hint_y: 1
                 BoxLayout:
                     id: recent_activity_list
                     orientation: 'vertical'
-                    
-                    # --- THE MAGIC TRICK ---
                     size_hint_y: None
                     height: self.minimum_height
-                    # -----------------------
-                    
                     spacing: dp(10)
                     padding: [0, dp(5), 0, dp(100)]
-                  
             Label:
                 size_hint_y: 0.05
-         
-#------------------------------------------------------------#
-#PRODUCT                  
-#-----------------------------------------------------------#
+
+# -------------------------------
+# TAB: Marketplace (Product)
+# -------------------------------
 <Product>:
     BoxLayout:
         size: root.size
         pos: root.pos
         orientation: 'vertical'
         spacing: dp(5)
-#-------------------------------------------------------------#
-# 0 (SEARCH BAR)
-#-------------------------------------------------------------#
         Label:
             size_hint_y: 0.01
         BoxLayout:
@@ -639,13 +601,10 @@
             height: dp(50)
             pos_hint: {'center_x': 0.5}
             padding: [0, dp(5), 0, dp(5)]
-
             BoxLayout:
                 size_hint_y: None
-                height: self.parent.height # Fills the parent container
+                height: self.parent.height
                 padding: [dp(15), 0]
-                
-                # The Background
                 canvas.before:
                     Color:
                         rgba: 0.15, 0.16, 0.22, 1
@@ -653,47 +612,41 @@
                         pos: self.pos
                         size: self.size
                         radius: [dp(15)]
-                        
-                # The Naked Text Input
                 TextInput:
                     id: search_bar
                     hint_text: 'Search for textbooks, notes...'
                     size_hint_y: None
                     height: self.minimum_height
-                    pos_hint: {'center_y': 0.5} # Perfectly centered!
-                    
+                    pos_hint: {'center_y': 0.5}
                     background_normal: ''
                     background_active: ''
                     background_color: 0, 0, 0, 0
                     foreground_color: 1, 1, 1, 1
                     hint_text_color: 0.5, 0.5, 0.5, 1
                     multiline: False
-                    padding: [0, 0] # Strip all internal padding
+                    padding: [0, 0]
                     on_text: root.filter_products()
         BoxLayout:
-            size_hint_y: None        # Stop shrinking to 10%!
-            height: dp(60)           # Lock the exact height
-            pos_hint: {'center_x': 0.5} 
+            size_hint_y: None
+            height: dp(60)
+            pos_hint: {'center_x': 0.5}
             spacing: dp(10)
             orientation: 'horizontal'
-            padding: [0, dp(10), 0, dp(10)] # Add breathing room around buttons
-#1------------------------------------------------------------#
+            padding: [0, dp(10), 0, dp(10)]
             ScrollView:
                 size_hint_y: None
                 height: dp(40)
                 pos_hint: {'center_y': 0.5}
                 do_scroll: True, False
                 bar_width: 0
-                scroll_timeout: 250 
+                scroll_timeout: 250
                 scroll_distance: dp(20)
-             
                 BoxLayout:
                     orientation: 'horizontal'
                     size_hint_x: None
                     width: self.minimum_width
                     padding: [dp(20), 0]
                     spacing: dp(10)
-                 
                     ToggleButton:
                         group: 'products'
                         state: 'down'
@@ -704,7 +657,7 @@
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                        on_release: root.set_category('All') # <--- ADDED THIS!
+                        on_release: root.set_category('All')
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -712,7 +665,6 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-                 
                     ToggleButton:
                         group: 'products'
                         text: 'Textbooks'
@@ -722,7 +674,7 @@
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                        on_release: root.set_category('Textbooks') # <--- ADDED THIS!
+                        on_release: root.set_category('Textbooks')
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -730,7 +682,6 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-                 
                     ToggleButton:
                         group: 'products'
                         text: 'Notes'
@@ -740,7 +691,7 @@
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                        on_release: root.set_category('Notes') # <--- ADDED THIS!
+                        on_release: root.set_category('Notes')
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -748,17 +699,16 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-
                     ToggleButton:
                         group: 'products'
-                        text: 'Guidelines' # <--- UPDATED FROM "Guides"
+                        text: 'Guidelines'
                         size_hint_x: None
-                        width: dp(100) # Slightly wider to fit "Guidelines"
+                        width: dp(100)
                         font_size: sp(14)
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                        on_release: root.set_category('Guidelines') # <--- ADDED THIS!
+                        on_release: root.set_category('Guidelines')
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -766,7 +716,6 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-
                     ToggleButton:
                         group: 'products'
                         text: 'Materials'
@@ -776,7 +725,7 @@
                         bold: True
                         background_color: 0,0,0,0
                         color: (1, 1, 1, 1) if self.state == 'down' else (1, 1, 1, 0.5)
-                        on_release: root.set_category('Materials') # <--- ADDED THIS!
+                        on_release: root.set_category('Materials')
                         canvas.before:
                             Color:
                                 rgba: (0.42, 0.35, 0.88, 1) if self.state == 'down' else (0.11, 0.13, 0.18, 1)
@@ -784,162 +733,37 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-#6------------------------------------------------------------#
         ScrollView:
             id: scroll
             do_scroll: False, True
             BoxLayout:
                 id: dynamic_product
                 orientation: 'vertical'
-                
-                # THE MAGIC FIX: Stop squishing based on len(children)!
                 size_hint_y: None
                 height: self.minimum_height
-                
                 spacing: dp(15)
-                padding: [0, dp(10), 0, dp(100)]  
+                padding: [0, dp(10), 0, dp(100)]
         Label:
             size_hint_y: 0.01
 
-<EscrowBanner@BoxLayout>:
-    size_hint_y: None
-    height: dp(60)
-    padding: dp(15)
-    spacing: dp(15)
-    canvas.before:
-        Color:
-            rgba: 0.08, 0.14, 0.16, 1 
-        RoundedRectangle:
-            size: self.size
-            pos: self.pos
-            radius: [dp(12)]
-    Image:
-        source: 'assets/green_shield.png'
-        size_hint_x: None
-        width: dp(24)
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: '[b]Escrow Protected[/b]'
-            markup: True
-            color: 0.15, 0.76, 0.51, 1
-            font_size: sp(14)
-            text_size: self.size
-            halign: 'left'
-            valign: 'bottom'
-        Label:
-            text: 'Payment held securely until the buyer confirms receipt'
-            color: 1, 1, 1, 0.6
-            font_size: sp(11)
-            text_size: self.size
-            halign: 'left'
-            valign: 'top'
-<FormInput@BoxLayout>:
-    orientation: 'vertical'
-    size_hint_y: None
-    height: dp(80)
-    spacing: dp(8)
-    title: ''
-    hint: ''
-    text_val: internal_input.text
-    multilined: False
-
-    Label:
-        text: root.title
-        font_size: sp(14)
-        bold: True
-        size_hint_y: None
-        height: dp(20)
-        text_size: self.size
-        halign: 'left'
-        valign: 'middle'
-        
-    BoxLayout:
-        pos_hint: {'center_y': 0.5}
-        padding: [dp(15), 0]
-        canvas.before:
-            Color:
-                rgba: 0.11, 0.13, 0.18, 1
-            RoundedRectangle:
-                size: self.size
-                pos: self.pos
-                radius: [dp(8)]
-            Color:
-                rgba: 1, 1, 1, 0.1
-            Line:
-                rounded_rectangle: [self.x, self.y, self.width, self.height, dp(8)]
-                width: dp(1)
-                
-        TextInput:
-            id: internal_input
-            hint_text: root.hint
-            hint_text_color: 1, 1, 1, 0.4
-            background_normal: ''
-            background_active: ''
-            foreground_color: 1, 1, 1, 1
-            background_color: 0, 0, 0, 0
-            cursor_color: 0.42, 0.35, 0.88, 1
-            multiline: root.multilined
-            
-            # --- THE FIX: Conditional 4-Point Padding ---
-            # If multilined=True, snap text to the top-left with standard 15dp padding.
-            # If multilined=False, use math to perfectly vertically center the single line!
-            padding: [dp(15), dp(15), dp(15), dp(15)] if root.multilined else [dp(15), (self.height - self.line_height) / 2, dp(15), (self.height - self.line_height) / 2]
-        
-<PrimaryButton@ButtonBehavior+FloatLayout>:
-    text: ''
-    size_hint_y: None
-    height: dp(55)
-    canvas.before:
-        Color:
-            rgba: (0.42, 0.35, 0.88, 1) if self.state == 'normal' else (0.3, 0.25, 0.7, 1)
-        RoundedRectangle:
-            size: self.size
-            pos: self.pos
-            radius: [dp(27)] 
-    Label:
-        text: root.text
-        markup: True
-        font_size: sp(16)
-        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-#------------------------------------------------------------#
-#SELL              
-#-----------------------------------------------------------#
-<SelectionBadge@ToggleButton>:
-    background_normal: ''
-    background_down: ''
-    background_color: 0, 0, 0, 0 
-    markup: True
-    color: (1, 1, 1, 1) if self.state == 'down' else (0.6, 0.6, 0.6, 1)
-    size_hint_x: None
-    canvas.before:
-        Color:
-            # Purple if selected, translucent white if unselected
-            rgba: (0.42, 0.35, 0.88, 0.4) if self.state == 'down' else (1, 1, 1, 0.05)
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [dp(12)]
-
+# -------------------------------
+# TAB: Create Listing (Sell)
+# -------------------------------
 <Sell>:
     ScrollView:
         size: root.size
         pos: root.pos
         do_scroll: False, True
         bar_width: 0
-        
         BoxLayout:
             orientation: 'vertical'
             size_hint_y: None
             height: self.minimum_height
             padding: [dp(20), dp(40), dp(20), dp(100)] 
             spacing: dp(24)
-
+            
             EscrowBanner:
-
-            # ---------------------------------------------------
-            # THE MASTER SWITCH (Product vs Service)
-            # ---------------------------------------------------
+            
             BoxLayout:
                 size_hint_y: None
                 height: dp(50)
@@ -951,7 +775,6 @@
                         pos: self.pos
                         size: self.size
                         radius: [dp(12)]
-                
                 ToggleButton:
                     text: '[b]Product[/b]'
                     markup: True
@@ -960,7 +783,6 @@
                     allow_no_selection: False
                     background_color: 0,0,0,0
                     color: (1,1,1,1) if self.state == 'down' else (0.5,0.5,0.5,1)
-                    # Automatically sets boolean state in Python class
                     on_state: root.is_service_mode = False if self.state == 'down' else True
                     canvas.before:
                         Color:
@@ -969,7 +791,6 @@
                             pos: self.pos
                             size: self.size
                             radius: [dp(12)]
-
                 ToggleButton:
                     text: '[b]Service[/b]'
                     markup: True
@@ -984,46 +805,34 @@
                             pos: self.pos
                             size: self.size
                             radius: [dp(12)]
-
-            # ---------------------------------------------------
-            # UNIVERSAL FIELDS
-            # ---------------------------------------------------
+            
             FormInput:
                 id: title_input
                 title: 'Title'
                 hint: 'e.g. Organic Chemistry 8th Edition'
                 multilined: False
-
             FormInput:
                 id: subject_input
                 title: 'Subject'
                 hint: 'e.g. Mathematics, History, Biology'
                 multilined: False
-
             FormInput:
                 id: desc_input
                 title: 'Description'
                 hint: 'Provide details about your listing...'
                 height: dp(120)
                 multilined: True
-
             FormInput:
                 id: price_input
                 title: 'Price'
-                # Dynamic hint changes based on the mode!
-                hint: '₱0.00' if not root.is_service_mode else '₱0.00 (Base Rate)'
+                hint: ' 0.00' if not root.is_service_mode else ' 0.00 (Base Rate)'
                 multilined: False
-
-            # ---------------------------------------------------
-            # THE OVERLAP ZONE (Magic Toggle UI)
-            # ---------------------------------------------------
+                
             FloatLayout:
                 size_hint_y: None
                 height: dp(160)
-
-                # ==========================================
+                
                 # LAYER A: PRODUCT SETTINGS
-                # ==========================================
                 BoxLayout:
                     orientation: 'vertical'
                     pos_hint: {'x': 0, 'y': 0} if not root.is_service_mode else {'x': 50, 'y': 0}
@@ -1031,7 +840,6 @@
                     spacing: dp(10)
                     opacity: 1 if not root.is_service_mode else 0
                     disabled: True if root.is_service_mode else False
-
                     Label:
                         text: 'Product Type'
                         bold: True
@@ -1068,7 +876,6 @@
                                 group: 'prod_type'
                                 text: 'Materials'
                                 width: dp(100)
-
                     Label:
                         text: 'Condition'
                         bold: True
@@ -1128,10 +935,8 @@
                                         pos: self.pos
                                         size: self.size
                                         radius: [dp(12)]
-
-                # ==========================================
+                                        
                 # LAYER B: SERVICE SETTINGS
-                # ==========================================
                 BoxLayout:
                     orientation: 'vertical'
                     pos_hint: {'x': 0, 'y': 0} if root.is_service_mode else {'x': 50, 'y': 0}
@@ -1139,7 +944,6 @@
                     spacing: dp(10)
                     opacity: 1 if root.is_service_mode else 0
                     disabled: True if not root.is_service_mode else False
-
                     Label:
                         text: 'Service Type'
                         bold: True
@@ -1176,7 +980,6 @@
                                 group: 'srv_type'
                                 text: 'Test Prep'
                                 width: dp(100)
-
                     Label:
                         text: 'Rate Format'
                         bold: True
@@ -1236,23 +1039,20 @@
                                         pos: self.pos
                                         size: self.size
                                         radius: [dp(12)]
-
             PrimaryButton:
                 id: publish_btn
                 text: '[b]Publish Listing[/b]'
                 on_release: root.add_product()
-#------------------------------------------------------------#
-#SERVICE                  
-#-----------------------------------------------------------#
+
+# -------------------------------
+# TAB: Freelance (Service)
+# -------------------------------
 <Service>:
     BoxLayout:
         size: root.size
         pos: root.pos
         orientation: 'vertical'
         spacing: dp(5)
-#-------------------------------------------------------------#
-# 0 (SEARCH BAR)
-#-------------------------------------------------------------#
         Label:
             size_hint_y: 0.01
         BoxLayout:
@@ -1260,12 +1060,10 @@
             height: dp(50)
             pos_hint: {'center_x': 0.5}
             padding: [0, dp(5), 0, dp(5)]
-
             BoxLayout:
                 size_hint_y: None
                 height: self.parent.height
                 padding: [dp(15), 0]
-                
                 canvas.before:
                     Color:
                         rgba: 0.15, 0.16, 0.22, 1
@@ -1273,14 +1071,12 @@
                         pos: self.pos
                         size: self.size
                         radius: [dp(15)]
-                        
                 TextInput:
                     id: search_bar
                     hint_text: 'Search for tutors, writers, guides...'
                     size_hint_y: None
                     height: self.minimum_height
                     pos_hint: {'center_y': 0.5}
-                    
                     background_normal: ''
                     background_active: ''
                     background_color: 0, 0, 0, 0
@@ -1290,29 +1086,26 @@
                     padding: [0, 0]
                     on_text: root.filter_services()
         BoxLayout:
-            size_hint_y: None        # Stop shrinking to 10%!
-            height: dp(60)           # Lock the exact height
-            pos_hint: {'center_x': 0.5} 
+            size_hint_y: None
+            height: dp(60)
+            pos_hint: {'center_x': 0.5}
             spacing: dp(10)
             orientation: 'horizontal'
-            padding: [0, dp(10), 0, dp(10)] # Add breathing room around buttons
-#1------------------------------------------------------------#
+            padding: [0, dp(10), 0, dp(10)]
             ScrollView:
                 size_hint_y: None
                 height: dp(40)
-                pos_hint: {'center_y': 0.5} # Perfectly centers the buttons
+                pos_hint: {'center_y': 0.5}
                 do_scroll: True, False
                 bar_width: 0
-                scroll_timeout: 250 
+                scroll_timeout: 250
                 scroll_distance: dp(20)
-             
                 BoxLayout:
                     orientation: 'horizontal'
                     size_hint_x: None
                     width: self.minimum_width
                     padding: [dp(20), 0]
                     spacing: dp(10)
-                 
                     ToggleButton:
                         group: 'services'
                         state: 'down'
@@ -1331,7 +1124,6 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-                 
                     ToggleButton:
                         group: 'services'
                         text: 'Tutoring'
@@ -1349,7 +1141,6 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-                 
                     ToggleButton:
                         group: 'services'
                         text: 'Writing'
@@ -1367,7 +1158,6 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-
                     ToggleButton:
                         group: 'services'
                         text: 'Career'
@@ -1385,7 +1175,6 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-
                     ToggleButton:
                         group: 'services'
                         text: 'Test Prep'
@@ -1403,305 +1192,23 @@
                                 size: self.size
                                 pos: self.pos
                                 radius: [dp(20)]
-#6------------------------------------------------------------#
         ScrollView:
             id: scroll
             do_scroll: False, True
             BoxLayout:
                 id: dynamic_service
                 orientation: 'vertical'
-                
-                # THE MAGIC FIX: Stop squishing based on len(children)!
                 size_hint_y: None
                 height: self.minimum_height
-                
                 spacing: dp(15)
                 padding: [0, dp(10), 0, dp(100)]
-#Dynamic Service List          
         Label:
             size_hint_y: 0.01
-          
-#-----------------------------------------------------------#
-# Custom Dynamic Class for NavBackButton
-#-----------------------------------------------------------#
-<NavBackButton@ButtonBehavior+BoxLayout>:
-    size_hint: None, None
-    size: dp(40), dp(40)
-    canvas.before:
-        Color:
-            rgba: 0.15, 0.16, 0.22, 1
-        RoundedRectangle:
-            size: self.size
-            pos: self.pos
-            radius: [dp(10)]
-    Label:
-        text: '<'
-        font_size: sp(18)
-        bold: True
-        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
 
-#-----------------------------------------------------------#
-# Custom Dynamic Class for Menu List Items
-#-----------------------------------------------------------#
-<CardBase@BoxLayout>:
-    canvas.before:
-        Color:
-            rgba: 0.11, 0.12, 0.16, 1  # Dark Card Background
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [dp(12)]
-<ListTile>:
-    size_hint_y: None
-    height: dp(70)
-    padding: dp(15)
-    spacing: dp(15)
-    canvas.before:
-        Color:
-            rgba: 0.11, 0.12, 0.16, 1
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [dp(12)]
-   
-    # Left Icon
-    FloatLayout:
-        size_hint: None, None
-        size: dp(40), dp(40)
-        pos_hint: {'center_y': 0.5}
-        canvas.before:
-            Color:
-                rgba: 0.15, 0.16, 0.22, 1
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(10)]
-        # Replaced the placeholder Label with the actual Image
-        Image:
-            source: root.icon_source
-            size_hint: 0.5, 0.5
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-    # Text Content
-    BoxLayout:
-        orientation: 'vertical'
-        spacing: dp(2)
-        pos_hint: {'center_y': 0.5}
-        Label:
-            text: root.title
-            font_size: sp(16)
-            bold: True
-            color: 1, 1, 1, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'bottom'
-        Label:
-            text: root.subtitle
-            font_size: sp(12)
-            color: 0.6, 0.6, 0.6, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'top'
-   
-    # Right Arrow (Optional)
-    Label:
-        text: '>' if root.show_arrow else ''
-        size_hint_x: None
-        width: dp(20)
-        color: 0.5, 0.5, 0.5, 1
-        font_size: sp(18)
-
-<WalletAction@ButtonBehavior+BoxLayout>:
-    orientation: 'horizontal'
-    padding: [dp(20), dp(10)]
-    spacing: dp(10)
-    icon: ''
-    text: ''
-    canvas.before:
-        Color:
-            rgba: 1, 1, 1, 0.2
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [dp(10)]
-    Image:
-        source: root.icon
-        size_hint_x: None
-        width: dp(24)
-    Label:
-        text: root.text
-        bold: True
-        font_size: sp(14)
-        text_size: self.size
-        halign: 'left'
-        valign: 'middle'
-
-<ChatBubble>:
-    size_hint_y: None
-    height: self.minimum_height
-    padding: [dp(10), dp(5)]
-    # Anchor left or right based on sender
-    AnchorLayout:
-        anchor_x: 'right' if root.is_sender else 'left'
-        size_hint_y: None
-        height: bubble_container.height
-       
-        BoxLayout:
-            id: bubble_container
-            orientation: 'vertical'
-            size_hint: None, None
-            width: min(dp(250), root.width * 0.75)
-            height: self.minimum_height
-            padding: dp(15)
-            spacing: dp(5)
-            canvas.before:
-                Color:
-                    rgba: (0.43, 0.33, 0.85, 1) if root.is_sender else (0.15, 0.16, 0.22, 1)
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [dp(15), dp(15), dp(0) if root.is_sender else dp(15), dp(15) if root.is_sender else dp(0)]
-            Label:
-                text: root.text
-                size_hint_y: None
-                height: self.texture_size[1]
-                text_size: self.width, None
-                color: 1, 1, 1, 1
-            Label:
-                text: root.time
-                font_size: sp(10)
-                size_hint_y: None
-                height: dp(12)
-                text_size: self.width, None
-                halign: 'right' if root.is_sender else 'left'
-                color: 0.8, 0.8, 0.8, 0.7
-<MenuItem@ButtonBehavior+BoxLayout>:
-    size_hint_y: None
-    height: dp(55)
-    spacing: dp(15)
-    padding: [dp(10), dp(5), dp(10), dp(5)]
-    opacity: 0.5 if self.state == 'down' else 1.0
-   
-    # Custom properties to easily pass data
-    icon_source: ''
-    text: ''
-    text_color: 1, 1, 1, 1
-    icon_bg_color: 0.12, 0.13, 0.20, 1
-    badge_count: 0
-
-    # Icon Container with Rounded Background
-    FloatLayout:
-        size_hint_x: None
-        width: dp(45)
-        canvas.before:
-            Color:
-                rgba: root.icon_bg_color
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(12)]
-        Image:
-            source: root.icon_source
-            size_hint: 0.5, 0.5
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-    # Left-Aligned Text Label
-    Label:
-        text: root.text
-        color: root.text_color
-        font_size: sp(16)
-        bold: True
-        text_size: self.size
-        halign: 'left'
-        valign: 'middle'
-    Label:
-        text: str(root.badge_count) if root.badge_count > 0 else ""
-        size_hint_x: None
-        width: dp(30) if root.badge_count > 0 else 0
-        color: 1, 1, 1, 1
-        font_size: sp(12)
-        bold: True
-        canvas.before:
-            Color:
-                rgba: (0.88, 0.25, 0.25, 1) if root.badge_count > 0 else (0,0,0,0)
-            RoundedRectangle:
-                size: [dp(22), dp(22)]
-                pos: [self.center_x - dp(11), self.center_y - dp(11)]
-                radius: [dp(11)]
-
-<Divider@Widget>:
-    size_hint_y: None
-    height: dp(1)
-    canvas.before:
-        Color:
-            rgba: 0.15, 0.16, 0.22, 1 # Faint divider line
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
-<SettingsTile@BoxLayout>:
-    size_hint_y: None
-    height: dp(70)
-    padding: dp(15)
-    spacing: dp(15)
-   
-    # We define custom properties so we can reuse this tile
-    icon_source: ''
-    title: ''
-    subtitle: ''
-   
-    # Left Icon Background
-    FloatLayout:
-        size_hint: None, None
-        size: dp(40), dp(40)
-        pos_hint: {'center_y': 0.5}
-        canvas.before:
-            Color:
-                rgba: 0.15, 0.16, 0.22, 1
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(10)]
-        Image:
-            source: root.icon_source
-            size_hint: 0.5, 0.5
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-    # Text Content
-    BoxLayout:
-        orientation: 'vertical'
-        spacing: dp(2)
-        pos_hint: {'center_y': 0.5}
-        Label:
-            text: root.title
-            font_size: sp(16)
-            bold: True
-            color: 1, 1, 1, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'bottom'
-        Label:
-            text: root.subtitle
-            font_size: sp(12)
-            color: 0.6, 0.6, 0.6, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'top'
-   
-    # Right Arrow
-    Label:
-        text: '>'
-        size_hint_x: None
-        width: dp(20)
-        color: 0.5, 0.5, 0.5, 1
-        font_size: sp(18)
-
-
-#-----------------------------------------------------------#
-# MAIN STATUS SCREEN
-#-----------------------------------------------------------#
+# -------------------------------
+# TAB: Status & Account Menu
+# -------------------------------
 <Status>:
-    # 1. Main Background Color
     canvas.before:
         Color:
             rgba: 0,0,0,0
@@ -1718,47 +1225,36 @@
                 orientation: 'vertical'
                 size: root.size
                 pos: root.pos
-              
                 ScrollView:
                     do_scroll: False, True
                     bar_width: 0
-
-                    # 2. Inner Scrolling Layout (Must have size_hint_y: None)
                     BoxLayout:
                         orientation: 'vertical'
                         size_hint_y: None
                         height: self.minimum_height
                         padding: dp(20)
                         spacing: dp(30)
-
-                        # --- TOP SECTION: PROFILE INFO ---
                         BoxLayout:
                             orientation: 'vertical'
                             size_hint_y: None
                             height: self.minimum_height
                             spacing: dp(10)
-
-                            # Avatar Container
                             FloatLayout:
                                 size_hint: None, None
                                 size: dp(100), dp(100)
                                 pos_hint: {'center_x': 0.5}
-
-                                # Purple initials circle
                                 canvas.before:
                                     Color:
-                                        rgba: 0.12, 0.13, 0.20, 1 # Slightly lighter dark circle
+                                        rgba: 0.12, 0.13, 0.20, 1
                                     Ellipse:
                                         pos: self.pos
                                         size: self.size
                                 Label:
-                                    text: f'[b]{root.initial}[/b]' # Example: 'JD'
+                                    text: f'[b]{root.initial}[/b]'
                                     markup: True
                                     font_size: sp(36)
-                                    color: 0.4, 0.31, 0.85, 1 # Purple accent
+                                    color: 0.4, 0.31, 0.85, 1 
                                     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-                                # Overlapping Camera Badge
                                 FloatLayout:
                                     size_hint: None, None
                                     size: dp(32), dp(32)
@@ -1770,27 +1266,22 @@
                                             pos: self.pos
                                             size: self.size
                                     Image:
-                                        source: 'assets/camera.png' # Ensure this asset exists
+                                        source: 'assets/camera.png'
                                         size_hint: 0.5, 0.5
                                         pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-                            # Names and Handles
                             Label:
-                                text: f'[b]{root.full_name}[/b]' # Example: 'Jane Doe'
+                                text: f'[b]{root.full_name}[/b]'
                                 markup: True
                                 font_size: sp(22)
                                 size_hint_y: None
                                 height: dp(30)
                                 color: 1, 1, 1, 1
-
                             Label:
-                                text: f'{root.email}' # Example: '@janedoe'
+                                text: f'{root.email}' 
                                 font_size: sp(14)
                                 size_hint_y: None
                                 height: dp(20)
                                 color: 0.6, 0.6, 0.6, 1
-
-                            # Badges Row (Verified & Rating)
                             BoxLayout:
                                 orientation: 'horizontal'
                                 size_hint: None, None
@@ -1798,8 +1289,6 @@
                                 width: self.minimum_width
                                 pos_hint: {'center_x': 0.5}
                                 spacing: dp(10)
-
-                                # Verified Badge
                                 BoxLayout:
                                     size_hint_x: None
                                     width: dp(95)
@@ -1807,13 +1296,13 @@
                                     spacing: dp(5)
                                     canvas.before:
                                         Color:
-                                            rgba: 0.10, 0.15, 0.15, 1 # Subtle dark green BG
+                                            rgba: 0.10, 0.15, 0.15, 1
                                         RoundedRectangle:
                                             pos: self.pos
                                             size: self.size
                                             radius: [dp(15)]
                                         Color:
-                                            rgba: 0.2, 0.8, 0.4, 0.5 # Green Border Line
+                                            rgba: 0.2, 0.8, 0.4, 0.5 
                                         Line:
                                             rounded_rectangle: [self.x, self.y, self.width, self.height, dp(15)]
                                             width: dp(1)
@@ -1826,8 +1315,6 @@
                                         color: 0.2, 0.8, 0.4, 1
                                         font_size: sp(12)
                                         bold: True
-
-                                # Rating Badge
                                 BoxLayout:
                                     size_hint_x: None
                                     width: dp(75)
@@ -1835,13 +1322,13 @@
                                     spacing: dp(5)
                                     canvas.before:
                                         Color:
-                                            rgba: 0.15, 0.12, 0.20, 1 # Subtle dark purple BG
+                                            rgba: 0.15, 0.12, 0.20, 1 
                                         RoundedRectangle:
                                             pos: self.pos
                                             size: self.size
                                             radius: [dp(15)]
                                         Color:
-                                            rgba: 0.4, 0.31, 0.85, 0.5 # Purple Border Line
+                                            rgba: 0.4, 0.31, 0.85, 0.5 
                                         Line:
                                             rounded_rectangle: [self.x, self.y, self.width, self.height, dp(15)]
                                             width: dp(1)
@@ -1854,28 +1341,22 @@
                                         color: 0.4, 0.31, 0.85, 1
                                         font_size: sp(12)
                                         bold: True
-
-                        # --- BOTTOM SECTION: MENU LIST ---
                         BoxLayout:
                             orientation: 'vertical'
                             size_hint_y: None
                             height: self.minimum_height
                             spacing: dp(5)
-
-                            # Instantiate custom MenuItems
                             MenuItem:
                                 icon_source: 'assets/profile.png'
                                 text: 'My Profile'
                                 on_release: 
                                     screenmanager.current = 'profile'
-                                    # THIS LINE FORCES THE INSTANT DATA LOAD:
                                     screenmanager.get_screen('profile').children[0].load_info()
                                     root.parent.parent.parent.parent.ids.label1.text = '[b]MY PROFILE[/b]'
                                     root.parent.parent.parent.parent.ids.label2.text = 'view your details'
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
                                     root.parent.parent.parent.parent.ids.back_btn.disabled = False
                                     app.root.get_screen('main').toggle_footer(False)
-                              
                             MenuItem:
                                 icon_source: 'assets/chat.png'
                                 text: 'Inbox'
@@ -1888,7 +1369,6 @@
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
                                     root.parent.parent.parent.parent.ids.back_btn.disabled = False
                                     app.root.get_screen('main').toggle_footer(False)
-                              
                             MenuItem:
                                 icon_source: 'assets/wallet.png'
                                 text: 'Wallet'
@@ -1900,7 +1380,6 @@
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
                                     root.parent.parent.parent.parent.ids.back_btn.disabled = False
                                     app.root.get_screen('main').toggle_footer(False)
-                              
                             MenuItem:
                                 icon_source: 'assets/settings.png'
                                 text: 'Settings'
@@ -1911,12 +1390,11 @@
                                     root.parent.parent.parent.parent.ids.back_btn.opacity = 1
                                     root.parent.parent.parent.parent.ids.back_btn.disabled = False
                                     app.root.get_screen('main').toggle_footer(False)
-                              
                             MenuItem:
                                 icon_source: 'assets/logout.png'
                                 text: 'Sign Out'
-                                text_color: 0.8, 0.2, 0.2, 1       # Red text
-                                icon_bg_color: 0.15, 0.05, 0.05, 1 # Faint red background
+                                text_color: 0.8, 0.2, 0.2, 1 
+                                icon_bg_color: 0.15, 0.05, 0.05, 1 
                                 on_release: 
                                     screenmanager.current = 'logout'
                                     root.parent.parent.parent.parent.ids.label1.text = '[b]SIGN OUT[/b]'
@@ -1930,7 +1408,7 @@
                 size: root.size
                 pos: root.pos
         Screen:
-            name: 'inbox'       
+            name: 'inbox'
             InboxScreen:
         Screen:
             name: 'chatbox'
@@ -1951,125 +1429,18 @@
                 size: root.size
                 pos: root.pos
 
-<EditProfileButton@ButtonBehavior+FloatLayout>:
+# ==========================================
+# DOMAIN: SUB-SCREENS & PAGES
+# ==========================================
+
+# -------------------------------
+# PAGE: Profile UI Elements
+# -------------------------------
+<ProfileDataTile@BoxLayout>:
+    orientation: 'horizontal'
     size_hint_y: None
-    height: dp(50)
-    canvas.before:
-        Color:
-            rgba: 0.43, 0.33, 0.85, 1
-        Line:
-            rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
-            width: dp(1.2)
-            
-    BoxLayout:
-        spacing: dp(8)
-        size_hint: None, 1
-        width: self.minimum_width
-        pos_hint: {'center_x': 0.5}
-        Image:
-            source: 'assets/edit.png'
-            size_hint_x: None
-            width: dp(18)
-        Label:
-            text: '[b]Edit Profile[/b]'
-            markup: True
-            color: 1, 1, 1, 1
-            size_hint_x: None
-            width: self.texture_size[0]
-
-<IconButton@ButtonBehavior+AnchorLayout>:
-    icon_source: ''
-    icon_size_hint: 0.5, 0.5
-    canvas.before:
-        Color:
-            rgba: (1, 1, 1, 0) # Default transparent
-        Rectangle:
-            pos: self.pos
-            size: self.size
-    Image:
-        source: root.icon_source
-        size_hint: root.icon_size_hint
-
-# FIX: Specialized Send Button with background styling
-<SendButton@ButtonBehavior+AnchorLayout>:
-    icon_source: 'assets/send.png'
-
-    Image:
-        source: root.icon_source
-        size_hint: 0.45, 0.45
-
-<InboxTile>:
-    size_hint_y: None
-    height: dp(85)
-    padding: dp(15)
-    spacing: dp(15)
-    on_release: self.open_chat()
-    canvas.before:
-        Color:
-            rgba: (0.15, 0.16, 0.22, 1) if self.state == 'normal' else (0.20, 0.21, 0.28, 1)
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [dp(15)]
-
-    # Avatar Box
-    FloatLayout:
-        size_hint_x: None
-        width: dp(50)
-        canvas.before:
-            Color:
-                rgba: 0.43, 0.33, 0.85, 1
-            Ellipse:
-                pos: [self.center_x - dp(25), self.center_y - dp(25)]
-                size: dp(50), dp(50)
-        Label:
-            text: f'[b]{root.partner_name[0:2].upper() if root.partner_name else ""}[/b]'
-            markup: True
-            font_size: sp(16)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-    # Text Content
-    BoxLayout:
-        orientation: 'vertical'
-        spacing: dp(2)
-        Label:
-            text: f'[b]{root.partner_name}[/b]'
-            markup: True
-            font_size: sp(16)
-            text_size: self.size
-            halign: 'left'
-            valign: 'bottom'
-        Label:
-            text: root.last_message
-            color: 0.6, 0.6, 0.6, 1
-            font_size: sp(13)
-            text_size: self.size
-            halign: 'left'
-            valign: 'top'
-            shorten: True
-            shorten_from: 'right'
-
-    # Timestamp
-    Label:
-        size_hint_x: None
-        width: dp(65)
-        text: root.time
-        color: 0.5, 0.5, 0.5, 1
-        font_size: sp(11)
-        text_size: self.size
-        halign: 'right'
-        valign: 'top'
-<OwnedItemTile@BoxLayout>:
-    title: ''
-    subtitle: ''
-    seller_name: '' 
-    icon_bg: 0.15, 0.16, 0.22, 1
-    
-    # --- 1. INCREASED HEIGHT TO FIT 2 LINES OF TEXT ---
-    size_hint_y: None
-    height: dp(90) 
-    
-    padding: dp(15)
+    height: dp(80) 
+    padding: [dp(15), 0]
     spacing: dp(15)
     canvas.before:
         Color:
@@ -2078,153 +1449,145 @@
             pos: self.pos
             size: self.size
             radius: [dp(15)]
-            
-    # Green Check Icon
+    icon_source: ''
+    title: ''
+    subtitle: ''
     FloatLayout:
-        # --- THE FIX: Lock both axes to create a perfect square ---
         size_hint: None, None
-        size: dp(45), dp(45)
-        pos_hint: {'center_y': 0.5} # Keeps it perfectly centered vertically!
-        
+        size: dp(50), dp(50)
+        pos_hint: {'center_y': 0.5}
         canvas.before:
             Color:
-                rgba: root.icon_bg
+                rgba: 0.12, 0.13, 0.20, 1
             RoundedRectangle:
                 pos: self.pos
                 size: self.size
                 radius: [dp(10)]
         Image:
-            source: 'assets/check_solid.png'
-            size_hint: 0.5, 0.5
+            id: tile_icon
+            source: root.icon_source
+            size_hint: 0.6, 0.6
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            
-    # Text Container
     BoxLayout:
         orientation: 'vertical'
-        pos_hint: {'center_y': 0.5} # Vertically centers the text block
-        
+        spacing: dp(5)
+        pos_hint: {'center_y': 0.5}
         Label:
-            text: f'[b]{root.title}[/b]'
-            markup: True
+            text: root.title
+            id: title_lbl
             font_size: sp(16)
-            size_hint_y: None
-            height: dp(22)
+            bold: True
+            color: 1, 1, 1, 1
             text_size: self.size
             halign: 'left'
             valign: 'bottom'
-            shorten: True
-            shorten_from: 'right'
-            
         Label:
             text: root.subtitle
-            color: 0.6, 0.6, 0.6, 1
+            id: subtitle_lbl
             font_size: sp(13)
-            
-            # --- 2. DYNAMIC TEXT WRAPPING FIX ---
+            color: 0.7, 0.7, 0.7, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+            shorten: True
+            shorten_from: 'right'
+
+<Profile>:
+    size: root.size
+    pos: root.pos
+    orientation: 'vertical'
+    padding: [dp(20), dp(5), dp(20), dp(20)]
+    spacing: dp(15)
+    ScrollView:
+        do_scroll: False, True
+        bar_width: 0
+        scroll_timeout: 250
+        scroll_distance: dp(20)
+        BoxLayout:
+            orientation: 'vertical'
             size_hint_y: None
-            text_size: self.width, None       # Force horizontal wrap
-            height: self.texture_size[1]      # Auto-expand vertical height
-            
-            halign: 'left'
-            valign: 'top'
+            height: self.minimum_height
+            spacing: dp(15)
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: dp(160)
+                spacing: dp(5)
+                FloatLayout:
+                    size_hint: None, None
+                    size: dp(90), dp(90)
+                    pos_hint: {'center_x': 0.5}
+                    canvas.before:
+                        Color:
+                            rgba: 0.12, 0.13, 0.20, 1
+                        Ellipse:
+                            pos: self.pos
+                            size: self.size
+                    Label:
+                        id: initial_label
+                        text: '[b]-[/b]'
+                        markup: True
+                        font_size: sp(32)
+                        color: 0.43, 0.33, 0.85, 1
+                        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                Label:
+                    id: display_name_label
+                    text: '[b]Loading...[/b]'
+                    markup: True
+                    font_size: sp(22)
+                    size_hint_y: None
+                    height: dp(30)
+                Label:
+                    id: display_email_label 
+                    text: '...'
+                    font_size: sp(14)
+                    color: 0.6, 0.6, 0.6, 1
+                    size_hint_y: None
+                    height: dp(20)
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(10)
+                ProfileDataTile:
+                    id: tile_email
+                    icon_source: 'assets/email.png'
+                    title: 'Email'
+                    subtitle: 'loading...'
+                ProfileDataTile:
+                    id: tile_role
+                    icon_source: 'assets/school.png'
+                    title: 'Role'
+                    subtitle: 'loading...'
+                ProfileDataTile:
+                    id: tile_age
+                    icon_source: 'assets/age.png' 
+                    title: 'Age'
+                    subtitle: 'loading...'
+                ProfileDataTile:
+                    id: tile_birthday
+                    icon_source: 'assets/birthday.png' 
+                    title: 'Birthday'
+                    subtitle: 'loading...'
+                ProfileDataTile:
+                    id: tile_location
+                    icon_source: 'assets/location.png' 
+                    title: 'Location'
+                    subtitle: 'loading...'
+            Label:
+                size_hint_y: None
+                height: dp(15)
+            EditProfileButton:
+                text: 'Edit Profile'
+                on_release: root.open_edit_modal()
 
-    # Rate Button
-    Button:
-        text: '[b]Rate[/b]' # Removed the broken star character
-        markup: True
-        size_hint: None, None
-        size: dp(70), dp(35)
-        pos_hint: {'center_y': 0.5}
-        background_color: 0,0,0,0
-        on_release: app.root.get_screen('main').ids.screenmanager.get_screen('info').children[0].ids.screenmanager.get_screen('inbox').children[0].open_review(root.seller_name)
-        canvas.before:
-            Color:
-                rgba: 1, 0.8, 0.2, 0.8
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(8)]
-<SubscriptionItemTile@BoxLayout>:
-    title: ''
-    schedule: ''
-    seller_name: ''
-    service_id: 0
-    
-    # --- 1. INCREASED HEIGHT TO FIT BUTTONS ---
-    size_hint_y: None
-    height: dp(110) 
-    
-    padding: dp(15)
-    spacing: dp(10)
-    canvas.before:
-        Color:
-            rgba: 0.15, 0.12, 0.20, 1 # Dark purple tint
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [dp(15)]
-            
-    # --- LEFT SIDE: TEXT ---
-    BoxLayout:
-        orientation: 'vertical'
-        pos_hint: {'center_y': 0.5}
-        Label:
-            text: f'[b]{root.title}[/b]'
-            markup: True
-            font_size: sp(16)
-            text_size: self.size
-            halign: 'left'
-            valign: 'bottom'
-        Label:
-            text: f'Starts: {root.schedule}'
-            color: 0.43, 0.33, 0.85, 1 # Neon Purple
-            font_size: sp(13)
-            text_size: self.size
-            halign: 'left'
-            valign: 'top'
-
-    # --- RIGHT SIDE: BUTTON COLUMN ---
-    BoxLayout:
-        orientation: 'vertical'  # Forces them to stack cleanly
-        size_hint_x: None
-        width: dp(100)           # Unifies the width of both buttons
-        spacing: dp(8)           # Breathing room between buttons
-        pos_hint: {'center_y': 0.5}
-        
-        Button:
-            text: 'Rate'
-            size_hint: 1, None   # Stretches to fill the 100dp width
-            height: dp(32)
-            background_color: 0,0,0,0
-            on_release: app.root.get_screen('main').ids.screenmanager.get_screen('info').children[0].ids.screenmanager.get_screen('inbox').children[0].open_review(root.seller_name)
-            canvas.before:
-                Color:
-                    rgba: 1, 0.8, 0.2, 0.8 # Gold action
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [dp(8)]
-                    
-        Button:
-            text: 'Unsubscribe'
-            size_hint: 1, None   # Stretches to fill the 100dp width
-            height: dp(32)
-            background_color: 0,0,0,0
-            on_release: app.root.get_screen('main').ids.screenmanager.get_screen('info').children[0].ids.screenmanager.get_screen('inbox').children[0].unsubscribe(root.service_id)
-            canvas.before:
-                Color:
-                    rgba: 0.85, 0.26, 0.33, 1 # Red action
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [dp(8)]
-
+# -------------------------------
+# PAGE: Inbox & Chat UI
+# -------------------------------
 <InboxScreen>:
     orientation: 'vertical'
     padding: [dp(20), dp(5), dp(20), dp(20)]
     spacing: dp(15)
-    
-    # 3-Way Tab Switcher
     BoxLayout:
         size_hint_y: None
         height: dp(40)
@@ -2272,7 +1635,6 @@
                     pos: self.pos
                     size: self.size
                     radius: [dp(10)]
-
     ScrollView:
         do_scroll: False, True
         bar_width: 0
@@ -2283,359 +1645,10 @@
             height: self.minimum_height
             spacing: dp(10)
 
-# -----------------------------------------------------------#
-# Custom Dynamic Class for Read-Only Profile Tiles
-# -----------------------------------------------------------#
-<ProfileDataTile@BoxLayout>:
-    orientation: 'horizontal'
-    size_hint_y: None
-    height: dp(80) # Made slightly taller for better text vertical spacing
-    padding: [dp(15), 0]
-    spacing: dp(15)
-    canvas.before:
-        Color:
-            rgba: 0.11, 0.12, 0.16, 1  # Dark Card Background
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [dp(15)]
-    
-    icon_source: ''
-    title: ''
-    subtitle: ''
-
-    # Left Icon with squared-off purple background
-    FloatLayout:
-        size_hint: None, None
-        size: dp(50), dp(50)
-        pos_hint: {'center_y': 0.5}
-        canvas.before:
-            Color:
-                rgba: 0.12, 0.13, 0.20, 1
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(10)]
-        Image:
-            id: tile_icon
-            source: root.icon_source
-            size_hint: 0.6, 0.6
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-    # Text content (prominent title, dimmer gray subtitle)
-    BoxLayout:
-        orientation: 'vertical'
-        spacing: dp(5)
-        pos_hint: {'center_y': 0.5}
-        Label:
-            text: root.title
-            id: title_lbl
-            font_size: sp(16)
-            bold: True
-            color: 1, 1, 1, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'bottom'
-        Label:
-            text: root.subtitle
-            id: subtitle_lbl
-            font_size: sp(13)
-            color: 0.7, 0.7, 0.7, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'top'
-            shorten: True
-            shorten_from: 'right'
-
-
-# =========================================================== #
-#                      THE PROFILE FLOW                      #
-# =========================================================== #
-
-# ------------------- 1A. READ-ONLY PROFILE ------------------- #
-<Profile>:
-    # This screen now looks exactly like user's screenshot image_1.png
-    size: root.size
-    pos: root.pos
-    orientation: 'vertical'
-    padding: [dp(20), dp(5), dp(20), dp(20)]
-    spacing: dp(15)
-
-    ScrollView:
-        do_scroll: False, True
-        bar_width: 0
-        scroll_timeout: 250
-        scroll_distance: dp(20)
-
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: self.minimum_height
-            spacing: dp(15)
-
-            # --- DYNAMIC AVATAR HEADER (matches image_1.png) ---
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_y: None
-                height: dp(160)
-                spacing: dp(5)
-                FloatLayout:
-                    size_hint: None, None
-                    size: dp(90), dp(90)
-                    pos_hint: {'center_x': 0.5}
-                    canvas.before:
-                        Color:
-                            rgba: 0.12, 0.13, 0.20, 1
-                        Ellipse:
-                            pos: self.pos
-                            size: self.size
-                    Label:
-                        id: initial_label
-                        text: '[b]-[/b]'
-                        markup: True
-                        font_size: sp(32)
-                        color: 0.43, 0.33, 0.85, 1
-                        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                Label:
-                    id: display_name_label
-                    text: '[b]Loading...[/b]'
-                    markup: True
-                    font_size: sp(22) # Made name larger
-                    size_hint_y: None
-                    height: dp(30)
-                Label:
-                    id: display_email_label # Gray text below the name
-                    text: '...'
-                    font_size: sp(14)
-                    color: 0.6, 0.6, 0.6, 1
-                    size_hint_y: None
-                    height: dp(20)
-
-            # --- READ-ONLY INFO TILES (Uses redesigned ProfileDataTile) ---
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_y: None
-                height: self.minimum_height
-                spacing: dp(10)
-
-                ProfileDataTile:
-                    id: tile_email
-                    icon_source: 'assets/email.png' # Using envelope icon from image_1.png
-                    title: 'Email'
-                    subtitle: 'loading...'
-                
-                ProfileDataTile:
-                    id: tile_role
-                    icon_source: 'assets/school.png' # Existing graduation cap icon
-                    title: 'Role'
-                    subtitle: 'loading...'
-                
-                ProfileDataTile:
-                    id: tile_age
-                    icon_source: 'assets/age.png' # Existing person icon
-                    title: 'Age'
-                    subtitle: 'loading...'
-                
-                ProfileDataTile:
-                    id: tile_birthday
-                    icon_source: 'assets/birthday.png' # Existing star icon
-                    title: 'Birthday'
-                    subtitle: 'loading...'
-
-                ProfileDataTile:
-                    id: tile_location
-                    icon_source: 'assets/location.png' # Using map pin icon from image_1.png
-                    title: 'Location'
-                    subtitle: 'loading...'
-
-            # This space ensures the button stays below the cards
-            Label:
-                size_hint_y: None
-                height: dp(15)
-
-            # THIS CENTRAL BUTTON OPENS THE EDIT MODAL (matches image_1.png)
-            EditProfileButton:
-                text: 'Edit Profile'
-                on_release: root.open_edit_modal()
-
-
-# ------------------- 1B. EDIT PROFILE POPUP ------------------- #
-<EditProfileModal@ModalView>:
-    # Master Background for the overlay
-    background_color: 0, 0, 0, 0.6
-    size_hint: 0.92, 0.88  # Made slightly taller
-    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-    auto_dismiss: False 
-
-    # Master Layout
-    BoxLayout:
-        id: modal_layout
-        orientation: 'vertical'
-        padding: dp(20)
-        spacing: dp(10)
-        canvas.before:
-            Color:
-                rgba: 0.11, 0.12, 0.16, 1
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(20)]
-
-        # --- 1. PINNED AVATAR HEADER ---
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: dp(130) # Shrunk slightly to prioritize form space
-            spacing: dp(5)
-            FloatLayout:
-                size_hint: None, None
-                size: dp(70), dp(70) 
-                pos_hint: {'center_x': 0.5}
-                canvas.before:
-                    Color:
-                        rgba: 0.12, 0.13, 0.20, 1
-                    Ellipse:
-                        pos: self.pos
-                        size: self.size
-                Label:
-                    id: modal_initial_label
-                    text: '[b]-[/b]'
-                    markup: True
-                    font_size: sp(26)
-                    color: 0.43, 0.33, 0.85, 1
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            Label:
-                id: modal_display_name_label
-                text: '[b]Loading...[/b]'
-                markup: True
-                font_size: sp(18)
-                size_hint_y: None
-                height: dp(25)
-        
-        # --- 2. SCROLLABLE FORM FIELDS ---
-        ScrollView:
-            do_scroll: False, True
-            bar_width: 0
-            scroll_timeout: 250
-            scroll_distance: dp(20)
-
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_y: None
-                height: self.minimum_height
-                spacing: dp(15)
-                padding: [0, dp(10), 0, dp(20)] # Extra padding at the bottom so it doesn't get cut off
-                
-                FormInput:
-                    id: name_input
-                    title: 'Full Name'
-                    hint: 'Change your display name'
-
-                FormInput:
-                    id: role_input
-                    title: 'Role'
-                    hint: 'Student or Teacher'
-                
-                FormInput:
-                    id: age_input
-                    title: 'Age'
-                    hint: 'e.g. 21'
-
-                FormInput:
-                    id: birthday_input
-                    title: 'Birthday'
-                    hint: 'YYYY-MM-DD or Month Day'
-
-                BoxLayout:
-                    size_hint_y: None
-                    height: dp(80)
-                    spacing: dp(10)
-                    
-                    FormInput:
-                        id: location_input
-                        title: 'Location'
-                        hint: 'Campus Dorm B, Room 204'
-                        size_hint_x: 0.8  # Takes up 80% of the width
-                        
-                    # Locate Me Button
-                    BoxLayout:
-                        orientation: 'vertical'
-                        size_hint_x: 0.2  # Takes up 20% of the width
-                        Label:
-                            size_hint_y: None
-                            height: dp(28)
-                        Button:
-                            text: ''
-                            background_color: 0,0,0,0
-                            on_release: root.auto_locate()
-                            canvas.before:
-                                Color:
-                                    rgba: 0.15, 0.16, 0.22, 1
-                                RoundedRectangle:
-                                    pos: self.pos
-                                    size: self.size
-                                    radius: [dp(8)]
-                                Color:
-                                    rgba: 0.43, 0.33, 0.85, 1
-                                Line:
-                                    rounded_rectangle: [self.x, self.y, self.width, self.height, dp(8)]
-                                    width: dp(1)
-                            Image:
-                                size: self.parent.size
-                                source: 'assets/location.png'
-                                size_hint: None, None
-                                size: dp(24), dp(24)
-                                center_x: self.parent.center_x
-                                center_y: self.parent.center_y
-                
-                FormInput:
-                    id: password_input
-                    title: 'New Password'
-                    hint: 'Leave blank to keep current'
-
-                FormInput:
-                    id: confirm_password_input
-                    title: 'Confirm Password'
-                    hint: 'Re-type new password'
-
-        # --- 3. PINNED ACTION BUTTONS ---
-        BoxLayout:
-            size_hint_y: None
-            height: dp(120)
-            orientation: 'vertical'
-            spacing: dp(10)
-
-            PrimaryButton:
-                text: '[b]Save Changes[/b]'
-                on_release: root.save_profile()
-
-            Button:
-                text: '[b]Cancel[/b]'
-                markup: True
-                size_hint_y: None
-                height: dp(55)
-                background_color: 0,0,0,0
-                canvas.before:
-                    Color:
-                        rgba: 0.15, 0.16, 0.22, 1
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [dp(27)]
-                    Color:
-                        rgba: 0.3, 0.3, 0.3, 1
-                    Line:
-                        rounded_rectangle: [self.x, self.y, self.width, self.height, dp(27)]
-                        width: dp(1)
-                on_release: root.dismiss()
-
-# ------------------- 2. CHATBOX SCREEN ------------------- #
 <ChatBox>:
     size: root.size
     pos: root.pos
     orientation: 'vertical'
-   
-    # Top Bar
     BoxLayout:
         size_hint_y: None
         height: dp(60)
@@ -2647,7 +1660,6 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-               
         FloatLayout:
             size_hint: None, None
             size: dp(40), dp(40)
@@ -2662,7 +1674,7 @@
                 text: '[b]-[/b]'
                 markup: True
                 font_size: sp(16)
-                color: 0.43, 0.33, 0.85, 1  # ScholarBridge Purple
+                color: 0.43, 0.33, 0.85, 1
                 pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         BoxLayout:
             orientation: 'vertical'
@@ -2680,12 +1692,10 @@
                 text_size: self.size
                 halign: 'left'
                 valign: 'top'
-   
-    # Chat Area
     ScrollView:
         id: chat_scroll
         do_scroll: False, True
-        scroll_timeout: 250 # Mobile Responsiveness fix
+        scroll_timeout: 250
         scroll_distance: dp(20)
         BoxLayout:
             id: chat_history
@@ -2694,8 +1704,6 @@
             height: self.minimum_height
             padding: dp(15)
             spacing: dp(15)
-   
-    # Input Bar
     BoxLayout:
         size_hint_y: None
         height: dp(70)
@@ -2707,15 +1715,12 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-       
-        # FIX: Replaced raw ButtonBehavior with valid IconButton
         IconButton:
             size_hint_x: None
             width: dp(30)
             icon_source: 'assets/attach.png'
             icon_size_hint: 0.8, 0.8
             on_release: print("Attach file triggered")
-       
         TextInput:
             id: chat_input
             hint_text: 'Type a message...'
@@ -2724,22 +1729,20 @@
             hint_text_color: 0.5, 0.5, 0.5, 1
             multiline: False
             padding: [dp(15), dp(10)]
-            
-       
-        # FIX: Replaced raw ButtonBehavior with valid SendButton
         SendButton:
             size_hint_x: None
             width: dp(50)
             on_release: root.send_new_message()
 
-# ------------------- 3. WALLET SCREEN ------------------- #
+# -------------------------------
+# PAGE: Wallet UI
+# -------------------------------
 <Wallet>:
     size: root.size
     pos: root.pos
     orientation: 'vertical'
     padding: [dp(20), dp(5), dp(20), dp(20)]
     spacing: dp(15)
-
     ScrollView:
         do_scroll: False, True
         bar_width: 0
@@ -2748,8 +1751,6 @@
             size_hint_y: None
             height: self.minimum_height
             spacing: dp(25)
-
-            # Big Purple Card
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
@@ -2794,7 +1795,6 @@
                         Line:
                             rounded_rectangle: [self.x, self.y, self.width, self.height, dp(5)]
                             width: dp(1)
-                # Action Buttons
                 BoxLayout:
                     spacing: dp(15)
                     padding: [0, dp(15), 0, 0]
@@ -2806,8 +1806,6 @@
                         icon: 'assets/red_down.png'
                         text: 'Withdraw'
                         on_release: root.process_transaction('withdraw')
-
-            # Payment Methods
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
@@ -2824,37 +1822,29 @@
                     text_size: self.size
                     halign: 'left'
                     valign: 'middle'
-
-                # Removed the inner ScrollView! We just use a plain container.
                 BoxLayout:
                     id: history_list  
                     orientation: 'vertical'
                     size_hint_y: None
-                    # We leave height blank here because your Python code 
-                    # explicitly calculates it (len * 75dp)!
                     spacing: dp(10)
                     padding: [0, 0, 0, dp(15)]
-# ------------------- 4. SETTINGS SCREEN ------------------- #
+
+# -------------------------------
+# PAGE: Settings & Logout
+# -------------------------------
 <UserSettings>:
     orientation: 'vertical'
     padding: [dp(20), dp(5), dp(20), dp(20)]
     spacing: dp(10)
-
-    # Master Background for the Settings Screen
-
-    # Scrollable Settings List
     ScrollView:
         do_scroll: False, True
-        bar_width: 0
-      
+        bar_width: 0               
         BoxLayout:
             orientation: 'vertical'
             size_hint_y: None
             height: self.minimum_height
             spacing: dp(25)
             padding: [0, dp(15), 0, dp(20)]
-
-            # --- ACCOUNT SECTION ---
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
@@ -2868,8 +1858,6 @@
                     halign: 'left'
                     size_hint_y: None
                     height: dp(20)
-             
-                # Card Container
                 BoxLayout:
                     orientation: 'vertical'
                     size_hint_y: None
@@ -2881,7 +1869,6 @@
                             pos: self.pos
                             size: self.size
                             radius: [dp(12)]
-                 
                     SettingsTile:
                         icon_source: 'assets/lock.png'
                         title: 'Privacy & Security'
@@ -2896,8 +1883,6 @@
                         icon_source: 'assets/university.png'
                         title: 'University'
                         subtitle: 'State University'
-
-            # --- PREFERENCES SECTION ---
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
@@ -2911,8 +1896,6 @@
                     halign: 'left'
                     size_hint_y: None
                     height: dp(20)
-             
-                # Card Container
                 BoxLayout:
                     orientation: 'vertical'
                     size_hint_y: None
@@ -2924,7 +1907,6 @@
                             pos: self.pos
                             size: self.size
                             radius: [dp(12)]
-                 
                     SettingsTile:
                         icon_source: 'assets/notification.png'
                         title: 'Notifications'
@@ -2939,8 +1921,6 @@
                         icon_source: 'assets/language.png'
                         title: 'Language'
                         subtitle: 'English (US)'
-
-            # --- SUPPORT SECTION ---
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
@@ -2954,8 +1934,6 @@
                     halign: 'left'
                     size_hint_y: None
                     height: dp(20)
-             
-                # Card Container
                 BoxLayout:
                     orientation: 'vertical'
                     size_hint_y: None
@@ -2967,25 +1945,20 @@
                             pos: self.pos
                             size: self.size
                             radius: [dp(12)]
-                 
                     SettingsTile:
                         icon_source: 'assets/help.png' 
                         title: 'Help Center'
                         subtitle: 'FAQs & guides'
 
-# ------------------- 5. LOGOUT SCREEN ------------------- #
 <LogOut>:
     size: root.size
     pos: root.pos
-   
     BoxLayout:
         orientation: 'vertical'
         size_hint: 0.85, None
         height: self.minimum_height
         pos_hint: {'center_x': 0.5, 'center_y': 0.6}
         spacing: dp(20)
-
-        # Red Icon
         FloatLayout:
             size_hint_y: None
             height: dp(80)
@@ -3000,8 +1973,6 @@
                 size_hint: 0.5, 0.5
                 pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                 color: (0.77, 0.1, 0.035, 1)
-
-        # Text
         Label:
             text: '[b]Sign Out?[/b]'
             markup: True
@@ -3021,15 +1992,12 @@
             font_size: sp(12)
             size_hint_y: None
             height: dp(20)
-
-        # Buttons
         BoxLayout:
             orientation: 'vertical'
             size_hint_y: None
             height: dp(120)
             spacing: dp(15)
             padding: [0, dp(10), 0, 0]
-
             Button:
                 text: '[b]Sign Out[/b]'
                 markup: True
@@ -3045,7 +2013,7 @@
                     root.perform_logout()
                     app.root.get_screen('main').toggle_footer(True)
                     app.root.get_screen('main').ids.dashboard.state = 'down'
-                    app.root.get_screen('main').ids.info.state = 'normal'        
+                    app.root.get_screen('main').ids.info.state = 'normal'
             Button:
                 text: '[b]Cancel[/b]'
                 markup: True
@@ -3062,10 +2030,611 @@
                     Line:
                         rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
                         width: dp(1)
-                # Wired Up LogOut Cancel button to hide the global back button
                 on_release:
                     root.parent.manager.current = 'menu'
                     root.parent.parent.parent.parent.parent.parent.parent.ids.label1.text = '[b]MENU[/b]'
                     root.parent.parent.parent.parent.parent.parent.parent.ids.label2.text = 'manage your account'
                     root.parent.parent.parent.parent.parent.parent.parent.ids.back_btn.opacity = 0
                     root.parent.parent.parent.parent.parent.parent.parent.ids.back_btn.disabled = True
+
+
+# ==========================================
+# DOMAIN: REUSABLE UI COMPONENTS
+# ==========================================
+
+# -------------------------------
+# COMPONENT: Buttons & Inputs
+# -------------------------------
+<PrimaryButton@ButtonBehavior+FloatLayout>:
+    text: ''
+    size_hint_y: None
+    height: dp(55)
+    canvas.before:
+        Color:
+            rgba: (0.42, 0.35, 0.88, 1) if self.state == 'normal' else (0.3, 0.25, 0.7, 1)
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(27)] 
+    Label:
+        text: root.text
+        markup: True
+        font_size: sp(16)
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+<SelectionBadge@ToggleButton>:
+    background_normal: ''
+    background_down: ''
+    background_color: 0, 0, 0, 0 
+    markup: True
+    color: (1, 1, 1, 1) if self.state == 'down' else (0.6, 0.6, 0.6, 1)
+    size_hint_x: None
+    canvas.before:
+        Color:
+            rgba: (0.42, 0.35, 0.88, 0.4) if self.state == 'down' else (1, 1, 1, 0.05)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+
+<NavBackButton@ButtonBehavior+BoxLayout>:
+    size_hint: None, None
+    size: dp(40), dp(40)
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.16, 0.22, 1
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(10)]
+    Label:
+        text: '<'
+        font_size: sp(18)
+        bold: True
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+<EditProfileButton@ButtonBehavior+FloatLayout>:
+    size_hint_y: None
+    height: dp(50)
+    canvas.before:
+        Color:
+            rgba: 0.43, 0.33, 0.85, 1
+        Line:
+            rounded_rectangle: [self.x, self.y, self.width, self.height, dp(12)]
+            width: dp(1.2)
+    BoxLayout:
+        spacing: dp(8)
+        size_hint: None, 1
+        width: self.minimum_width
+        pos_hint: {'center_x': 0.5}
+        Image:
+            source: 'assets/edit.png'
+            size_hint_x: None
+            width: dp(18)
+        Label:
+            text: '[b]Edit Profile[/b]'
+            markup: True
+            color: 1, 1, 1, 1
+            size_hint_x: None
+            width: self.texture_size[0]
+
+<IconButton@ButtonBehavior+AnchorLayout>:
+    icon_source: ''
+    icon_size_hint: 0.5, 0.5
+    canvas.before:
+        Color:
+            rgba: (1, 1, 1, 0)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    Image:
+        source: root.icon_source
+        size_hint: root.icon_size_hint
+
+<SendButton@ButtonBehavior+AnchorLayout>:
+    icon_source: 'assets/send.png'
+    Image:
+        source: root.icon_source
+        size_hint: 0.45, 0.45
+
+<FormInput@BoxLayout>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: dp(80)
+    spacing: dp(8)
+    title: ''
+    hint: ''
+    text_val: internal_input.text
+    multilined: False
+    Label:
+        text: root.title
+        font_size: sp(14)
+        bold: True
+        size_hint_y: None
+        height: dp(20)
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
+    BoxLayout:
+        pos_hint: {'center_y': 0.5}
+        padding: [dp(15), 0]
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.13, 0.18, 1
+            RoundedRectangle:
+                size: self.size
+                pos: self.pos
+                radius: [dp(8)]
+            Color:
+                rgba: 1, 1, 1, 0.1
+            Line:
+                rounded_rectangle: [self.x, self.y, self.width, self.height, dp(8)]
+                width: dp(1)
+        TextInput:
+            id: internal_input
+            hint_text: root.hint
+            hint_text_color: 1, 1, 1, 0.4
+            background_normal: ''
+            background_active: ''
+            foreground_color: 1, 1, 1, 1
+            background_color: 0, 0, 0, 0
+            cursor_color: 0.42, 0.35, 0.88, 1
+            multiline: root.multilined
+            padding: [dp(15), dp(15), dp(15), dp(15)] if root.multilined else [dp(15), (self.height - self.line_height) / 2, dp(15), (self.height - self.line_height) / 2]
+
+# -------------------------------
+# COMPONENT: Cards & Tiles
+# -------------------------------
+<EscrowBanner@BoxLayout>:
+    size_hint_y: None
+    height: dp(60)
+    padding: dp(15)
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.08, 0.14, 0.16, 1 
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(12)]
+    Image:
+        source: 'assets/green_shield.png'
+        size_hint_x: None
+        width: dp(24)
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: '[b]Escrow Protected[/b]'
+            markup: True
+            color: 0.15, 0.76, 0.51, 1
+            font_size: sp(14)
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: 'Payment held securely until the buyer confirms receipt'
+            color: 1, 1, 1, 0.6
+            font_size: sp(11)
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+
+<CardBase@BoxLayout>:
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.16, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+
+<ListTile>:
+    size_hint_y: None
+    height: dp(70)
+    padding: dp(15)
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.16, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+    FloatLayout:
+        size_hint: None, None
+        size: dp(40), dp(40)
+        pos_hint: {'center_y': 0.5}
+        canvas.before:
+            Color:
+                rgba: 0.15, 0.16, 0.22, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(10)]
+        Image:
+            source: root.icon_source
+            size_hint: 0.5, 0.5
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(2)
+        pos_hint: {'center_y': 0.5}
+        Label:
+            text: root.title
+            font_size: sp(16)
+            bold: True
+            color: 1, 1, 1, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: root.subtitle
+            font_size: sp(12)
+            color: 0.6, 0.6, 0.6, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+    Label:
+        text: '>' if root.show_arrow else ''
+        size_hint_x: None
+        width: dp(20)
+        color: 0.5, 0.5, 0.5, 1
+        font_size: sp(18)
+
+<WalletAction@ButtonBehavior+BoxLayout>:
+    orientation: 'horizontal'
+    padding: [dp(20), dp(10)]
+    spacing: dp(10)
+    icon: ''
+    text: ''
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 0.2
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(10)]
+    Label:
+        text: root.text
+        bold: True
+        font_size: sp(14)
+        text_size: self.size
+        halign: 'center'
+        valign: 'middle'
+
+<ChatBubble>:
+    size_hint_y: None
+    height: self.minimum_height
+    padding: [dp(10), dp(5)]
+    AnchorLayout:
+        anchor_x: 'right' if root.is_sender else 'left'
+        size_hint_y: None
+        height: bubble_container.height
+        BoxLayout:
+            id: bubble_container
+            orientation: 'vertical'
+            size_hint: None, None
+            width: min(dp(250), root.width * 0.75)
+            height: self.minimum_height
+            padding: dp(15)
+            spacing: dp(5)
+            canvas.before:
+                Color:
+                    rgba: (0.43, 0.33, 0.85, 1) if root.is_sender else (0.15, 0.16, 0.22, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(15), dp(15), dp(0) if root.is_sender else dp(15), dp(15) if root.is_sender else dp(0)]
+            Label:
+                text: root.text
+                size_hint_y: None
+                height: self.texture_size[1]
+                text_size: self.width, None
+                color: 1, 1, 1, 1
+            Label:
+                text: root.time
+                font_size: sp(10)
+                size_hint_y: None
+                height: dp(12)
+                text_size: self.width, None
+                halign: 'right' if root.is_sender else 'left'
+                color: 0.8, 0.8, 0.8, 0.7
+
+<MenuItem@ButtonBehavior+BoxLayout>:
+    size_hint_y: None
+    height: dp(55)
+    spacing: dp(15)
+    padding: [dp(10), dp(5), dp(10), dp(5)]
+    opacity: 0.5 if self.state == 'down' else 1.0
+    icon_source: ''
+    text: ''
+    text_color: 1, 1, 1, 1
+    icon_bg_color: 0.12, 0.13, 0.20, 1
+    badge_count: 0
+    FloatLayout:
+        size_hint_x: None
+        width: dp(45)
+        canvas.before:
+            Color:
+                rgba: root.icon_bg_color
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(12)]
+        Image:
+            source: root.icon_source
+            size_hint: 0.5, 0.5
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    Label:
+        text: root.text
+        color: root.text_color
+        font_size: sp(16)
+        bold: True
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
+    Label:
+        text: str(root.badge_count) if root.badge_count > 0 else ""
+        size_hint_x: None
+        width: dp(30) if root.badge_count > 0 else 0
+        color: 1, 1, 1, 1
+        font_size: sp(12)
+        bold: True
+        canvas.before:
+            Color:
+                rgba: (0.88, 0.25, 0.25, 1) if root.badge_count > 0 else (0,0,0,0)
+            RoundedRectangle:
+                size: [dp(22), dp(22)]
+                pos: [self.center_x - dp(11), self.center_y - dp(11)]
+                radius: [dp(11)]
+
+<SettingsTile@BoxLayout>:
+    size_hint_y: None
+    height: dp(70)
+    padding: dp(15)
+    spacing: dp(15)
+    icon_source: ''
+    title: ''
+    subtitle: ''
+    FloatLayout:
+        size_hint: None, None
+        size: dp(40), dp(40)
+        pos_hint: {'center_y': 0.5}
+        canvas.before:
+            Color:
+                rgba: 0.15, 0.16, 0.22, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(10)]
+        Image:
+            source: root.icon_source
+            size_hint: 0.5, 0.5
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(2)
+        pos_hint: {'center_y': 0.5}
+        Label:
+            text: root.title
+            font_size: sp(16)
+            bold: True
+            color: 1, 1, 1, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: root.subtitle
+            font_size: sp(12)
+            color: 0.6, 0.6, 0.6, 1
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+    Label:
+        text: '>'
+        size_hint_x: None
+        width: dp(20)
+        color: 0.5, 0.5, 0.5, 1
+        font_size: sp(18)
+
+<InboxTile>:
+    size_hint_y: None
+    height: dp(85)
+    padding: dp(15)
+    spacing: dp(15)
+    on_release: self.open_chat()
+    canvas.before:
+        Color:
+            rgba: (0.15, 0.16, 0.22, 1) if self.state == 'normal' else (0.20, 0.21, 0.28, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(15)]
+    FloatLayout:
+        size_hint_x: None
+        width: dp(50)
+        canvas.before:
+            Color:
+                rgba: 0.43, 0.33, 0.85, 1
+            Ellipse:
+                pos: [self.center_x - dp(25), self.center_y - dp(25)]
+                size: dp(50), dp(50)
+        Label:
+            text: f'[b]{root.partner_name[0:2].upper() if root.partner_name else ""}[/b]'
+            markup: True
+            font_size: sp(16)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(2)
+        Label:
+            text: f'[b]{root.partner_name}[/b]'
+            markup: True
+            font_size: sp(16)
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: root.last_message
+            color: 0.6, 0.6, 0.6, 1
+            font_size: sp(13)
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+            shorten: True
+            shorten_from: 'right'
+    Label:
+        size_hint_x: None
+        width: dp(65)
+        text: root.time
+        color: 0.5, 0.5, 0.5, 1
+        font_size: sp(11)
+        text_size: self.size
+        halign: 'right'
+        valign: 'top'
+
+<OwnedItemTile@BoxLayout>:
+    title: ''
+    subtitle: ''
+    seller_name: '' 
+    icon_bg: 0.15, 0.16, 0.22, 1
+    size_hint_y: None
+    height: dp(90) 
+    padding: dp(15)
+    spacing: dp(15)
+    canvas.before:
+        Color:
+            rgba: 0.11, 0.12, 0.16, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(15)]
+    FloatLayout:
+        size_hint: None, None
+        size: dp(45), dp(45)
+        pos_hint: {'center_y': 0.5} 
+        canvas.before:
+            Color:
+                rgba: root.icon_bg
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(10)]
+        Image:
+            source: 'assets/check_solid.png'
+            size_hint: 0.5, 0.5
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    BoxLayout:
+        orientation: 'vertical'
+        pos_hint: {'center_y': 0.5}
+        Label:
+            text: f'[b]{root.title}[/b]'
+            markup: True
+            font_size: sp(16)
+            size_hint_y: None
+            height: dp(22)
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+            shorten: True
+            shorten_from: 'right'
+        Label:
+            text: root.subtitle
+            color: 0.6, 0.6, 0.6, 1
+            font_size: sp(13)
+            size_hint_y: None
+            text_size: self.width, None      
+            height: self.texture_size[1]      
+            halign: 'left'
+            valign: 'top'
+    Button:
+        text: '[b]Rate[/b]'
+        markup: True
+        size_hint: None, None
+        size: dp(70), dp(35)
+        pos_hint: {'center_y': 0.5}
+        background_color: 0,0,0,0
+        on_release: app.root.get_screen('main').ids.screenmanager.get_screen('info').children[0].ids.screenmanager.get_screen('inbox').children[0].open_review(root.seller_name)
+        canvas.before:
+            Color:
+                rgba: 1, 0.8, 0.2, 0.8
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(8)]
+
+<SubscriptionItemTile@BoxLayout>:
+    title: ''
+    schedule: ''
+    seller_name: ''
+    service_id: 0
+    size_hint_y: None
+    height: dp(110) 
+    padding: dp(15)
+    spacing: dp(10)
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.12, 0.20, 1 
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(15)]
+    BoxLayout:
+        orientation: 'vertical'
+        pos_hint: {'center_y': 0.5}
+        Label:
+            text: f'[b]{root.title}[/b]'
+            markup: True
+            font_size: sp(16)
+            text_size: self.size
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            text: f'Starts: {root.schedule}'
+            color: 0.43, 0.33, 0.85, 1 
+            font_size: sp(13)
+            text_size: self.size
+            halign: 'left'
+            valign: 'top'
+    BoxLayout:
+        orientation: 'vertical' 
+        size_hint_x: None
+        width: dp(100)           
+        spacing: dp(8)           
+        pos_hint: {'center_y': 0.5}
+        Button:
+            text: 'Rate'
+            size_hint: 1, None   
+            height: dp(32)
+            background_color: 0,0,0,0
+            on_release: app.root.get_screen('main').ids.screenmanager.get_screen('info').children[0].ids.screenmanager.get_screen('inbox').children[0].open_review(root.seller_name)
+            canvas.before:
+                Color:
+                    rgba: 1, 0.8, 0.2, 0.8 
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(8)]
+        Button:
+            text: 'Unsubscribe'
+            size_hint: 1, None   
+            height: dp(32)
+            background_color: 0,0,0,0
+            on_release: app.root.get_screen('main').ids.screenmanager.get_screen('info').children[0].ids.screenmanager.get_screen('inbox').children[0].unsubscribe(root.service_id)
+            canvas.before:
+                Color:
+                    rgba: 0.85, 0.26, 0.33, 1 
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(8)]
+
+<Divider@Widget>:
+    size_hint_y: None
+    height: dp(1)
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.16, 0.22, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
