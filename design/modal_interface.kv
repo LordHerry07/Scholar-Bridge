@@ -721,3 +721,155 @@
                     pos: self.pos
                     radius: [dp(25)]
             on_release: root.submit()
+
+# -------------------------------
+# COMPONENT: Edit Profile Modal
+# -------------------------------
+<EditProfileModal>:
+    background: ''
+    background_color: 0, 0, 0, 0.7
+    size_hint: 0.92, 0.88
+    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    auto_dismiss: False
+    BoxLayout:
+        id: modal_layout
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(10)
+        canvas.before:
+            Color:
+                rgba: 0.11, 0.12, 0.16, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(20)]
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(130)
+            spacing: dp(5)
+            FloatLayout:
+                size_hint: None, None
+                size: dp(70), dp(70)
+                pos_hint: {'center_x': 0.5}
+                canvas.before:
+                    Color:
+                        rgba: 0.12, 0.13, 0.20, 1
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+                Label:
+                    id: modal_initial_label
+                    text: '[b]-[/b]'
+                    markup: True
+                    font_size: sp(26)
+                    color: 0.43, 0.33, 0.85, 1
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            Label:
+                id: modal_display_name_label
+                text: '[b]Loading...[/b]'
+                markup: True
+                font_size: sp(18)
+                size_hint_y: None
+                height: dp(25)
+        ScrollView:
+            do_scroll: False, True
+            bar_width: 0
+            scroll_timeout: 250
+            scroll_distance: dp(20)
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(15)
+                padding: [0, dp(10), 0, dp(20)] 
+
+                FormInput:
+                    id: name_input
+                    title: 'Full Name'
+                    hint: 'Change your display name'
+                FormInput:
+                    id: role_input
+                    title: 'Role'
+                    hint: 'Student or Teacher'
+                FormInput:
+                    id: age_input
+                    title: 'Age'
+                    hint: 'e.g. 21'
+                FormInput:
+                    id: birthday_input
+                    title: 'Birthday'
+                    hint: 'YYYY-MM-DD or Month Day'
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(80)
+                    spacing: dp(10)
+                    FormInput:
+                        id: location_input
+                        title: 'Location'
+                        hint: 'Campus Dorm B, Room 204'
+                        size_hint_x: 0.8
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint_x: 0.2
+                        Label:
+                            size_hint_y: None
+                            height: dp(28)
+                        Button:
+                            text: ''
+                            background_color: 0,0,0,0
+                            on_release: root.auto_locate()
+                            canvas.before:
+                                Color:
+                                    rgba: 0.15, 0.16, 0.22, 1
+                                RoundedRectangle:
+                                    pos: self.pos
+                                    size: self.size
+                                    radius: [dp(8)]
+                                Color:
+                                    rgba: 0.43, 0.33, 0.85, 1
+                                Line:
+                                    rounded_rectangle: [self.x, self.y, self.width, self.height, dp(8)]
+                                    width: dp(1)
+                            Image:
+                                size: self.parent.size
+                                source: 'assets/location.png'
+                                size_hint: None, None
+                                size: dp(24), dp(24)
+                                center_x: self.parent.center_x
+                                center_y: self.parent.center_y
+                FormInput:
+                    id: password_input
+                    title: 'New Password'
+                    hint: 'Leave blank to keep current'
+                FormInput:
+                    id: confirm_password_input
+                    title: 'Confirm Password'
+                    hint: 'Re-type new password'
+        BoxLayout:
+            size_hint_y: None
+            height: dp(120)
+            orientation: 'vertical'
+            spacing: dp(10)
+            PrimaryButton:
+                text: '[b]Save Changes[/b]'
+                on_release: root.save_profile()
+            Button:
+                text: '[b]Cancel[/b]'
+                markup: True
+                size_hint_y: None
+                height: dp(55)
+                background_color: 0,0,0,0
+                canvas.before:
+                    Color:
+                        rgba: 0.15, 0.16, 0.22, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(27)]
+                    Color:
+                        rgba: 0.3, 0.3, 0.3, 1
+                    Line:
+                        rounded_rectangle: [self.x, self.y, self.width, self.height, dp(27)]
+                        width: dp(1)
+                on_release: root.dismiss()

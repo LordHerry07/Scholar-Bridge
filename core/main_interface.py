@@ -212,7 +212,15 @@ class ReviewModal(ModalView):
     def submit(self):
         my_email = Data.user.get('email')
         comment = self.ids.review_comment.text.strip()
-        success = request.submit_review(my_email, self.seller_name, self.current_rating, comment)
+        
+        # --- THREADED ---
+        threading.Thread(target=self._thread_submit_review, args=(my_email, self.seller_name, self.current_rating, comment), daemon=True).start()
+
+    def _thread_submit_review(self, email, seller_name, rating, comment):
+        success = request.submit_review(email, seller_name, rating, comment)
+        Clock.schedule_once(lambda dt: self._update_review_ui(success), 0)
+        
+    def _update_review_ui(self, success):
         if success:
             print("Review saved!")
             self.dismiss()
@@ -238,9 +246,15 @@ class ProductDetailsModal(ModalView):
             NotificationModal().show("Action Blocked", "You cannot buy your own listing.", is_error=True)
             return
             
-        result = request.buy_product(self.product_id, my_email)
+        # --- THREADED ---
+        threading.Thread(target=self._thread_buy_item, args=(self.product_id, my_email), daemon=True).start()
+
+    def _thread_buy_item(self, product_id, my_email):
+        result = request.buy_product(product_id, my_email)
+        Clock.schedule_once(lambda dt: self._update_buy_ui(result), 0)
+
+    def _update_buy_ui(self, result):
         is_success = result.get("success") if isinstance(result, dict) else bool(result)
-        
         if is_success:
             self.dismiss()
             app = App.get_running_app()
@@ -254,7 +268,9 @@ class ProductDetailsModal(ModalView):
                             if widget_name == 'Product': widget.get_products()
                             elif widget_name == 'Service': widget.get_services()
                             elif widget_name == 'Dashboard': widget.load_stats()
-                            elif widget_name == 'Wallet': widget.load_balance()
+                            elif widget_name == 'Wallet': 
+                                widget.load_balance()
+                                widget.load_recent_activity()
                 except Exception as e:
                     print(f"Radar Refresh Error: {e}")
             try:
@@ -374,8 +390,15 @@ class BookingCalendarModal(ModalView):
         day_str = f"{n}{suffix} {weekday_str}"
         
         my_email = Data.user.get('email')
-        success = request.subscribe_service(self.service_id, my_email, day_str)
         
+        # --- THREADED ---
+        threading.Thread(target=self._thread_confirm_booking, args=(self.service_id, my_email, day_str), daemon=True).start()
+
+    def _thread_confirm_booking(self, service_id, my_email, day_str):
+        success = request.subscribe_service(service_id, my_email, day_str)
+        Clock.schedule_once(lambda dt: self._update_booking_ui(success, day_str), 0)
+
+    def _update_booking_ui(self, success, day_str):
         if success:
             NotificationModal().show("Subscription Active", f"Your subscription starts on {day_str}.", is_error=False)
             self.dismiss()
@@ -479,41 +502,51 @@ class EditProfileModal(ModalView):
                 NotificationModal().show("Action Blocked", "Passwords do not match.", is_error=True)
                 return
 
-            result = request.update_profile(
-                email, old_name, new_name, new_password, 
-                new_role, new_age, new_birthday, new_location
-            )
-            
-            is_success = result.get("success") if isinstance(result, dict) else bool(result)
+            # --- THREADED ---
+            threading.Thread(
+                target=self._thread_save_profile, 
+                args=(email, old_name, new_name, new_password, new_role, new_age, new_birthday, new_location), 
+                daemon=True
+            ).start()
 
-            if is_success:
-                Data.user['full_name'] = new_name
-                Data.user['role'] = new_role
-                Data.user['age'] = new_age
-                Data.user['birthday'] = new_birthday
-                Data.user['location'] = new_location
+    def _thread_save_profile(self, email, old_name, new_name, new_password, new_role, new_age, new_birthday, new_location):
+        result = request.update_profile(
+            email, old_name, new_name, new_password, 
+            new_role, new_age, new_birthday, new_location
+        )
+        Clock.schedule_once(lambda dt: self._update_save_ui(result, new_name, new_role, new_age, new_birthday, new_location), 0)
+
+    def _update_save_ui(self, result, new_name, new_role, new_age, new_birthday, new_location):
+        is_success = result.get("success") if isinstance(result, dict) else bool(result)
+
+        if is_success:
+            Data.user['full_name'] = new_name
+            Data.user['role'] = new_role
+            Data.user['age'] = new_age
+            Data.user['birthday'] = new_birthday
+            Data.user['location'] = new_location
+            try:
+                with open('local_state.json', 'w', encoding='utf-8') as f:
+                    json.dump(Data.user, f)
+            except: pass
+
+            self.dismiss()
+            self.profile_screen_ref.load_info()
+            
+            app = App.get_running_app()
+            if app.root and app.root.has_screen('main'):
                 try:
-                    with open('local_state.json', 'w', encoding='utf-8') as f:
-                        json.dump(Data.user, f)
+                    sm = app.root.get_screen('main').ids.screenmanager
+                    for screen in sm.screens: 
+                        for widget in screen.walk():
+                            if type(widget).__name__ == 'Status':
+                                widget.check_info(0) 
                 except: pass
 
-                self.dismiss()
-                self.profile_screen_ref.load_info()
-                
-                app = App.get_running_app()
-                if app.root and app.root.has_screen('main'):
-                    try:
-                        sm = app.root.get_screen('main').ids.screenmanager
-                        for screen in sm.screens: 
-                            for widget in screen.walk():
-                                if type(widget).__name__ == 'Status':
-                                    widget.check_info(0) 
-                    except: pass
-
-                NotificationModal().show("Profile Updated", "Your changes have been saved.", is_error=False)
-            else:
-                error_msg = result.get("error", "An unknown error occurred.") if isinstance(result, dict) else "Update failed."
-                NotificationModal().show("Update Failed", error_msg, is_error=True)
+            NotificationModal().show("Profile Updated", "Your changes have been saved.", is_error=False)
+        else:
+            error_msg = result.get("error", "An unknown error occurred.") if isinstance(result, dict) else "Update failed."
+            NotificationModal().show("Update Failed", error_msg, is_error=True)
 
 class PublicProfileModal(ModalView):
     target_user = StringProperty("")
@@ -522,17 +555,30 @@ class PublicProfileModal(ModalView):
     def load_profile(self, fullname, initial):
         self.target_user = fullname
         self.initial = initial
+        
+        # Give immediate UI feedback
+        self.ids.profile_name.text = f'[b]{fullname}[/b]'
+        self.ids.profile_stats.text = 'Loading...'
+        self.ids.active_listings.clear_widgets()
+
+        # --- THREADED ---
+        threading.Thread(target=self._thread_load_profile, args=(fullname,), daemon=True).start()
+
+    def _thread_load_profile(self, fullname):
         profile_data = request.get_user_profile(fullname)
-        if not profile_data: return
+        Clock.schedule_once(lambda dt: self._update_public_profile_ui(profile_data), 0)
+
+    def _update_public_profile_ui(self, profile_data):
+        if not profile_data: 
+            self.ids.profile_stats.text = 'Profile not found.'
+            return
         
         products = profile_data.get('products', [])
         rating = profile_data.get('rating', 0)
         
-        self.ids.profile_name.text = f'[b]{fullname}[/b]'
         self.ids.profile_stats.text = f'⭐ {rating} Rating • {len(products)} Active Listings'
         
         container = self.ids.active_listings
-        container.clear_widgets()
         
         for data in products:
             card = DynamicProduct(
@@ -792,9 +838,16 @@ class MainInterface(Screen):
     def poll_notifications(self, dt):
         name = Data.user.get('full_name')
         if name:
-            app = App.get_running_app()
-            if app:
-                app.unread_count = request.get_unread_count(name)
+            threading.Thread(target=self._thread_poll_notifs, args=(name,), daemon=True).start()
+
+    def _thread_poll_notifs(self, name):
+        count = request.get_unread_count(name)
+        Clock.schedule_once(lambda dt: self._update_notif_ui(count), 0)
+
+    def _update_notif_ui(self, count):
+        app = App.get_running_app()
+        if app:
+            app.unread_count = count
 
     def toggle_footer(self, show=True):
         if not hasattr(self.ids, 'footer_nav'): return
@@ -830,6 +883,9 @@ class MainInterface(Screen):
             label1.text = '[b]DASHBOARD[/b]'
             label2.text = 'your activity overview'
             sm.get_screen('dashboard').children[0].load_stats()
+            dashboard_widget = sm.get_screen('dashboard').children[0]
+            dashboard_widget.load_stats()
+            dashboard_widget.load_recent_activity()
         elif tab_name == 'product':
             label1.text = '[b]PRODUCT[/b]'
             label2.text = 'textbooks, notes & materials'
@@ -979,13 +1035,19 @@ class Signup(Widget):
 # -------------------------------
 class Dashboard(Widget):
     MAX_BARS = 15
+    
+    total_earnings = StringProperty("[b]₱0.00[/b]")
+    active_listings = StringProperty("[b]0[/b]")
+    items_sold = StringProperty("[b]0[/b]")
+    seller_rating = StringProperty("[b]0.0[/b]")
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.data = []
         self.max_v = 50
         self.bind(size=self.on_resize, pos=self.on_resize)
-        Clock.schedule_once(self.load_stats, 1)
-        Clock.schedule_once(self.load_recent_activity, 0.5)
+        Clock.schedule_once(self.load_stats, 1.0)
+        Clock.schedule_once(self.load_recent_activity, 1.5) 
 
     def load_recent_activity(self, dt=0):
         user = Data.user or {}
@@ -993,12 +1055,20 @@ class Dashboard(Widget):
         if not email: 
             Clock.schedule_once(self.load_recent_activity, 1)
             return
-        container = self.ids.recent_activity_list
-        container.clear_widgets()
-        try: activities = request.get_recent_activity(email)
+            
+        threading.Thread(target=self._thread_load_recent_activity, args=(email,), daemon=True).start()
+
+    def _thread_load_recent_activity(self, email):
+        try: 
+            activities = request.get_recent_activity(email)
         except Exception as e:
             print(f"Dashboard Activity Error: {e}")
             activities = []
+        Clock.schedule_once(lambda dt: self._update_recent_activity_ui(activities), 0)
+
+    def _update_recent_activity_ui(self, activities):
+        container = self.ids.recent_activity_list
+        container.clear_widgets()
 
         if not activities:
             empty_label = Label(text="No recent transactions yet.", color=(1, 1, 1, 0.4), size_hint_y=None, height=dp(50))
@@ -1006,7 +1076,7 @@ class Dashboard(Widget):
             return
 
         for act in activities:
-            tile = ActivityTile()
+            tile = ActivityTile(size_hint_y=None, height=dp(70))
             tile.setup_tile(
                 act_type=act.get("type", "Unknown"),
                 title=act.get("title", "Item"),
@@ -1021,20 +1091,22 @@ class Dashboard(Widget):
         if not full_name: 
             Clock.schedule_once(self.load_stats, 1)
             return
+            
+        threading.Thread(target=self._thread_load_stats, args=(full_name,), daemon=True).start()
 
+    def _thread_load_stats(self, full_name):
         stats = request.get_user_stats(full_name)
         profile_data = request.get_user_profile(full_name)
+        Clock.schedule_once(lambda dt: self._update_stats_ui(stats, profile_data), 0)
+
+    def _update_stats_ui(self, stats, profile_data):
         real_rating = profile_data.get('rating', 0.0) if profile_data else 0.0
         
         if stats:
-            if hasattr(self.ids, 'earnings_label'):
-                self.ids.earnings_label.text = f"[b]₱{stats.get('total_earnings', 0):,.2f}[/b]"
-            if hasattr(self.ids, 'active_listings_label'):
-                self.ids.active_listings_label.text = f"[b]{stats.get('active_listings', 0)}[/b]"
-            if hasattr(self.ids, 'items_sold_label'):
-                self.ids.items_sold_label.text = f"[b]{stats.get('items_sold', 0)}[/b]"
-            if hasattr(self.ids, 'rating_label'):
-                self.ids.rating_label.text = f"[b]{float(real_rating):.1f}[/b]"
+            self.total_earnings = f"[b]₱{stats.get('total_earnings', 0):,.2f}[/b]"
+            self.active_listings = f"[b]{stats.get('active_listings', 0)}[/b]"
+            self.items_sold = f"[b]{stats.get('items_sold', 0)}[/b]"
+            self.seller_rating = f"[b]{float(real_rating):.1f}[/b]"
 
             e_pct = stats.get('earnings_pct', 0)
             e_color = "2ECC71" if e_pct >= 0 else "E74C3C" 
@@ -1060,7 +1132,6 @@ class Dashboard(Widget):
             self.max_v = max(current_max * 1.5, 50)
             
             self.draw_graph()
-            self.load_recent_activity()
 
     def draw_graph(self):
         chart = self.ids.chart
@@ -1190,6 +1261,7 @@ class Product(Widget):
 # -------------------------------
 class Sell(Widget):
     is_service_mode = BooleanProperty(False)
+    
     def add_product(self):
         title = self.ids.title_input.ids.internal_input.text.strip() if 'title_input' in self.ids else ""
         subject_name = self.ids.subject_input.ids.internal_input.text.strip() if 'subject_input' in self.ids else ""
@@ -1237,8 +1309,6 @@ class Sell(Widget):
                 "price": price, "review": description, "condition_status": condition,
                 "rate": 0, "escrow": True, "satisfied": False
             }
-            res = request.add_product(payload)
-            success_type = listing_type
         else:
             category = "Tutoring"
             if 'service_type_group' in self.ids:
@@ -1259,9 +1329,20 @@ class Sell(Widget):
                 "rate_format": rate_format, "description": description, 
                 "schedule": "Flexible", "escrow": True
             }
-            res = request.add_service(payload) 
-            success_type = category
 
+        # --- THREADED ---
+        threading.Thread(target=self._thread_add_product, args=(payload, self.is_service_mode), daemon=True).start()
+
+    def _thread_add_product(self, payload, is_service_mode):
+        if not is_service_mode:
+            res = request.add_product(payload)
+            success_type = payload.get("product_type", "Textbook")
+        else:
+            res = request.add_service(payload) 
+            success_type = payload.get("category", "Service")
+        Clock.schedule_once(lambda dt: self._update_sell_ui(res, success_type), 0)
+
+    def _update_sell_ui(self, res, success_type):
         if res:
             NotificationModal().show("Success!", f"Your {success_type} is now live.", is_error=False)
             if 'title_input' in self.ids: self.ids.title_input.ids.internal_input.text = ""
@@ -1372,8 +1453,15 @@ class Status(Widget):
     def load_user_stats(self, dt=0):
         name = Data.user.get('full_name')
         if name:
-            profile = request.get_user_profile(name)
-            if profile: self.rating = str(profile.get('rating', '0'))
+            # --- THREADED ---
+            threading.Thread(target=self._thread_load_user_stats, args=(name,), daemon=True).start()
+
+    def _thread_load_user_stats(self, name):
+        profile = request.get_user_profile(name)
+        Clock.schedule_once(lambda dt: self._update_status_ui(profile), 0)
+
+    def _update_status_ui(self, profile):
+        if profile: self.rating = str(profile.get('rating', '0'))
 
 class Profile(BoxLayout):
     def __init__(self, **kwargs):
@@ -1423,16 +1511,32 @@ class InboxScreen(BoxLayout):
         container = self.ids.hub_list
         container.clear_widgets()
 
-        if self.current_tab == 'chats':
+        threading.Thread(target=self._thread_load_hub, args=(my_name, my_email, self.current_tab), daemon=True).start()
+
+    def _thread_load_hub(self, my_name, my_email, active_tab):
+        inbox_data = []
+        hub_data = {"products": [], "subscriptions": []}
+        
+        if active_tab == 'chats':
             inbox_data = request.get_inbox(my_name)
+        else:
+            hub_data = request.get_my_hub(my_email)
+            
+        Clock.schedule_once(lambda dt: self._update_hub_ui(active_tab, inbox_data, hub_data), 0)
+
+    def _update_hub_ui(self, active_tab, inbox_data, hub_data):
+        if self.current_tab != active_tab: return
+        
+        container = self.ids.hub_list
+        
+        if active_tab == 'chats':
             for convo in inbox_data:
                 container.add_widget(InboxTile(
                     partner_name=convo['partner_name'],
                     last_message=convo['last_message'],
                     time=convo['timestamp']
                 ))
-        elif self.current_tab == 'products':
-            hub_data = request.get_my_hub(my_email)
+        elif active_tab == 'products':
             for prod in hub_data.get('products', []):
                 tile = Factory.OwnedItemTile()
                 tile.title = prod['title']
@@ -1440,8 +1544,7 @@ class InboxScreen(BoxLayout):
                 tile.seller_name = prod['full_name'] 
                 tile.icon_bg = (0.16, 0.67, 0.38, 1) 
                 container.add_widget(tile)
-        elif self.current_tab == 'subs':
-            hub_data = request.get_my_hub(my_email)
+        elif active_tab == 'subs':
             for sub in hub_data.get('subscriptions', []):
                 tile = Factory.SubscriptionItemTile()
                 tile.title = sub['title']
@@ -1451,7 +1554,14 @@ class InboxScreen(BoxLayout):
                 container.add_widget(tile)
 
     def unsubscribe(self, service_id):
+        # --- THREADED ---
+        threading.Thread(target=self._thread_unsubscribe, args=(service_id,), daemon=True).start()
+
+    def _thread_unsubscribe(self, service_id):
         success = request.unsubscribe_service(service_id)
+        Clock.schedule_once(lambda dt: self._update_unsubscribe_ui(success), 0)
+
+    def _update_unsubscribe_ui(self, success):
         if success:
             NotificationModal().show("Unsubscribed", "You have ended this subscription.", is_error=False)
             self.load_hub_data() 
@@ -1489,13 +1599,19 @@ class ChatBox(BoxLayout):
         if self.parent and self.parent.manager and self.parent.manager.current != 'chatbox':
             return
         my_name = Data.user.get('full_name', '')
-        history = request.get_messages(my_name, self.target_user)
-        
+        threading.Thread(target=self._thread_load_messages, args=(my_name, self.target_user), daemon=True).start()
+
+    def _thread_load_messages(self, my_name, target_user):
+        history = request.get_messages(my_name, target_user)
+        Clock.schedule_once(lambda dt: self._update_chat_ui(history, my_name), 0)
+
+    def _update_chat_ui(self, history, my_name):
         chat_container = self.ids.chat_history
+        # Don't redraw if no new messages exist
         if len(chat_container.children) == len(history):
             return
+            
         chat_container.clear_widgets()
-        
         for msg in history:
             is_me = (msg['sender_name'] == my_name)
             chat_container.add_widget(ChatBubble(
@@ -1511,29 +1627,48 @@ class ChatBox(BoxLayout):
         message_text = text_input.text.strip()
         if not message_text or not self.target_user: return
         my_name = Data.user.get('full_name', '')
-        success = request.send_message(my_name, self.target_user, message_text)
+        
+        # --- THREADED ---
+        threading.Thread(target=self._thread_send_message, args=(my_name, self.target_user, message_text, text_input), daemon=True).start()
+
+    def _thread_send_message(self, my_name, target_user, message_text, text_input):
+        success = request.send_message(my_name, target_user, message_text)
+        Clock.schedule_once(lambda dt: self._update_send_msg_ui(success, text_input), 0)
+
+    def _update_send_msg_ui(self, success, text_input):
         if success:
             text_input.text = "" 
-            self.load_messages() 
+            self.load_messages()
 
 # -------------------------------
 # SCREEN: Wallet
 # -------------------------------
 class Wallet(BoxLayout):
-    current_balance = StringProperty("₱0.00")
+    current_balance = StringProperty("0.00")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        Clock.schedule_once(self.load_balance, 1)
         
-    def load_balance(self):
+    def load_balance(self, dt=0):
         my_email = Data.user.get('email')
-        if not my_email: return
+        if not my_email: 
+            Clock.schedule_once(self.load_balance, 1)
+            return
+            
+        threading.Thread(target=self._thread_load_balance, args=(my_email,), daemon=True).start()
+
+    def _thread_load_balance(self, my_email):
         balance = request.get_wallet_balance(my_email)
-        self.ids.balance_label.text = f'[b]₱{balance:,.2f}[/b]'
         history = request.get_wallet_history(my_email)
+        Clock.schedule_once(lambda dt: self._update_wallet_ui(balance, history), 0)
+
+    def _update_wallet_ui(self, balance, history):
+        self.current_balance = f"{balance:,.2f}"
         container = self.ids.history_list
         container.clear_widgets()
         container.height = len(history) * dp(75)
+        
         for item in history:
             sign = "+" if item['type'] == 'Deposit' else "-"
             formatted_amount = f"{sign} ₱{float(item['amount']):,.2f}"
@@ -1558,7 +1693,13 @@ class Wallet(BoxLayout):
         except ValueError:
             NotificationModal().show("Invalid Amount", "Please enter a valid number greater than 0.", is_error=True)
             return
+        threading.Thread(target=self._thread_process_transaction, args=(my_email, amount, action), daemon=True).start()
+
+    def _thread_process_transaction(self, my_email, amount, action):
         success = request.process_wallet_transaction(my_email, amount, action)
+        Clock.schedule_once(lambda dt: self._update_process_txn_ui(success, amount, action), 0)
+
+    def _update_process_txn_ui(self, success, amount, action):
         if success:
             self.ids.amount_input.text = "" 
             self.load_balance() 

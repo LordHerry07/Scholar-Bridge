@@ -337,7 +337,7 @@
                             size_hint_x: 0.1
                     Label:
                         id: earnings_label
-                        text: '[b] 0.00[/b]'
+                        text: root.total_earnings
                         font_size: dp(16)
                         text_size: self.size
                         markup: True
@@ -394,7 +394,7 @@
                             size_hint_x: 0.1
                     Label:
                         id: active_listings_label
-                        text: '[b]0[/b]'
+                        text: root.active_listings
                         font_size: dp(16)
                         text_size: self.size
                         markup: True
@@ -451,7 +451,7 @@
                             size_hint_x: 0.1
                     Label:
                         id: items_sold_label
-                        text: '[b]0[/b]'
+                        text: root.items_sold
                         font_size: dp(16)
                         text_size: self.size
                         markup: True
@@ -509,7 +509,7 @@
                             size_hint_x: 0.1
                     Label:
                         id: rating_label
-                        text: '[b]5.0[/b]'
+                        text: root.seller_rating
                         font_size: dp(16)
                         text_size: self.size
                         markup: True
@@ -1772,7 +1772,7 @@
                     halign: 'left'
                 Label:
                     id: balance_label
-                    text: '[b]$0.00[/b]'
+                    text: f'[b]₱{root.current_balance}[/b]'
                     markup: True
                     font_size: sp(36)
                     size_hint_y: None
