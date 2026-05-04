@@ -7,7 +7,9 @@ from core.main_interface import Interface
 # -------------------------------
 # APP: Window Configuration
 # -------------------------------
-Window.size = 360, 702
+
+#uncomment if your running on mobile
+#Window.size = 360, 702
 
 class ScholarBridge(App):
     unread_count = NumericProperty(0)
